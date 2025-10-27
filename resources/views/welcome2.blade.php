@@ -475,13 +475,97 @@
             color: var(--text-light);
         }
 
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Bars */
+        .progress-bar-custom {
+            height: 8px;
+            background: var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Charts and Graphs */
+        .chart-container {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--primary-green);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
         /* Animations */
         @keyframes slideDown {
             from {
                 transform: translateY(-20px);
                 opacity: 0;
             }
-
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -493,7 +577,6 @@
                 transform: translateY(20px);
                 opacity: 0;
             }
-
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -505,7 +588,6 @@
                 transform: translateX(30px);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -517,7 +599,6 @@
                 transform: translateY(15px);
                 opacity: 0;
             }
-
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -528,28 +609,16 @@
             from {
                 opacity: 0;
             }
-
             to {
                 opacity: 1;
             }
         }
 
         /* Stagger animations */
-        .metric-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .metric-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .metric-card:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .metric-card:nth-child(4) {
-            animation-delay: 0.4s;
-        }
+        .metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .metric-card:nth-child(2) { animation-delay: 0.2s; }
+        .metric-card:nth-child(3) { animation-delay: 0.3s; }
+        .metric-card:nth-child(4) { animation-delay: 0.4s; }
 
         .btn-salesforce {
             background: var(--primary-green);
@@ -577,21 +646,6 @@
 
         .logout-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-bar-custom {
-            height: 8px;
-            background: var(--border-light);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-green);
-            border-radius: 4px;
-            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -724,6 +778,104 @@
                 </div>
             </div>
 
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Sales Performance Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Sales Performance
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-bar" style="height: 70%;">
+                            <div class="chart-label">Mon</div>
+                        </div>
+                        <div class="chart-bar" style="height: 85%; background: var(--secondary-blue);">
+                            <div class="chart-label">Tue</div>
+                        </div>
+                        <div class="chart-bar" style="height: 60%;">
+                            <div class="chart-label">Wed</div>
+                        </div>
+                        <div class="chart-bar" style="height: 90%; background: var(--secondary-blue);">
+                            <div class="chart-label">Thu</div>
+                        </div>
+                        <div class="chart-bar" style="height: 95%;">
+                            <div class="chart-label">Fri</div>
+                        </div>
+                        <div class="chart-bar" style="height: 75%; background: var(--secondary-blue);">
+                            <div class="chart-label">Sat</div>
+                        </div>
+                        <div class="chart-bar" style="height: 50%;">
+                            <div class="chart-label">Sun</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Overview -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-dollar-sign"></i>
+                            Revenue Overview
+                        </div>
+                    </div>
+                    <div class="performance-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">₿ 248K</div>
+                            <div class="stat-label">Total Revenue</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">₿ 142K</div>
+                            <div class="stat-label">This Month</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span style="font-size: 0.75rem; color: var(--text-light);">Monthly Target</span>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--primary-green);">75%</span>
+                    </div>
+                </div>
+
+                <!-- Team Distribution -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-users"></i>
+                            Team Distribution
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 0.875rem;">Sales Executives</span>
+                            <span style="font-size: 0.875rem; font-weight: 600;">12</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 60%;"></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin: 1rem 0 8px 0;">
+                            <span style="font-size: 0.875rem;">Account Managers</span>
+                            <span style="font-size: 0.875rem; font-weight: 600;">8</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 40%; background: var(--secondary-blue);"></div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin: 1rem 0 8px 0;">
+                            <span style="font-size: 0.875rem;">Business Dev</span>
+                            <span style="font-size: 0.875rem; font-weight: 600;">4</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 20%; background: var(--warning);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Team Performance & Quick Actions -->
             <div class="row">
                 <div class="col-md-8">
@@ -735,10 +887,6 @@
 
                         <div class="performance-stats">
                             <div class="stat-card">
-                                <div class="stat-value">₿ 248K</div>
-                                <div class="stat-label">Total Revenue</div>
-                            </div>
-                            <div class="stat-card">
                                 <div class="stat-value">142</div>
                                 <div class="stat-label">Closed Deals</div>
                             </div>
@@ -749,6 +897,10 @@
                             <div class="stat-card">
                                 <div class="stat-value">18</div>
                                 <div class="stat-label">New Leads</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">5.2</div>
+                                <div class="stat-label">Avg. Rating</div>
                             </div>
                         </div>
 
@@ -973,7 +1125,7 @@
             }, observerOptions);
 
             // Observe all animated elements
-            document.querySelectorAll('.metric-card, .action-item, .performer-item, .activity-item').forEach(
+            document.querySelectorAll('.metric-card, .action-item, .performer-item, .activity-item, .dashboard-card').forEach(
                 element => {
                     element.style.animationPlayState = 'paused';
                     observer.observe(element);
@@ -988,8 +1140,8 @@
                     }, 150);
                 });
             });
-        });
-    </script>
-</body>
 
-</html>
+            // Animate chart bars on load
+            setTimeout(() => {
+                document.querySelectorAll('.chart-bar').forEach((bar, index) => {
+                    setTimeout(()
