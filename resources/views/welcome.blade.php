@@ -287,6 +287,94 @@
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
 
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .metric-info {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .metric-trend {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+        }
+
         /* Cards Grid */
         .cards-grid {
             display: grid;
@@ -420,100 +508,304 @@
             animation: ripple 1s ease-out;
         }
 
-        /* Leads & Opportunities Section */
-        .data-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.8rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .data-card {
+        /* User Management Section */
+        .user-management {
             background: var(--card-bg);
-            border-radius: 18px;
-            padding: 2rem;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
             border: 1px solid rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
-            box-shadow: var(--card-shadow);
+            margin-bottom: 2.5rem;
             transition: var(--transition);
         }
 
-        .data-card:hover {
+        .user-management:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
-        .data-header {
+        .user-management::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .table-header {
+            display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .btn-add-user {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: var(--transition);
+            padding: 10px 20px;
+        }
+
+        .btn-add-user:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(103, 16, 242, 0.3);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-bottom: 1.5rem;
         }
 
-        .data-title {
-            font-size: 1.3rem;
+        .users-table th {
+            background: rgba(0, 123, 255, 0.05);
+            padding: 1rem;
+            text-align: left;
             font-weight: 600;
             color: var(--dark-color);
+            border-bottom: 2px solid rgba(0, 123, 255, 0.1);
         }
 
-        .data-badge {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 6px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-        }
-
-        .data-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .data-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .users-table td {
             padding: 1rem;
-            border-radius: 12px;
-            transition: var(--transition);
-            cursor: pointer;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
         }
 
-        .data-item:hover {
-            background: rgba(0, 123, 255, 0.05);
+        .users-table tr {
+            transition: var(--transition);
+        }
+
+        .users-table tr:hover {
+            background: rgba(0, 123, 255, 0.03);
             transform: translateX(5px);
         }
 
-        .data-avatar {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .user-avatar-table {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            font-size: 0.9rem;
+            margin-right: 10px;
         }
 
-        .data-content {
-            flex: 1;
+        .user-info-table {
+            display: flex;
+            align-items: center;
         }
 
-        .data-name {
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 4px;
         }
 
-        .data-info {
-            font-size: 0.85rem;
+        .status-active {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+        }
+
+        .role-badge-table {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .role-superadmin {
+            background: rgba(0, 123, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .role-adminsales {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .role-sales {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background: rgba(0, 123, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .btn-deactivate {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+        }
+
+        .btn-deactivate:hover {
+            background: var(--error-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .btn-reset {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+
+        .btn-reset:hover {
+            background: var(--warning-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+        }
+
+        .btn-delete:hover {
+            background: var(--error-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .pagination-info {
             color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
         /* Animations */
@@ -591,7 +883,8 @@
 
             .welcome-card,
             .feature-card,
-            .data-card {
+            .data-card,
+            .user-management {
                 padding: 1.5rem;
             }
 
@@ -609,6 +902,23 @@
             .user-nav {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .users-table {
+                font-size: 0.85rem;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -640,10 +950,10 @@
                 <div class="user-nav">
                     <div class="user-info">
                         <div class="user-avatar">
-                            S
+                            {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
                         <div>
-                            <div style="font-weight: 600; font-size: 0.95rem;">STEVAN</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{{ Auth::user()->name }}</div>
                             <div style="font-size: 0.75rem; opacity: 0.9;">Super Administrator</div>
                         </div>
                     </div>
@@ -665,11 +975,74 @@
             <div class="welcome-section" data-aos="fade-up" data-aos-duration="800">
                 <div class="welcome-card">
                     <h1 class="welcome-title">Home</h1>
-                    <p class="welcome-subtitle">Welcome, STEVAN</p>
+                    <p class="welcome-subtitle">Welcome, {{ Auth::user()->name }}</p>
                     <p class="welcome-subtitle">Check out these suggestions to kick off your day.</p>
                     <div class="role-badge">
                         <i class="fas fa-shield-alt"></i>
                         Super Administrator Access
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: var(--primary-color);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-title">Total Users</div>
+                            <div class="metric-value">{{ $totalUsers }}</div>
+                        </div>
+                        <div class="metric-trend trend-up">
+                            +{{ $userGrowth }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: var(--success-color);">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-title">Active Users</div>
+                            <div class="metric-value">{{ $activeUsers }}</div>
+                        </div>
+                        <div class="metric-trend trend-up">
+                            +{{ $activeGrowth }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: var(--warning-color);">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-title">New This Month</div>
+                            <div class="metric-value">{{ $newUsersThisMonth }}</div>
+                        </div>
+                        <div class="metric-trend trend-up">
+                            +{{ $monthlyGrowth }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: var(--info-color);">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-title">Admin Users</div>
+                            <div class="metric-value">{{ $adminUsers }}</div>
+                        </div>
+                        <div class="metric-trend trend-up">
+                            +{{ $adminGrowth }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -724,70 +1097,285 @@
                 </button>
             </div>
 
-            <!-- Leads & Opportunities Section -->
-            <div class="data-section">
-                <div class="data-card" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">
-                    <div class="data-header">
-                        <h3 class="data-title">My Leads</h3>
-                        <span class="data-badge">New</span>
-                    </div>
-                    <div class="data-list">
-                        <div class="data-item">
-                            <div class="data-avatar">JD</div>
-                            <div class="data-content">
-                                <div class="data-name">John Doe</div>
-                                <div class="data-info">Software Company</div>
-                            </div>
+            <!-- User Management Section -->
+            <div class="user-management" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
+                <div class="section-title">
+                    <i class="fas fa-users-cog"></i>
+                    User Management
+                </div>
+
+                <div class="table-header">
+                    <h5 class="mb-0 fw-semibold">All System Users ({{ $users->total() }})</h5>
+                    <div class="d-flex gap-3">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Search users..." value="{{ request('search') }}">
                         </div>
-                        <div class="data-item">
-                            <div class="data-avatar">SJ</div>
-                            <div class="data-content">
-                                <div class="data-name">Sarah Johnson</div>
-                                <div class="data-info">Marketing Agency</div>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <div class="data-avatar">MB</div>
-                            <div class="data-content">
-                                <div class="data-name">Michael Brown</div>
-                                <div class="data-info">Retail Business</div>
-                            </div>
-                        </div>
+                        <button class="btn btn-add-user" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                            <i class="fas fa-plus me-2"></i>Add User
+                        </button>
                     </div>
                 </div>
 
-                <div class="data-card" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
-                    <div class="data-header">
-                        <h3 class="data-title">My Opportunities</h3>
-                        <span class="data-badge">New</span>
-                    </div>
-                    <div class="data-list">
-                        <div class="data-item">
-                            <div class="data-avatar">TC</div>
-                            <div class="data-content">
-                                <div class="data-name">TechCorp Deal</div>
-                                <div class="data-info">$25,000 • Closing in 2 weeks</div>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <div class="data-avatar">GS</div>
-                            <div class="data-content">
-                                <div class="data-name">Global Solutions</div>
-                                <div class="data-info">$15,000 • In negotiation</div>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <div class="data-avatar">IS</div>
-                            <div class="data-content">
-                                <div class="data-name">Innovate Systems</div>
-                                <div class="data-info">$50,000 • Discovery phase</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($users as $user)
+                                <tr>
+                                    <td>USR{{ str_pad($user->id, 3, '0', STR_PAD_LEFT) }}</td>
+                                    <td>
+                                        <div class="user-info-table">
+                                            <div class="user-avatar-table"
+                                                style="background: {{ $user->role === 'superadmin' ? 'var(--primary-color)' : ($user->role === 'adminsales' ? 'var(--success-color)' : 'var(--warning-color)') }};">
+                                                {{ substr($user->name, 0, 1) }}
+                                            </div>
+                                            <span>{{ $user->name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ $user->email }}</td>
+                                    <td>
+                                        @if ($user->role === 'superadmin')
+                                            <span class="role-badge-table role-superadmin">SuperAdmin</span>
+                                        @elseif($user->role === 'adminsales')
+                                            <span class="role-badge-table role-adminsales">AdminSales</span>
+                                        @else
+                                            <span class="role-badge-table role-sales">Sales</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($user->is_active)
+                                            <span class="status-badge status-active">Active</span>
+                                        @else
+                                            <span class="status-badge status-inactive">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($user->last_login_at)
+                                            {{ $user->last_login_at->format('M j, Y H:i') }}
+                                        @else
+                                            <span class="text-muted">Never</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $user->created_at->format('M j, Y') }}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-edit" title="Edit User"
+                                                onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}', '{{ $user->phone }}', {{ $user->is_active ? 'true' : 'false' }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon btn-reset" title="Reset Password"
+                                                onclick="resetPassword({{ $user->id }})">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                            @if ($user->is_active)
+                                                <button class="btn-icon btn-deactivate" title="Deactivate"
+                                                    onclick="toggleUserStatus({{ $user->id }})">
+                                                    <i class="fas fa-user-slash"></i>
+                                                </button>
+                                            @else
+                                                <button class="btn-icon btn-deactivate" title="Activate"
+                                                    onclick="toggleUserStatus({{ $user->id }})"
+                                                    style="background: rgba(40, 167, 69, 0.1); color: var(--success-color);">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                            @endif
+                                            @if ($user->id !== Auth::id())
+                                                <button class="btn-icon btn-delete" title="Delete User"
+                                                    onclick="deleteUser({{ $user->id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-users fa-2x mb-3"></i>
+                                            <p>No users found</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- Pagination -->
+                @if ($users->hasPages())
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }}
+                            entries
+                        </div>
+                        <nav>
+                            {{ $users->links() }}
+                        </nav>
+                    </div>
+                @endif
             </div>
         </div>
     </main>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus"></i>
+                        Add New User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('admin.users.store') }}" method="POST" id="addUserForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" name="name" class="form-control"
+                                        placeholder="Enter full name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" name="email" class="form-control"
+                                        placeholder="Enter email address" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Role *</label>
+                                    <select name="role" class="form-control" required>
+                                        <option value="">Select Role</option>
+                                        <option value="superadmin">Super Administrator</option>
+                                        <option value="adminsales">Admin Sales</option>
+                                        <option value="sales">Sales</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Initial Password *</label>
+                                    <input type="password" name="password" class="form-control"
+                                        placeholder="Enter initial password" required minlength="8">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control"
+                                placeholder="Enter phone number">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-add-user">
+                            <i class="fas fa-plus me-2"></i>Add User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i>
+                        Edit User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editUserForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="user_id" id="edit_user_id">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" name="name" id="edit_name" class="form-control"
+                                        placeholder="Enter full name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" name="email" id="edit_email" class="form-control"
+                                        placeholder="Enter email address" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Role *</label>
+                                    <select name="role" id="edit_role" class="form-control" required>
+                                        <option value="">Select Role</option>
+                                        <option value="superadmin">Super Administrator</option>
+                                        <option value="adminsales">Admin Sales</option>
+                                        <option value="sales">Sales</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" name="phone" id="edit_phone" class="form-control"
+                                        placeholder="Enter phone number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="edit_is_active"
+                                    name="is_active" value="1">
+                                <label class="form-check-label" for="edit_is_active">Active User</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Change Password (Leave blank to keep current)</label>
+                            <input type="password" name="password" class="form-control"
+                                placeholder="Enter new password" minlength="8">
+                            <small class="text-muted">Minimum 8 characters</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-add-user">
+                            <i class="fas fa-save me-2"></i>Update User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -802,6 +1390,103 @@
             duration: 800,
             offset: 100
         });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value;
+                window.location.href = '{{ route('superadmin.welcome') }}?search=' + encodeURIComponent(
+                searchTerm);
+            }
+        });
+
+        // Open Edit Modal
+        function openEditModal(userId, name, email, role, phone, isActive) {
+            // Set form values
+            document.getElementById('edit_user_id').value = userId;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_role').value = role;
+            document.getElementById('edit_phone').value = phone || '';
+            document.getElementById('edit_is_active').checked = isActive;
+
+            // Set form action
+            document.getElementById('editUserForm').action = '{{ route('admin.users.update') }}';
+
+            // Show modal
+            const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            editModal.show();
+        }
+
+        // User management functions
+        function resetPassword(userId) {
+            if (confirm('Are you sure you want to reset this user\'s password?')) {
+                fetch('{{ route('admin.users.reset-password') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Password reset successfully');
+                        } else {
+                            alert('Error resetting password');
+                        }
+                    });
+            }
+        }
+
+        function toggleUserStatus(userId) {
+            if (confirm('Are you sure you want to change this user\'s status?')) {
+                fetch('{{ route('admin.users.toggle-status') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error updating user status');
+                        }
+                    });
+            }
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch('{{ route('admin.users.destroy') }}', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error deleting user: ' + (data.message || 'Unknown error'));
+                        }
+                    });
+            }
+        }
 
         // Function to handle creating contacts
         function createContact() {

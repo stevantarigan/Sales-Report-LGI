@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/users/reset-password', [SuperAdminController::class, 'resetPassword'])->name('admin.users.reset-password');
     Route::post('/admin/users/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('admin.users.toggle-status');
     Route::delete('/admin/users', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
-
+    Route::put('/admin/users/update', [SuperAdminController::class, 'updateUser'])->name('admin.users.update');
     // AdminSales routes
     Route::get('/welcome2', function () {
         // Cek role

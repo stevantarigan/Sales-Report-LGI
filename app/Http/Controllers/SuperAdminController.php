@@ -135,4 +135,32 @@ class SuperAdminController extends Controller
 
         return response()->json(['success' => true]);
     }
+    public function updateUser(Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:superadmin,adminsales,sales',
+            'phone' => 'nullable|string',
+            'password' => 'nullable|min:8'
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'phone' => $request->phone,
+            'is_active' => $request->has('is_active'),
+        ]);
+
+        if ($request->password) {
+            $user->update([
+                'password' => bcrypt($request->password)
+            ]);
+        }
+
+        return redirect()->route('superadmin.welcome')->with('success', 'User updated successfully.');
+    }
 }
