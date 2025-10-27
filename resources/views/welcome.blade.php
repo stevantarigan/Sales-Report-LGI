@@ -647,7 +647,8 @@
                             <div style="font-size: 0.75rem; opacity: 0.9;">Super Administrator</div>
                         </div>
                     </div>
-                    <form action="#" method="POST">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
                         <button type="submit" class="logout-btn">
                             <i class="fas fa-sign-out-alt me-1"></i>Logout
                         </button>
