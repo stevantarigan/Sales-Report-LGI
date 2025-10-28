@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,45 +22,85 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected routes - berdasarkan role
 Route::middleware(['auth'])->group(function () {
-    // SuperAdmin routes
+
+    // =============================================
+    // SUPER ADMIN ROUTES
+    // =============================================
+    Route::prefix('admin')->group(function () {
+        // User Management
+        Route::post('/users', [SuperAdminController::class, 'storeUser'])->name('admin.users.store');
+        Route::post('/users/reset-password', [SuperAdminController::class, 'resetPassword'])->name('admin.users.reset-password');
+        Route::post('/users/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+        Route::delete('/users', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
+        Route::put('/users/update', [SuperAdminController::class, 'updateUser'])->name('admin.users.update');
+    });
+
+    // SuperAdmin Dashboard
     Route::get('/welcome', [SuperAdminController::class, 'welcome'])->name('superadmin.welcome');
-    Route::post('/admin/users', [SuperAdminController::class, 'storeUser'])->name('admin.users.store');
-    Route::post('/admin/users/reset-password', [SuperAdminController::class, 'resetPassword'])->name('admin.users.reset-password');
-    Route::post('/admin/users/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('admin.users.toggle-status');
-    Route::delete('/admin/users', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
-    Route::put('/admin/users/update', [SuperAdminController::class, 'updateUser'])->name('admin.users.update');
-    // AdminSales routes
+
+    // =============================================
+    // PRODUCT MANAGEMENT ROUTES
+    // =============================================
+    Route::prefix('products')->group(function () {
+        // CRUD Routes
+        Route::get('/', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('/', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('products.show');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+        // Additional Features
+        Route::post('/bulk-action', [ProductController::class, 'bulkAction'])->name('products.bulk-action');
+        Route::post('/{product}/update-stock', [ProductController::class, 'updateStock'])->name('products.update-stock');
+        Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::post('/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
+    });
+
+    // =============================================
+    // ADMIN SALES ROUTES
+    // =============================================
     Route::get('/welcome2', function () {
-        // Cek role
         if (auth()->user()->role !== 'adminsales') {
             abort(403, 'Unauthorized access.');
         }
         return view('welcome2');
     })->name('adminsales.welcome');
 
-    // Sales routes
+    // =============================================
+    // SALES ROUTES
+    // =============================================
     Route::get('/welcome3', function () {
-        // Cek role
         if (auth()->user()->role !== 'sales') {
             abort(403, 'Unauthorized access.');
         }
         return view('welcome3');
     })->name('sales.welcome');
 
-    // Dashboard umum (fallback)
+    // =============================================
+    // GENERAL DASHBOARD ROUTE
+    // =============================================
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-        // Redirect berdasarkan role jika mengakses dashboard umum
         switch ($user->role) {
             case 'superadmin':
-                return redirect('/welcome');
+                return redirect()->route('superadmin.welcome');
             case 'adminsales':
-                return redirect('/welcome2');
+                return redirect()->route('adminsales.welcome');
             case 'sales':
-                return redirect('/welcome3');
+                return redirect()->route('sales.welcome');
             default:
                 return view('dashboard');
         }
     })->name('dashboard');
+
+});
+
+// =============================================
+// FALLBACK ROUTE
+// =============================================
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
 });
