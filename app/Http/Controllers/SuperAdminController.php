@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class SuperAdminController extends Controller
 {
     public function welcome()
     {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
         // Get all users with pagination
         $users = User::query();
 
@@ -24,13 +29,13 @@ class SuperAdminController extends Controller
 
         $users = $users->orderBy('created_at', 'desc')->paginate(10);
 
-        // Calculate metrics
+        // Calculate metrics - SESUAIKAN DENGAN STRUCTURE is_active
         $totalUsers = User::count();
         $activeUsers = User::where('is_active', true)->count();
         $newUsersThisMonth = User::whereMonth('created_at', now()->month)->count();
         $adminUsers = User::whereIn('role', ['superadmin', 'adminsales'])->count();
 
-        // Calculate growth percentages (you might want to store these in cache)
+        // Calculate growth percentages
         $previousMonthUsers = User::whereMonth('created_at', now()->subMonth()->month)->count();
         $userGrowth = $previousMonthUsers > 0 ? round((($totalUsers - $previousMonthUsers) / $previousMonthUsers) * 100, 1) : 100;
 
@@ -49,23 +54,7 @@ class SuperAdminController extends Controller
             ->count();
         $adminGrowth = $previousAdminUsers > 0 ? $adminUsers - $previousAdminUsers : $adminUsers;
 
-        // Get recent activities (you might want to create an activities table)
-        $recentActivities = collect([
-            (object) [
-                'description' => 'New user registered: ' . User::latest()->first()->name,
-                'created_at' => User::latest()->first()->created_at
-            ],
-            (object) [
-                'description' => 'System backup completed',
-                'created_at' => now()->subHours(1)
-            ],
-            (object) [
-                'description' => 'Monthly user report generated',
-                'created_at' => now()->subHours(3)
-            ]
-        ]);
-
-        return view('welcome', compact(
+        return view('superadmin.dashboard', compact(
             'users',
             'totalUsers',
             'activeUsers',
@@ -74,78 +63,91 @@ class SuperAdminController extends Controller
             'userGrowth',
             'activeGrowth',
             'monthlyGrowth',
-            'adminGrowth',
-            'recentActivities'
+            'adminGrowth'
         ));
+    }
+
+    // User Management Methods
+    public function users()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $users = User::latest()->paginate(10);
+        return view('superadmin.users.index', compact('users'));
+    }
+
+    public function createUser()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('superadmin.users.create');
     }
 
     public function storeUser(Request $request)
     {
-        $request->validate([
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
             'role' => 'required|in:superadmin,adminsales,sales',
-            'phone' => 'nullable|string'
+            'password' => 'required|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
             'role' => $request->role,
+            'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
 
-        return redirect()->route('superadmin.welcome')->with('success', 'User created successfully.');
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully.');
     }
 
-    public function resetPassword(Request $request)
+    public function editUser(User $user)
     {
-        $user = User::findOrFail($request->user_id);
-        $user->update([
-            'password' => bcrypt('password123') // Default password, you might want to generate a random one
-        ]);
-
-        return response()->json(['success' => true]);
-    }
-
-    public function toggleStatus(Request $request)
-    {
-        $user = User::findOrFail($request->user_id);
-        $user->update([
-            'is_active' => !$user->is_active
-        ]);
-
-        return response()->json(['success' => true]);
-    }
-
-    public function destroyUser(Request $request)
-    {
-        $user = User::findOrFail($request->user_id);
-
-        // Prevent self-deletion
-        if ($user->id === auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'Cannot delete your own account.']);
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
         }
 
-        $user->delete();
-
-        return response()->json(['success' => true]);
+        return view('superadmin.users.edit', compact('user'));
     }
-    public function updateUser(Request $request)
-    {
-        $user = User::findOrFail($request->user_id);
 
-        $request->validate([
+    public function updateUser(Request $request, User $user)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:superadmin,adminsales,sales',
-            'phone' => 'nullable|string',
-            'password' => 'nullable|min:8'
+            'phone' => 'nullable|string|max:20',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         $user->update([
             'name' => $request->name,
@@ -155,12 +157,66 @@ class SuperAdminController extends Controller
             'is_active' => $request->has('is_active'),
         ]);
 
-        if ($request->password) {
-            $user->update([
-                'password' => bcrypt($request->password)
-            ]);
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
         }
 
-        return redirect()->route('superadmin.welcome')->with('success', 'User updated successfully.');
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Password reset successfully.']);
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $user->update([
+            'is_active' => !$user->is_active,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User status updated.',
+            'new_status' => $user->is_active ? 'active' : 'inactive'
+        ]);
+    }
+
+    public function destroyUser(User $user)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Prevent self-deletion
+        if ($user->id === auth()->id()) {
+            return redirect()->back()
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User deleted successfully.');
     }
 }

@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+@extends('superadmin.dashboard')
+
+
+{{-- <!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -1141,7 +1144,7 @@
             </div>
 
             <div class="sidebar-menu">
-                <a href="{{ route('superadmin.welcome') }}" class="menu-item active">
+                <a href="{{ url('/') }}" class="menu-item active">
                     <i class="fas fa-home"></i>
                     <span class="menu-text">Dashboard</span>
                 </a>
@@ -1155,11 +1158,11 @@
                 </a>
 
                 <div class="submenu" id="userSubmenu">
-                    <a href="{{ route('admin.users.index') }}" class="submenu-item">
+                    <a href="{{ url('/users') }}" class="submenu-item">
                         <i class="fas fa-list"></i>
                         All Users
                     </a>
-                    <a href="{{ route('admin.users.create') }}" class="submenu-item">
+                    <a href="{{ url('/users/create') }}" class="submenu-item">
                         <i class="fas fa-plus"></i>
                         Add New User
                     </a>
@@ -1179,11 +1182,11 @@
                 </a>
 
                 <div class="submenu" id="productSubmenu">
-                    <a href="{{ route('products.index') }}" class="submenu-item">
+                    <a href="{{ url('/products') }}" class="submenu-item">
                         <i class="fas fa-list"></i>
                         All Products
                     </a>
-                    <a href="{{ route('products.create') }}" class="submenu-item">
+                    <a href="{{ url('/products/create') }}" class="submenu-item">
                         <i class="fas fa-plus"></i>
                         Add New Product
                     </a>
@@ -1230,10 +1233,13 @@
                             <div style="font-size: 0.75rem; color: #64748b;">Super Administrator</div>
                         </div>
                     </div>
-                    <button class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
-                    </button>
+                    <form action="{{ url('/logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </header>
 
@@ -1753,4 +1759,4 @@
     </script>
 </body>
 
-</html>
+</html> --}}

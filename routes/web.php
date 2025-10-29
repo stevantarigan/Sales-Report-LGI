@@ -27,12 +27,15 @@ Route::middleware(['auth'])->group(function () {
     // SUPER ADMIN ROUTES
     // =============================================
     Route::prefix('admin')->group(function () {
-        // User Management
+        // User Management Routes
+        Route::get('/users', [SuperAdminController::class, 'users'])->name('admin.users.index');
+        Route::get('/users/create', [SuperAdminController::class, 'createUser'])->name('admin.users.create');
         Route::post('/users', [SuperAdminController::class, 'storeUser'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('admin.users.edit');
+        Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('admin.users.update');
         Route::post('/users/reset-password', [SuperAdminController::class, 'resetPassword'])->name('admin.users.reset-password');
         Route::post('/users/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('admin.users.toggle-status');
-        Route::delete('/users', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
-        Route::put('/users/update', [SuperAdminController::class, 'updateUser'])->name('admin.users.update');
+        Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
     });
 
     // SuperAdmin Dashboard
@@ -88,7 +91,7 @@ Route::middleware(['auth'])->group(function () {
             case 'superadmin':
                 return redirect()->route('superadmin.welcome');
             case 'adminsales':
-                return redirect()->route('adminsales.welcome');
+                return redirect()->route('/adminsales.welcome2');
             case 'sales':
                 return redirect()->route('sales.welcome');
             default:
