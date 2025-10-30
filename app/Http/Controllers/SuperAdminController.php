@@ -75,7 +75,7 @@ class SuperAdminController extends Controller
         }
 
         $users = User::latest()->paginate(10);
-        return view('superadmin.users.index', compact('users'));
+        return view('superadmin.user.index', compact('users')); // DIUBAH: superadmin.user.index
     }
 
     public function createUser()
@@ -84,7 +84,7 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.users.create');
+        return view('superadmin.user.create'); // DIUBAH: superadmin.user.create
     }
 
     public function storeUser(Request $request)
@@ -127,7 +127,7 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.users.edit', compact('user'));
+        return view('superadmin.user.edit', compact('user')); // DIUBAH: superadmin.user.edit
     }
 
     public function updateUser(Request $request, User $user)
