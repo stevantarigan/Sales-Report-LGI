@@ -32,14 +32,6 @@
                 <i class="fas fa-plus"></i>
                 Add New User
             </a>
-            <a href="#" class="submenu-item">
-                <i class="fas fa-user-shield"></i>
-                User Roles
-            </a>
-            <a href="#" class="submenu-item">
-                <i class="fas fa-chart-bar"></i>
-                User Analytics
-            </a>
         </div>
 
         <a href="#" class="menu-item" id="productManagementMenu">
