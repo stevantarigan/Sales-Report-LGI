@@ -19,7 +19,6 @@
         <a href="#" class="menu-item" id="userManagementMenu">
             <i class="fas fa-users"></i>
             <span class="menu-text">User Management</span>
-            <span class="menu-badge">New</span>
         </a>
 
         <div class="submenu" id="userSubmenu">
