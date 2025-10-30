@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Customer;
+use App\Models\SalesTransaction;
+use App\Models\ActivityLog;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,55 +20,54 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // Get all users with pagination
-        $users = User::query();
+        // Statistik
+        $totalUsers = User::count();
+        $totalProducts = Product::count();
+        $totalCustomers = Customer::count();
+        $totalRevenue = SalesTransaction::sum('total_price');
 
-        // Search functionality
-        if (request('search')) {
-            $search = request('search');
-            $users->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
+        // Aktivitas terbaru
+        $recentActivities = ActivityLog::latest()->limit(5)->get();
+
+        // Transaksi terbaru
+        $recentTransactions = SalesTransaction::with(['customer', 'product'])
+            ->latest()->limit(5)->get();
+
+        // Grafik penjualan per bulan
+        $salesChartRaw = SalesTransaction::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $months = [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'May',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Aug',
+            9 => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Dec'
+        ];
+
+        $salesChart = [];
+        foreach ($months as $num => $name) {
+            $salesChart[$name] = $salesChartRaw[$num] ?? 0;
         }
 
-        $users = $users->orderBy('created_at', 'desc')->paginate(10);
-
-        // Calculate metrics - SESUAIKAN DENGAN STRUCTURE is_active
-        $totalUsers = User::count();
-        $activeUsers = User::where('is_active', true)->count();
-        $newUsersThisMonth = User::whereMonth('created_at', now()->month)->count();
-        $adminUsers = User::whereIn('role', ['superadmin', 'adminsales'])->count();
-
-        // Calculate growth percentages
-        $previousMonthUsers = User::whereMonth('created_at', now()->subMonth()->month)->count();
-        $userGrowth = $previousMonthUsers > 0 ? round((($totalUsers - $previousMonthUsers) / $previousMonthUsers) * 100, 1) : 100;
-
-        $previousActiveUsers = User::where('is_active', true)
-            ->whereMonth('created_at', now()->subMonth()->month)
-            ->count();
-        $activeGrowth = $previousActiveUsers > 0 ? round((($activeUsers - $previousActiveUsers) / $previousActiveUsers) * 100, 1) : 100;
-
-        $previousMonthNewUsers = User::whereMonth('created_at', now()->subMonth()->month)
-            ->whereYear('created_at', now()->subMonth()->year)
-            ->count();
-        $monthlyGrowth = $previousMonthNewUsers > 0 ? round((($newUsersThisMonth - $previousMonthNewUsers) / $previousMonthNewUsers) * 100, 1) : 100;
-
-        $previousAdminUsers = User::whereIn('role', ['superadmin', 'adminsales'])
-            ->whereMonth('created_at', now()->subMonth()->month)
-            ->count();
-        $adminGrowth = $previousAdminUsers > 0 ? $adminUsers - $previousAdminUsers : $adminUsers;
-
         return view('superadmin.dashboard', compact(
-            'users',
             'totalUsers',
-            'activeUsers',
-            'newUsersThisMonth',
-            'adminUsers',
-            'userGrowth',
-            'activeGrowth',
-            'monthlyGrowth',
-            'adminGrowth'
+            'totalProducts',
+            'totalCustomers',
+            'totalRevenue',
+            'recentActivities',
+            'recentTransactions',
+            'salesChart'
         ));
     }
 
@@ -219,4 +223,5 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
     }
+
 }
