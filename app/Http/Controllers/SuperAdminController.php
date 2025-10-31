@@ -131,7 +131,21 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.user.edit', compact('user')); // DIUBAH: superadmin.user.edit
+        // For AJAX requests, return JSON
+        if (request()->ajax()) {
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'role' => $user->role,
+                'is_active' => $user->is_active,
+                'last_login_at' => $user->last_login_at,
+                'created_at' => $user->created_at,
+            ]);
+        }
+
+        return view('superadmin.user.edit', compact('user'));
     }
 
     public function updateUser(Request $request, User $user)
@@ -148,6 +162,14 @@ class SuperAdminController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Untuk AJAX request, return JSON errors
+            if ($request->ajax()) {
+                return response()->json([
+                    'errors' => $validator->errors(),
+                    'message' => 'Validation failed'
+                ], 422);
+            }
+
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -158,13 +180,21 @@ class SuperAdminController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'phone' => $request->phone,
-            'is_active' => $request->has('is_active'),
+            'is_active' => $request->boolean('is_active'), // Gunakan boolean() untuk konsistensi
         ]);
+
+        // Untuk AJAX request, return JSON success
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully!',
+                'user' => $user
+            ]);
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully.');
     }
-
     public function resetPassword(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {

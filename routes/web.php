@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,10 +37,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/users/reset-password', [SuperAdminController::class, 'resetPassword'])->name('admin.users.reset-password');
         Route::post('/users/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('admin.users.toggle-status');
         Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('admin.users.destroy');
-    });
 
-    // SuperAdmin Dashboard
-    Route::get('/welcome', [SuperAdminController::class, 'welcome'])->name('superadmin.welcome');
+        // SuperAdmin Dashboard
+        Route::get('/dashboard', [SuperAdminController::class, 'welcome'])->name('superadmin.dashboard');
+    });
 
     // =============================================
     // PRODUCT MANAGEMENT ROUTES
@@ -64,40 +65,62 @@ Route::middleware(['auth'])->group(function () {
     // =============================================
     // ADMIN SALES ROUTES
     // =============================================
-    Route::get('/welcome2', function () {
-        if (auth()->user()->role !== 'adminsales') {
-            abort(403, 'Unauthorized access.');
-        }
-        return view('welcome2');
-    })->name('adminsales.welcome');
+    Route::prefix('sales-admin')->group(function () {
+        Route::get('/dashboard', function () {
+            if (auth()->user()->role !== 'adminsales') {
+                abort(403, 'Unauthorized access.');
+            }
+            return view('adminsales.dashboard');
+        })->name('adminsales.dashboard');
+    });
 
     // =============================================
     // SALES ROUTES
     // =============================================
-    Route::get('/welcome3', function () {
-        if (auth()->user()->role !== 'sales') {
-            abort(403, 'Unauthorized access.');
-        }
-        return view('welcome3');
-    })->name('sales.welcome');
+    Route::prefix('sales')->group(function () {
+        Route::get('/dashboard', function () {
+            if (auth()->user()->role !== 'sales') {
+                abort(403, 'Unauthorized access.');
+            }
+            return view('sales.dashboard');
+        })->name('sales.dashboard');
+    });
 
     // =============================================
-    // GENERAL DASHBOARD ROUTE
+    // GENERAL DASHBOARD ROUTE (Auto-redirect based on role)
     // =============================================
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
         switch ($user->role) {
             case 'superadmin':
-                return redirect()->route('superadmin.welcome');
+                return redirect()->route('superadmin.dashboard');
             case 'adminsales':
-                return redirect()->route('/adminsales.welcome2');
+                return redirect()->route('adminsales.dashboard');
             case 'sales':
-                return redirect()->route('sales.welcome');
+                return redirect()->route('sales.dashboard');
             default:
-                return view('dashboard');
+                abort(403, 'Unknown user role.');
         }
     })->name('dashboard');
+
+    // =============================================
+    // WELCOME PAGES (Legacy - bisa dihapus jika tidak digunakan)
+    // =============================================
+    Route::get('/welcome', [SuperAdminController::class, 'welcome'])->name('superadmin.welcome');
+    Route::get('/welcome2', function () {
+        if (auth()->user()->role !== 'adminsales') {
+            abort(403, 'Unauthorized access.');
+        }
+        return view('adminsales.dashboard');
+    })->name('adminsales.welcome');
+
+    Route::get('/welcome3', function () {
+        if (auth()->user()->role !== 'sales') {
+            abort(403, 'Unauthorized access.');
+        }
+        return view('sales.dashboard');
+    })->name('sales.welcome');
 
 });
 
