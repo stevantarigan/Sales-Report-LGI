@@ -43,6 +43,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/reset-password', [SuperAdminController::class, 'resetPassword'])->name('reset-password');
             Route::post('/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('toggle-status');
             Route::delete('/{user}', [SuperAdminController::class, 'destroyUser'])->name('destroy');
+            // Tambahkan route untuk bulk actions
+            Route::post('/bulk-action', [SuperAdminController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('/bulk-delete', [SuperAdminController::class, 'bulkDelete'])->name('bulk-delete');
         });
 
         // Transaction Management Routes

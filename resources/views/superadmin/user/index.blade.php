@@ -451,55 +451,6 @@
                 height: 32px;
             }
         }
-
-        /* Modal Styles */
-        .modal-content {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            background: var(--gradient-primary);
-            color: white;
-            border-bottom: none;
-            border-radius: 16px 16px 0 0;
-            padding: 1.5rem 2rem;
-        }
-
-        .modal-title {
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #e2e8f0;
-            padding: 1.5rem 2rem;
-        }
-
-        .btn-close {
-            filter: invert(1);
-        }
-
-        .form-switch .form-check-input {
-            width: 3em;
-            height: 1.5em;
-        }
-
-        .form-switch .form-check-input:checked {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-        }
-
-        /* Loading state */
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
     </style>
 @endpush
 
@@ -634,7 +585,7 @@
                 <thead>
                     <tr>
                         <th width="50">
-                            <input type="checkbox" class="form-check-input">
+                            <input type="checkbox" class="form-check-input" id="selectAllHeader">
                         </th>
                         <th>User</th>
                         <th>Email</th>
@@ -687,19 +638,17 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="#" class="btn-icon btn-icon-edit" title="Edit"
-                                        data-user-id="{{ $user->id }}">
+                                    <!-- Tombol Edit - Sekarang link ke halaman edit terpisah -->
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn-icon btn-icon-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon btn-icon-delete" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this user?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <!-- Tombol Delete - Tetap menggunakan SweetAlert -->
+                                    <button type="button" class="btn-icon btn-icon-delete delete-user-btn" 
+                                            title="Delete"
+                                            data-user-id="{{ $user->id }}"
+                                            data-user-name="{{ $user->name }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -733,537 +682,177 @@
             </div>
         @endif
     </div>
-    <!-- Edit User Modal -->
-    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="editUserForm" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="edit_name" class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="edit_name" name="name" required>
-                                <div class="invalid-feedback" id="name_error"></div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="edit_email" class="form-label">Email Address *</label>
-                                <input type="email" class="form-control" id="edit_email" name="email" required>
-                                <div class="invalid-feedback" id="email_error"></div>
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="edit_phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="edit_phone" name="phone">
-                                <div class="invalid-feedback" id="phone_error"></div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="edit_role" class="form-label">Role *</label>
-                                <select class="form-control" id="edit_role" name="role" required>
-                                    <option value="">Select Role</option>
-                                    <option value="superadmin">Super Admin</option>
-                                    <option value="adminsales">Admin Sales</option>
-                                    <option value="sales">Sales</option>
-                                </select>
-                                <div class="invalid-feedback" id="role_error"></div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active"
-                                        value="1">
-                                    <label class="form-check-label" for="edit_is_active">Active User</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="card bg-light">
-                                    <div class="card-body p-3">
-                                        <small class="text-muted">
-                                            <strong>Last Login:</strong>
-                                            <span id="last_login_text">Never</span>
-                                        </small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <strong>Created:</strong>
-                                            <span id="created_at_text">-</span>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Password Section (Optional) -->
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header bg-light">
-                                        <h6 class="mb-0">Change Password (Optional)</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="edit_password" class="form-label">New Password</label>
-                                                <input type="password" class="form-control" id="edit_password"
-                                                    name="password" placeholder="Leave blank to keep current password">
-                                                <div class="invalid-feedback" id="password_error"></div>
-                                                <small class="form-text text-muted">Minimal 8 characters</small>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="edit_password_confirmation" class="form-label">Confirm
-                                                    Password</label>
-                                                <input type="password" class="form-control"
-                                                    id="edit_password_confirmation" name="password_confirmation">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="updateUserBtn">
-                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                            Update User
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Delete Form (Hidden) -->
+    <form id="deleteUserForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
-            let currentUserId = null;
-
-            // Get CSRF token safely
-            function getCsrfToken() {
-                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-                if (csrfMeta) {
-                    return csrfMeta.getAttribute('content');
-                }
-
-                // Fallback: check for CSRF token in form input
-                const csrfInput = document.querySelector('input[name="_token"]');
-                if (csrfInput) {
-                    return csrfInput.value;
-                }
-
-                console.warn('CSRF token not found');
-                return '';
-            }
-
-            // Edit button click handler
-            document.addEventListener('click', function(e) {
-                const editButton = e.target.closest('.btn-icon-edit');
-                if (editButton) {
-                    e.preventDefault();
-                    const userId = editButton.getAttribute('data-user-id');
-
-                    if (userId) {
-                        loadUserData(userId);
-                    }
-                }
-            });
-
-            // Load user data for editing - FIXED VERSION
-            function loadUserData(userId) {
-                console.log('Loading user data for ID:', userId);
-
-                // Ambil data dari row table
-                const row = document.querySelector(`.user-checkbox[value="${userId}"]`)?.closest('tr');
-                if (!row) {
-                    alert('User data not found in table');
-                    return;
-                }
-
-                // Debug: Check semua cell
-                console.log('All cells:');
-                const cells = row.querySelectorAll('td');
-                cells.forEach((cell, index) => {
-                    console.log(`Cell ${index}:`, cell.textContent.trim());
-                });
-
-                // Ambil name dengan cara yang lebih reliable
-                const nameCell = row.querySelector('td:nth-child(2)');
-                let userName = '';
-
-                if (nameCell) {
-                    const nameDiv = nameCell.querySelector('div div:first-child');
-                    if (nameDiv) {
-                        userName = nameDiv.textContent.trim();
-                    } else {
-                        // Jika struktur berbeda, ambil semua text dan filter
-                        const allText = nameCell.textContent.trim();
-                        // Hapus "ID: xxxx" jika ada
-                        userName = allText.replace(/ID:\s*\d+/, '').trim();
-                    }
-                }
-
-                // Ambil email
-                const emailCell = row.querySelector('td:nth-child(3)');
-                const userEmail = emailCell ? emailCell.textContent.trim() : '';
-
-                // Ambil role dari badge
-                const roleBadge = row.querySelector('.badge');
-                const userRole = roleBadge ? roleBadge.textContent.trim().toLowerCase() : '';
-
-                // Ambil status
-                const statusBadge = row.querySelector('.status-badge');
-                const isActive = statusBadge ? statusBadge.textContent.trim() === 'Active' : false;
-
-                console.log('Extracted data:', {
-                    userName,
-                    userEmail,
-                    userRole,
-                    isActive
-                });
-
-                // Isi form fields
-                document.getElementById('edit_name').value = userName;
-                document.getElementById('edit_email').value = userEmail;
-                document.getElementById('edit_role').value = userRole;
-                document.getElementById('edit_is_active').checked = isActive;
-
-                // Set phone kosong dulu, akan diisi via AJAX
-                document.getElementById('edit_phone').value = '';
-
-                // Set form action
-                document.getElementById('editUserForm').action = `/admin/users/${userId}`;
-
-                // Clear previous errors
-                clearErrors();
-
-                // Show modal
-                editUserModal.show();
-
-                // Load detailed user data via AJAX untuk dapat phone number dan info lainnya
-                loadUserDetails(userId);
-            }
-
-            // Load user details via AJAX untuk dapat phone number
-            async function loadUserDetails(userId) {
-                try {
-                    console.log('Loading detailed data for user:', userId);
-
-                    const response = await fetch(`/admin/users/${userId}/edit`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken()
-                        }
-                    });
-
-                    if (response.ok) {
-                        const userData = await response.json();
-                        console.log('Detailed user data:', userData);
-
-                        // Update form dengan data dari AJAX
-                        if (userData.phone) {
-                            document.getElementById('edit_phone').value = userData.phone;
-                        }
-
-                        // Update informasi tambahan
-                        if (userData.last_login_at) {
-                            const lastLogin = new Date(userData.last_login_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            document.getElementById('last_login_text').textContent = lastLogin;
-                        } else {
-                            document.getElementById('last_login_text').textContent = 'Never';
-                        }
-
-                        if (userData.created_at) {
-                            const createdAt = new Date(userData.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                            document.getElementById('created_at_text').textContent = createdAt;
-                        }
-
-                        // Pastikan role sesuai
-                        if (userData.role) {
-                            document.getElementById('edit_role').value = userData.role;
-                        }
-
-                    } else {
-                        console.warn('Failed to load user details, status:', response.status);
-                    }
-                } catch (error) {
-                    console.error('Error loading user details:', error);
-                    // Continue without detailed data
-                }
-            }
-
-            // Form submission handler - FIXED VERSION
-            document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete button functionality dengan SweetAlert
+        const deleteButtons = document.querySelectorAll('.delete-user-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
                 e.preventDefault();
-
-                try {
-                    showLoading(true, 'updateUserBtn');
-                    clearErrors();
-
-                    const formData = new FormData(this);
-                    formData.append('_method', 'PUT');
-
-                    const csrfToken = getCsrfToken();
-                    if (!csrfToken) {
-                        throw new Error('CSRF token not found');
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to delete user "${userName}". This action cannot be undone!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Create and submit delete form
+                        const form = document.getElementById('deleteUserForm');
+                        form.action = `/admin/users/${userId}`;
+                        form.submit();
                     }
-
-                    const response = await fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        body: formData
-                    });
-
-                    const contentType = response.headers.get('content-type');
-
-                    // Handle JSON response
-                    if (contentType && contentType.includes('application/json')) {
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            // Success response
-                            showNotification(data.message || 'User updated successfully!', 'success');
-                            editUserModal.hide();
-
-                            // Reload page after a short delay
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-
-                        } else {
-                            // Error response dengan validasi
-                            if (data.errors) {
-                                displayErrors(data.errors);
-                            } else {
-                                showNotification(data.message || 'Failed to update user', 'error');
-                            }
-                        }
-                    } else {
-                        // Handle non-JSON response (redirect response)
-                        if (response.ok) {
-                            // Jika response adalah redirect, reload page
-                            showNotification('User updated successfully!', 'success');
-                            editUserModal.hide();
-                            window.location.reload();
-                        } else {
-                            // Handle other non-JSON errors
-                            const errorText = await response.text();
-                            console.error('Non-JSON error response:', errorText);
-                            showNotification('Failed to update user. Please try again.', 'error');
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('Error updating user:', error);
-                    showNotification('An error occurred while updating user: ' + error.message,
-                    'error');
-                } finally {
-                    showLoading(false, 'updateUserBtn');
-                }
+                });
             });
-
-            // Helper functions
-            function clearErrors() {
-                const errorElements = document.querySelectorAll('.invalid-feedback');
-                const inputElements = document.querySelectorAll('.is-invalid');
-
-                errorElements.forEach(el => el.textContent = '');
-                inputElements.forEach(el => el.classList.remove('is-invalid'));
-            }
-
-            function displayErrors(errors) {
-                for (const [field, messages] of Object.entries(errors)) {
-                    const input = document.querySelector(`[name="${field}"]`);
-                    const errorElement = document.getElementById(`${field}_error`);
-
-                    if (input && errorElement) {
-                        input.classList.add('is-invalid');
-                        errorElement.textContent = messages[0];
-                    }
-                }
-            }
-
-            function showLoading(show, buttonId) {
-                const button = document.getElementById(buttonId);
-                if (!button) {
-                    console.error('Button not found:', buttonId);
-                    return;
-                }
-
-                if (show) {
-                    button.disabled = true;
-                    button.innerHTML =
-                        '<span class="spinner-border spinner-border-sm" role="status"></span> Updating...';
-                } else {
-                    button.disabled = false;
-                    button.innerHTML =
-                        '<span class="spinner-border spinner-border-sm d-none" role="status"></span> Update User';
-                }
-            }
-
-            function showNotification(message, type) {
-                // Remove existing notifications
-                const existingAlerts = document.querySelectorAll('.alert.position-fixed');
-                existingAlerts.forEach(alert => {
-                    if (alert.parentNode) {
-                        alert.parentNode.removeChild(alert);
-                    }
-                });
-
-                // Create new notification
-                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                alertDiv.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
-                    <div>${message}</div>
-                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-                document.body.appendChild(alertDiv);
-
-                // Auto remove after 5 seconds
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.parentNode.removeChild(alertDiv);
-                    }
-                }, 5000);
-            }
-
-            // Quick search functionality
-            const quickSearch = document.getElementById('quickSearch');
-            if (quickSearch) {
-                quickSearch.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('tbody tr');
-
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
-            }
-
-            // Select all functionality
-            const selectAll = document.getElementById('selectAll');
-            if (selectAll) {
-                selectAll.addEventListener('change', function(e) {
-                    const checkboxes = document.querySelectorAll('.user-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = e.target.checked;
-                    });
-                });
-            }
-
-            // Initialize edit buttons with data attributes
-            function initializeEditButtons() {
-                const editButtons = document.querySelectorAll('.btn-icon-edit');
-                editButtons.forEach(button => {
-                    const row = button.closest('tr');
-                    if (row) {
-                        const checkbox = row.querySelector('.user-checkbox');
-                        if (checkbox) {
-                            const userId = checkbox.value;
-                            button.setAttribute('data-user-id', userId);
-                        }
-                    }
-                });
-            }
-
-            // Initialize on page load
-            initializeEditButtons();
-
-            // Add CSRF token to all fetch requests globally
-            const originalFetch = window.fetch;
-            window.fetch = function(...args) {
-                const [url, options = {}] = args;
-
-                // Only add CSRF token to same-origin requests
-                if (typeof url === 'string' && url.startsWith('/')) {
-                    options.headers = {
-                        ...options.headers,
-                        'X-CSRF-TOKEN': getCsrfToken()
-                    };
-                }
-
-                return originalFetch.call(this, url, options);
-            };
         });
 
-        function handleBulkAction(action) {
-            const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'))
-                .map(checkbox => checkbox.value);
+        // Quick search functionality
+        const quickSearch = document.getElementById('quickSearch');
+        if (quickSearch) {
+            quickSearch.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
 
-            if (selectedUsers.length === 0) {
-                showNotification('Please select at least one user.', 'error');
-                return;
-            }
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
 
-            if (action === 'delete') {
-                if (!confirm(`Are you sure you want to delete ${selectedUsers.length} user(s)?`)) {
-                    return;
+        // Select all functionality
+        const selectAllHeader = document.getElementById('selectAllHeader');
+        const selectAll = document.getElementById('selectAll');
+        
+        if (selectAllHeader) {
+            selectAllHeader.addEventListener('change', function(e) {
+                const checkboxes = document.querySelectorAll('.user-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                });
+            });
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function(e) {
+                const checkboxes = document.querySelectorAll('.user-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                });
+            });
+        }
+    });
+
+    function handleBulkAction(action) {
+        const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (selectedUsers.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No users selected',
+                text: 'Please select at least one user.',
+                confirmButtonColor: '#4f46e5'
+            });
+            return;
+        }
+
+        if (action === 'delete') {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete ${selectedUsers.length} user(s). This action cannot be undone!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Implement bulk delete logic here
+                    console.log('Bulk delete:', selectedUsers);
+                    // Anda bisa mengirim AJAX request untuk bulk delete
+                    bulkDeleteUsers(selectedUsers);
                 }
-            }
-
+            });
+        } else {
+            // Implement other bulk actions
             console.log('Bulk action:', action, 'on users:', selectedUsers);
-
-            // Implement bulk action logic here
-            showNotification(`Bulk action "${action}" would be performed on ${selectedUsers.length} users`, 'info');
+            Swal.fire({
+                icon: 'info',
+                title: 'Bulk Action',
+                text: `Bulk action "${action}" would be performed on ${selectedUsers.length} users`,
+                confirmButtonColor: '#4f46e5'
+            });
         }
+    }
 
-        function exportUsers() {
-            showNotification('Export functionality would be implemented here', 'info');
-        }
+    function bulkDeleteUsers(userIds) {
+        // Implement AJAX untuk bulk delete
+        fetch('{{ route("admin.users.bulk-delete") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ user_ids: userIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    confirmButtonColor: '#10b981'
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message,
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'An error occurred while deleting users.',
+                confirmButtonColor: '#ef4444'
+            });
+        });
+    }
 
-        // Global helper function untuk notifications
-        function showNotification(message, type = 'info') {
-            const alertClass = type === 'success' ? 'alert-success' :
-                type === 'error' ? 'alert-danger' : 'alert-info';
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alertDiv.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 
-                             type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2"></i>
-                <div>${message}</div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-            document.body.appendChild(alertDiv);
-
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
-        }
-    </script>
+    function exportUsers() {
+        Swal.fire({
+            icon: 'info',
+            title: 'Export Users',
+            text: 'Export functionality would be implemented here',
+            confirmButtonColor: '#4f46e5'
+        });
+    }
+</script>
 @endpush
