@@ -34,6 +34,25 @@
             </a>
         </div>
 
+        <!-- CUSTOMERS MANAGEMENT MENU -->
+        <a href="#" class="menu-item" id="customerManagementMenu">
+            <i class="fas fa-user-friends"></i>
+            <span class="menu-text">Customers Management</span>
+        </a>
+
+        <div class="submenu" id="customerSubmenu">
+            <a href="{{ route('admin.customers.index') }}"
+                class="submenu-item {{ request()->routeIs('admin.customers.index') ? 'active' : '' }}">
+                <i class="fas fa-list"></i>
+                All Customers
+            </a>
+            <a href="{{ route('admin.customers.create') }}"
+                class="submenu-item {{ request()->routeIs('admin.customers.create') ? 'active' : '' }}">
+                <i class="fas fa-plus"></i>
+                Add Customer
+            </a>
+        </div>
+
         <a href="#" class="menu-item" id="productManagementMenu">
             <i class="fas fa-box"></i>
             <span class="menu-text">Product Management</span>
@@ -52,7 +71,7 @@
             </a>
         </div>
 
-        <!-- TRANSACTION MANAGEMENT MENU - YANG BARU DITAMBAHKAN -->
+        <!-- TRANSACTION MANAGEMENT MENU -->
         <a href="#" class="menu-item" id="transactionManagementMenu">
             <i class="fas fa-exchange-alt"></i>
             <span class="menu-text">Transaction Management</span>

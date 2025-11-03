@@ -451,5 +451,120 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.transactions.index')
             ->with('success', 'Transaction deleted successfully.');
     }
+    // Customers Management Methods
+    public function customers()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
 
+        $customers = Customer::withCount('transactions')
+            ->latest()
+            ->paginate(10);
+
+        // Stats untuk dashboard - SESUAI DENGAN FIELD YANG ADA
+        $totalCustomers = $customers->total();
+        $customersWithPhone = Customer::whereNotNull('phone')->count();
+        $customersWithAddress = Customer::whereNotNull('address')->count();
+        $newCustomersThisMonth = Customer::where('created_at', '>=', now()->startOfMonth())->count();
+
+        return view('superadmin.customers.index', compact(
+            'customers',
+            'totalCustomers',
+            'customersWithPhone',
+            'customersWithAddress',
+            'newCustomersThisMonth'
+        ));
+    }
+
+    public function createCustomer()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('superadmin.customers.create');
+    }
+
+    public function storeCustomer(Request $request)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:customers',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'company' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        Customer::create($request->all());
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Customer created successfully.');
+    }
+
+    public function showCustomer(Customer $customer)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('superadmin.customers.show', compact('customer'));
+    }
+
+    public function editCustomer(Customer $customer)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('superadmin.customers.edit', compact('customer'));
+    }
+
+    public function updateCustomer(Request $request, Customer $customer)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:customers,email,' . $customer->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'company' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $customer->update($request->all());
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Customer updated successfully.');
+    }
+
+    public function destroyCustomer(Customer $customer)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $customer->delete();
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Customer deleted successfully.');
+    }
 }
