@@ -50,14 +50,6 @@
                 <i class="fas fa-plus"></i>
                 Add New Product
             </a>
-            <a href="#" class="submenu-item">
-                <i class="fas fa-tags"></i>
-                Categories
-            </a>
-            <a href="#" class="submenu-item">
-                <i class="fas fa-chart-bar"></i>
-                Product Analytics
-            </a>
         </div>
 
         <div class="menu-divider"></div>
