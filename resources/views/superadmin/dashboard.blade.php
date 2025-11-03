@@ -582,9 +582,10 @@
             <div class="action-icon">
                 <i class="fas fa-user-friends"></i>
             </div>
-            <div class="action-title">Pelanggan</div>
-            <div class="action-description">Kelola data pelanggan</div>
+            <div class="action-title">Transaksi</div>
+            <div class="action-description">Kelola data transaksi</div>
         </a>
+        
     </div>
 
     <!-- Metrics Grid -->

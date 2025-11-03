@@ -253,5 +253,203 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
     }
+    public function transactions()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $transactions = SalesTransaction::with(['user', 'customer', 'product'])
+            ->latest()
+            ->paginate(10);
+
+        return view('superadmin.transactions.index', compact('transactions'));
+    }
+
+    public function createTransaction()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $users = User::where('is_active', true)->get();
+        $customers = Customer::all();
+        $products = Product::all();
+
+        return view('superadmin.transactions.create', compact('users', 'customers', 'products'));
+    }
+
+    public function storeTransaction(Request $request)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'customer_id' => 'required|exists:customers,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'payment_status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:pending,completed,cancelled',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // TAMBAH VALIDASI FOTO
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Calculate total price
+        $totalPrice = $request->quantity * $request->price;
+
+        // Generate map link if coordinates exist - INI YANG DITAMBAH
+        $mapLink = null;
+        if (!empty($request->latitude) && !empty($request->longitude)) {
+            $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
+        }
+
+        // Handle photo upload - INI YANG DITAMBAH
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('transaction-photos', 'public');
+        }
+
+        try {
+            SalesTransaction::create([
+                'user_id' => $request->user_id,
+                'customer_id' => $request->customer_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'price' => $request->price,
+                'total_price' => $totalPrice,
+                'payment_status' => $request->payment_status,
+                'status' => $request->status,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'map_link' => $mapLink, // SIMPAN MAP LINK
+                'photo' => $photoPath, // SIMPAN PATH FOTO
+            ]);
+
+            return redirect()->route('admin.transactions.index')
+                ->with('success', 'Transaction created successfully.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create transaction: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function showTransaction(SalesTransaction $transaction)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Load relationships to avoid N+1 queries
+        $transaction->load(['user', 'customer', 'product']);
+
+        return view('superadmin.transactions.show', compact('transaction'));
+    }
+
+    public function editTransaction(SalesTransaction $transaction)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $users = User::where('is_active', true)->get();
+        $customers = Customer::all();
+        $products = Product::all();
+
+        return view('superadmin.transactions.edit', compact('transaction', 'users', 'customers', 'products'));
+    }
+
+    public function updateTransaction(Request $request, SalesTransaction $transaction)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'customer_id' => 'required|exists:customers,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'payment_status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:pending,completed,cancelled',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // TAMBAH VALIDASI FOTO
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Calculate total price
+        $totalPrice = $request->quantity * $request->price;
+
+        // Generate map link if coordinates exist - INI YANG DITAMBAH
+        $mapLink = $transaction->map_link; // keep existing if no new coordinates
+        if (!empty($request->latitude) && !empty($request->longitude)) {
+            $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
+        }
+
+        // Handle photo upload - INI YANG DITAMBAH
+        $photoPath = $transaction->photo; // keep existing photo
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($transaction->photo && Storage::disk('public')->exists($transaction->photo)) {
+                Storage::disk('public')->delete($transaction->photo);
+            }
+            $photoPath = $request->file('photo')->store('transaction-photos', 'public');
+        }
+
+        try {
+            $transaction->update([
+                'user_id' => $request->user_id,
+                'customer_id' => $request->customer_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'price' => $request->price,
+                'total_price' => $totalPrice,
+                'payment_status' => $request->payment_status,
+                'status' => $request->status,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'map_link' => $mapLink, // UPDATE MAP LINK
+                'photo' => $photoPath, // UPDATE PATH FOTO
+            ]);
+
+            return redirect()->route('admin.transactions.index')
+                ->with('success', 'Transaction updated successfully.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update transaction: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function destroyTransaction(SalesTransaction $transaction)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $transaction->delete();
+
+        return redirect()->route('admin.transactions.index')
+            ->with('success', 'Transaction deleted successfully.');
+    }
 
 }

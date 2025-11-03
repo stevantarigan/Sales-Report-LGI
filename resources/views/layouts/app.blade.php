@@ -65,7 +65,7 @@
             offset: 100
         });
 
-        // Sidebar toggle functionality - PERBAIKAN
+        // Sidebar toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.getElementById('mainContent');
@@ -94,25 +94,45 @@
             const userSubmenu = document.getElementById('userSubmenu');
             const productMenu = document.getElementById('productManagementMenu');
             const productSubmenu = document.getElementById('productSubmenu');
+            const transactionMenu = document.getElementById('transactionManagementMenu');
+            const transactionSubmenu = document.getElementById('transactionSubmenu');
 
+            // User Management Menu
             if (userMenu && userSubmenu) {
                 userMenu.addEventListener('click', function(e) {
                     e.preventDefault();
                     userSubmenu.classList.toggle('show');
-                    // Close other submenu if open
-                    if (productSubmenu && productSubmenu.classList.contains('show')) {
-                        productSubmenu.classList.remove('show');
-                    }
+                    // Close other submenus if open
+                    closeOtherSubmenus(userSubmenu);
                 });
             }
 
+            // Product Management Menu
             if (productMenu && productSubmenu) {
                 productMenu.addEventListener('click', function(e) {
                     e.preventDefault();
                     productSubmenu.classList.toggle('show');
-                    // Close other submenu if open
-                    if (userSubmenu && userSubmenu.classList.contains('show')) {
-                        userSubmenu.classList.remove('show');
+                    // Close other submenus if open
+                    closeOtherSubmenus(productSubmenu);
+                });
+            }
+
+            // Transaction Management Menu
+            if (transactionMenu && transactionSubmenu) {
+                transactionMenu.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    transactionSubmenu.classList.toggle('show');
+                    // Close other submenus if open
+                    closeOtherSubmenus(transactionSubmenu);
+                });
+            }
+
+            // Function to close other submenus
+            function closeOtherSubmenus(currentSubmenu) {
+                const allSubmenus = [userSubmenu, productSubmenu, transactionSubmenu];
+                allSubmenus.forEach(submenu => {
+                    if (submenu && submenu !== currentSubmenu && submenu.classList.contains('show')) {
+                        submenu.classList.remove('show');
                     }
                 });
             }
@@ -136,7 +156,8 @@
                         setInterval(() => {
                             typingTitle.style.borderRight = typingTitle.style.borderRight ===
                                 '2px solid var(--primary-color)' ?
-                                '2px solid transparent' : '2px solid var(--primary-color)';
+                                '2px solid transparent' :
+                                '2px solid var(--primary-color)';
                         }, 500);
                     }
                 };
@@ -189,17 +210,17 @@
                     const y = e.clientY - rect.top - size / 2;
 
                     ripple.style.cssText = `
-                    position: absolute;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.6);
-                    transform: scale(0);
-                    animation: ripple 0.6s linear;
-                    width: ${size}px;
-                    height: ${size}px;
-                    left: ${x}px;
-                    top: ${y}px;
-                    pointer-events: none;
-                `;
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
 
                     this.style.position = 'relative';
                     this.style.overflow = 'hidden';
@@ -210,6 +231,21 @@
                     }, 600);
                 });
             });
+
+            // Add CSS for ripple animation if not exists
+            if (!document.querySelector('#ripple-styles')) {
+                const style = document.createElement('style');
+                style.id = 'ripple-styles';
+                style.textContent = `
+                    @keyframes ripple {
+                        to {
+                            transform: scale(4);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
         });
 
         // Global functions

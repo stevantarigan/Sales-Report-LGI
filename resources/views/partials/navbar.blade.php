@@ -52,6 +52,25 @@
             </a>
         </div>
 
+        <!-- TRANSACTION MANAGEMENT MENU - YANG BARU DITAMBAHKAN -->
+        <a href="#" class="menu-item" id="transactionManagementMenu">
+            <i class="fas fa-exchange-alt"></i>
+            <span class="menu-text">Transaction Management</span>
+        </a>
+
+        <div class="submenu" id="transactionSubmenu">
+            <a href="{{ route('admin.transactions.index') }}"
+                class="submenu-item {{ request()->routeIs('admin.transactions.index') ? 'active' : '' }}">
+                <i class="fas fa-list"></i>
+                All Transactions
+            </a>
+            <a href="{{ route('admin.transactions.create') }}"
+                class="submenu-item {{ request()->routeIs('admin.transactions.create') ? 'active' : '' }}">
+                <i class="fas fa-plus"></i>
+                Add Transaction
+            </a>
+        </div>
+
         <div class="menu-divider"></div>
 
         <a href="#" class="menu-item">
