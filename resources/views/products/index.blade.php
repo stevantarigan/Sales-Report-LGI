@@ -242,6 +242,18 @@
             border-color: var(--primary-color);
         }
 
+        .product-img-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+
         /* Badge Styles */
         .badge {
             padding: 0.5rem 0.75rem;
@@ -598,7 +610,7 @@
                 <thead>
                     <tr>
                         <th width="50">
-                            <input type="checkbox" class="form-check-input">
+                            <input type="checkbox" class="form-check-input" id="selectAllHeader">
                         </th>
                         <th>Product</th>
                         <th>SKU</th>
@@ -621,12 +633,13 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if ($product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                                            class="product-img me-3">
+                                        <img src="{{ Storage::disk('public')->exists($product->image) ? asset('storage/' . $product->image) : 'https://via.placeholder.com/60x60?text=No+Image' }}" 
+                                             alt="{{ $product->name }}"
+                                             class="product-img me-3"
+                                             onerror="this.src='https://via.placeholder.com/60x60?text=Image+Error'">
                                     @else
-                                        <div
-                                            class="product-img me-3 bg-light d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-box text-muted"></i>
+                                        <div class="product-img-placeholder me-3">
+                                            <i class="fas fa-box"></i>
                                         </div>
                                     @endif
                                     <div>
@@ -693,15 +706,12 @@
                                         title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('products.destroy', $product) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon btn-icon-delete" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this product?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-icon btn-icon-delete delete-product-btn" 
+                                            title="Delete"
+                                            data-product-id="{{ $product->id }}"
+                                            data-product-name="{{ $product->name }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -736,59 +746,178 @@
             </div>
         @endif
     </div>
+
+    <!-- Delete Form (Hidden) -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Quick search functionality
-            const quickSearch = document.getElementById('quickSearch');
-            if (quickSearch) {
-                quickSearch.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('tbody tr');
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quick search functionality
+        const quickSearch = document.getElementById('quickSearch');
+        if (quickSearch) {
+            quickSearch.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
 
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
                 });
-            }
+            });
+        }
 
-            // Select all functionality
-            const selectAll = document.getElementById('selectAll');
-            if (selectAll) {
-                selectAll.addEventListener('change', function(e) {
-                    const checkboxes = document.querySelectorAll('.product-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = e.target.checked;
-                    });
+        // Select all functionality
+        const selectAllHeader = document.getElementById('selectAllHeader');
+        const selectAll = document.getElementById('selectAll');
+        
+        if (selectAllHeader) {
+            selectAllHeader.addEventListener('change', function(e) {
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
                 });
-            }
+            });
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function(e) {
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                });
+            });
+        }
+
+        // Delete button functionality dengan SweetAlert
+        const deleteButtons = document.querySelectorAll('.delete-product-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                const productName = this.getAttribute('data-product-name');
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to delete "${productName}". This action cannot be undone!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Create and submit delete form
+                        const form = document.getElementById('deleteForm');
+                        form.action = `/products/${productId}`;
+                        form.submit();
+                    }
+                });
+            });
         });
+    });
 
-        function handleBulkAction(action) {
-            const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
-                .map(checkbox => checkbox.value);
+    function handleBulkAction(action) {
+        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+            .map(checkbox => checkbox.value);
 
-            if (selectedProducts.length === 0) {
-                alert('Please select at least one product.');
-                return;
-            }
+        if (selectedProducts.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No products selected',
+                text: 'Please select at least one product.',
+                confirmButtonColor: '#4f46e5'
+            });
+            return;
+        }
 
-            if (action === 'delete') {
-                if (!confirm(`Are you sure you want to delete ${selectedProducts.length} product(s)?`)) {
-                    return;
+        if (action === 'delete') {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete ${selectedProducts.length} product(s). This action cannot be undone!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit bulk delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route("products.bulk-action") }}';
+                    
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = 'delete';
+                    form.appendChild(actionInput);
+
+                    selectedProducts.forEach(productId => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'product_ids[]';
+                        input.value = productId;
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
                 }
-            }
+            });
+        } else {
+            // For other bulk actions, submit directly
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("products.bulk-action") }}';
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            form.appendChild(csrfToken);
 
-            // Implement bulk action logic here
-            console.log('Bulk action:', action, 'on products:', selectedProducts);
-            alert(`Bulk action "${action}" would be performed on ${selectedProducts.length} products`);
-        }
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = action;
+            form.appendChild(actionInput);
 
-        function exportProducts() {
-            alert('Export functionality would be implemented here');
+            selectedProducts.forEach(productId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'product_ids[]';
+                input.value = productId;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
         }
-    </script>
+    }
+
+    function exportProducts() {
+        Swal.fire({
+            icon: 'info',
+            title: 'Export Products',
+            text: 'Export functionality would be implemented here',
+            confirmButtonColor: '#4f46e5'
+        });
+    }
+</script>
 @endpush
