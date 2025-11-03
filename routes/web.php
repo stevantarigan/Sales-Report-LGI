@@ -45,6 +45,17 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{user}', [SuperAdminController::class, 'destroyUser'])->name('destroy');
         });
 
+        // Customers Management Routes - YANG DIPERBAIKI
+        Route::prefix('customers')->name('customers.')->group(function () {
+            Route::get('/', [SuperAdminController::class, 'customers'])->name('index');
+            Route::get('/create', [SuperAdminController::class, 'createCustomer'])->name('create');
+            Route::post('/', [SuperAdminController::class, 'storeCustomer'])->name('store');
+            Route::get('/{customer}', [SuperAdminController::class, 'showCustomer'])->name('show');
+            Route::get('/{customer}/edit', [SuperAdminController::class, 'editCustomer'])->name('edit');
+            Route::put('/{customer}', [SuperAdminController::class, 'updateCustomer'])->name('update');
+            Route::delete('/{customer}', [SuperAdminController::class, 'destroyCustomer'])->name('destroy');
+        });
+
         // Transaction Management Routes
         Route::prefix('transactions')->name('transactions.')->group(function () {
             Route::get('/', [SuperAdminController::class, 'transactions'])->name('index');
