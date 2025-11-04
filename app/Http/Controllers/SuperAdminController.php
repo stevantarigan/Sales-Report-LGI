@@ -642,4 +642,54 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer deleted successfully.');
     }
+    public function index(Request $request)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $query = User::query();
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by role
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $isActive = $request->status == 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $query->orderBy($sort, 'desc');
+
+        $users = $query->paginate(10);
+
+        // Untuk export functionality (opsional)
+        if ($request->has('export') && $request->export == 'true') {
+            // Logic untuk export Excel/PDF
+            return $this->exportUsers($users);
+        }
+
+        return view('superadmin.user.index', compact('users'));
+    }
+
+    // Method untuk export (opsional)
+    private function exportUsers($users)
+    {
+        // Implementasi export ke Excel atau PDF
+        // Contoh menggunakan Laravel Excel
+        return Excel::download(new UsersExport($users), 'users-' . date('Y-m-d') . '.xlsx');
+    }
 }

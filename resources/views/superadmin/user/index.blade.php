@@ -88,45 +88,50 @@
             font-weight: 500;
         }
 
-        /* Filter Section */
+        /* Filter Section - Diperkecil */
         .filter-section {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 1.8rem;
+            padding: 1.2rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--card-shadow);
         }
 
         .filter-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
             align-items: end;
         }
 
         .form-label {
             font-weight: 600;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             display: block;
+            font-size: 0.85rem;
         }
 
-        .form-control {
+        .form-control,
+        .form-select {
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
             width: 100%;
             transition: var(--transition);
+            font-size: 0.85rem;
+            height: 38px;
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
             outline: none;
         }
 
-        /* Action Bar */
+        /* Action Bar - Diperkecil */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -138,33 +143,36 @@
 
         .search-box {
             position: relative;
-            min-width: 320px;
+            min-width: 280px;
         }
 
         .search-box input {
-            padding-left: 3rem;
-            border-radius: 10px;
+            padding-left: 2.5rem;
+            border-radius: 8px;
             border: 1px solid #e2e8f0;
             transition: var(--transition);
             background: white;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .search-box input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
         }
 
         .search-box i {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+            font-size: 0.9rem;
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
             border: none;
@@ -172,7 +180,9 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .btn-primary {
@@ -181,8 +191,8 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
         }
 
         .btn-success {
@@ -191,8 +201,8 @@
         }
 
         .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
         }
 
         /* Table Styles */
@@ -207,20 +217,23 @@
             margin-bottom: 0;
             border-collapse: separate;
             border-spacing: 0;
+            font-size: 0.9rem;
         }
 
         .table thead th {
             background: #f8fafc;
             border-bottom: 2px solid #e2e8f0;
-            padding: 1rem;
+            padding: 0.8rem;
             font-weight: 600;
             color: var(--dark-color);
+            font-size: 0.85rem;
         }
 
         .table tbody td {
-            padding: 1rem;
+            padding: 0.8rem;
             vertical-align: middle;
             border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
         }
 
         .table tbody tr:hover {
@@ -229,8 +242,8 @@
 
         /* User Avatar */
         .user-avatar {
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #e2e8f0;
@@ -244,9 +257,9 @@
 
         /* Badge Styles */
         .badge {
-            padding: 0.5rem 0.75rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
 
@@ -276,40 +289,41 @@
         }
 
         /* Status Badge */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
         .status-badge.active {
             color: var(--success-color);
-            font-weight: 600;
             background: rgba(16, 185, 129, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .status-badge.inactive {
             color: var(--error-color);
-            font-weight: 600;
             background: rgba(239, 68, 68, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.4rem;
         }
 
         .btn-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             transition: var(--transition);
             border: 1px solid transparent;
+            font-size: 0.8rem;
         }
 
         .btn-icon-view {
@@ -351,7 +365,7 @@
         /* Bulk Actions */
         .bulk-actions {
             background: rgba(79, 70, 229, 0.05);
-            padding: 1.2rem 1.5rem;
+            padding: 1rem 1.2rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             display: flex;
             align-items: center;
@@ -370,19 +384,21 @@
         .form-select {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            padding: 0.5rem;
+            padding: 0.4rem;
+            font-size: 0.8rem;
+            height: 32px;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             color: #64748b;
         }
 
         .empty-state i {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             opacity: 0.5;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
@@ -391,13 +407,13 @@
         }
 
         .empty-state h4 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-bottom: 1rem;
             color: var(--dark-color);
         }
 
         .empty-state p {
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 2rem;
             color: #64748b;
         }
@@ -407,8 +423,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-top: 1px solid #e2e8f0;
+            font-size: 0.85rem;
         }
 
         /* Responsive */
@@ -447,8 +464,8 @@
             }
 
             .btn-icon {
-                width: 32px;
-                height: 32px;
+                width: 28px;
+                height: 28px;
             }
         }
     </style>
@@ -461,7 +478,7 @@
             <div class="stat-icon" style="background: var(--gradient-primary);">
                 <i class="fas fa-users"></i>
             </div>
-            <div class="stat-value">{{ $totalUsers ?? $users->total() }}</div>
+            <div class="stat-value">{{ $users->total() }}</div>
             <div class="stat-label">Total Users</div>
         </div>
 
@@ -469,7 +486,7 @@
             <div class="stat-icon" style="background: var(--gradient-success);">
                 <i class="fas fa-user-check"></i>
             </div>
-            <div class="stat-value">{{ $activeUsers ?? $users->where('is_active', true)->count() }}</div>
+            <div class="stat-value">{{ $users->where('is_active', true)->count() }}</div>
             <div class="stat-label">Active Users</div>
         </div>
 
@@ -477,7 +494,7 @@
             <div class="stat-icon" style="background: var(--gradient-warning);">
                 <i class="fas fa-user-clock"></i>
             </div>
-            <div class="stat-value">{{ $inactiveUsers ?? $users->where('is_active', false)->count() }}</div>
+            <div class="stat-value">{{ $users->where('is_active', false)->count() }}</div>
             <div class="stat-label">Inactive Users</div>
         </div>
 
@@ -485,39 +502,30 @@
             <div class="stat-icon" style="background: var(--gradient-danger);">
                 <i class="fas fa-user-shield"></i>
             </div>
-            <div class="stat-value">{{ $superAdmins ?? $users->where('role', 'superadmin')->count() }}</div>
+            <div class="stat-value">{{ $users->where('role', 'superadmin')->count() }}</div>
             <div class="stat-label">Super Admins</div>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section" data-aos="fade-up" data-aos-delay="500">
-        <form action="{{ route('admin.users.index') }}" method="GET">
+        <form action="{{ route('admin.users.index') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
-                    <label class="form-label">Search Users</label>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" class="form-control" placeholder="Search by name, email..."
-                            value="{{ request('search') }}">
-                    </div>
-                </div>
-
-                <div>
                     <label class="form-label">Role</label>
-                    <select name="role" class="form-control">
+                    <select name="role" class="form-select" id="roleSelect">
                         <option value="">All Roles</option>
                         <option value="superadmin" {{ request('role') == 'superadmin' ? 'selected' : '' }}>Super Admin
                         </option>
                         <option value="adminsales" {{ request('role') == 'adminsales' ? 'selected' : '' }}>Admin Sales
                         </option>
-                        <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                        <option value="sales" {{ request('role') == 'sales' ? 'selected' : '' }}>Sales</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="form-label">Status</label>
-                    <select name="status" class="form-control">
+                    <select name="status" class="form-select" id="statusSelect">
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -526,7 +534,7 @@
 
                 <div>
                     <label class="form-label">Sort By</label>
-                    <select name="sort" class="form-control">
+                    <select name="sort" class="form-select" id="sortSelect">
                         <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Newest First
                         </option>
                         <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
@@ -557,6 +565,13 @@
             <button class="btn btn-primary" onclick="exportUsers()">
                 <i class="fas fa-download me-2"></i>Export
             </button>
+
+            <!-- Clear Filters Button (akan muncul jika ada filter aktif) -->
+            @if (request()->hasAny(['search', 'role', 'status', 'sort']))
+                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </a>
+            @endif
         </div>
     </div>
 
@@ -622,6 +637,7 @@
                                     class="badge 
                                     @if ($user->role == 'superadmin') badge-danger
                                     @elseif($user->role == 'adminsales') badge-warning
+                                    @elseif($user->role == 'sales') badge-primary
                                     @else badge-secondary @endif">
                                     {{ $user->role }}
                                 </span>
@@ -638,15 +654,13 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <!-- Tombol Edit - Sekarang link ke halaman edit terpisah -->
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn-icon btn-icon-edit" title="Edit">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn-icon btn-icon-edit"
+                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <!-- Tombol Delete - Tetap menggunakan SweetAlert -->
-                                    <button type="button" class="btn-icon btn-icon-delete delete-user-btn" 
-                                            title="Delete"
-                                            data-user-id="{{ $user->id }}"
-                                            data-user-name="{{ $user->name }}">
+                                    <button type="button" class="btn-icon btn-icon-delete delete-user-btn"
+                                        title="Delete" data-user-id="{{ $user->id }}"
+                                        data-user-name="{{ $user->name }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -677,7 +691,7 @@
                     Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} users
                 </div>
                 <nav>
-                    {{ $users->links() }}
+                    {{ $users->appends(request()->query())->links() }}
                 </nav>
             </div>
         @endif
@@ -691,168 +705,204 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Delete button functionality dengan SweetAlert
-        const deleteButtons = document.querySelectorAll('.delete-user-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const userId = this.getAttribute('data-user-id');
-                const userName = this.getAttribute('data-user-name');
-                
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-submit filter form ketika dropdown berubah
+            const filterSelects = document.querySelectorAll('#roleSelect, #statusSelect, #sortSelect');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            // Auto-submit search dengan debounce
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        document.getElementById('filterForm').submit();
+                    }, 800); // Submit setelah 800ms tidak ada input
+                });
+            }
+
+            // Delete button functionality dengan SweetAlert
+            const deleteButtons = document.querySelectorAll('.delete-user-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `You are about to delete user "${userName}". This action cannot be undone!`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Create and submit delete form
+                            const form = document.getElementById('deleteUserForm');
+                            form.action = `/admin/users/${userId}`;
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Quick search functionality (client-side)
+            const quickSearch = document.getElementById('quickSearch');
+            if (quickSearch) {
+                quickSearch.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('tbody tr');
+
+                    rows.forEach(row => {
+                        const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const email = row.querySelector('td:nth-child(3)').textContent
+                    .toLowerCase();
+                        const role = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+
+                        const matches = name.includes(searchTerm) || email.includes(searchTerm) ||
+                            role.includes(searchTerm);
+                        row.style.display = matches ? '' : 'none';
+                    });
+                });
+            }
+
+            // Select all functionality
+            const selectAllHeader = document.getElementById('selectAllHeader');
+            const selectAll = document.getElementById('selectAll');
+
+            if (selectAllHeader) {
+                selectAllHeader.addEventListener('change', function(e) {
+                    const checkboxes = document.querySelectorAll('.user-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = e.target.checked;
+                    });
+                });
+            }
+
+            if (selectAll) {
+                selectAll.addEventListener('change', function(e) {
+                    const checkboxes = document.querySelectorAll('.user-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = e.target.checked;
+                    });
+                });
+            }
+        });
+
+        function handleBulkAction(action) {
+            const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedUsers.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No users selected',
+                    text: 'Please select at least one user.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            if (action === 'delete') {
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: `You are about to delete user "${userName}". This action cannot be undone!`,
+                    text: `You are about to delete ${selectedUsers.length} user(s). This action cannot be undone!`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#ef4444',
                     cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Yes, delete it!',
+                    confirmButtonText: 'Yes, delete them!',
                     cancelButtonText: 'Cancel',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Create and submit delete form
-                        const form = document.getElementById('deleteUserForm');
-                        form.action = `/admin/users/${userId}`;
-                        form.submit();
+                        // Implement bulk delete logic here
+                        console.log('Bulk delete:', selectedUsers);
+                        // Anda bisa mengirim AJAX request untuk bulk delete
+                        bulkDeleteUsers(selectedUsers);
                     }
                 });
-            });
-        });
-
-        // Quick search functionality
-        const quickSearch = document.getElementById('quickSearch');
-        if (quickSearch) {
-            quickSearch.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-
-        // Select all functionality
-        const selectAllHeader = document.getElementById('selectAllHeader');
-        const selectAll = document.getElementById('selectAll');
-        
-        if (selectAllHeader) {
-            selectAllHeader.addEventListener('change', function(e) {
-                const checkboxes = document.querySelectorAll('.user-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                });
-            });
-        }
-
-        if (selectAll) {
-            selectAll.addEventListener('change', function(e) {
-                const checkboxes = document.querySelectorAll('.user-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                });
-            });
-        }
-    });
-
-    function handleBulkAction(action) {
-        const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'))
-            .map(checkbox => checkbox.value);
-
-        if (selectedUsers.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No users selected',
-                text: 'Please select at least one user.',
-                confirmButtonColor: '#4f46e5'
-            });
-            return;
-        }
-
-        if (action === 'delete') {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to delete ${selectedUsers.length} user(s). This action cannot be undone!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, delete them!',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Implement bulk delete logic here
-                    console.log('Bulk delete:', selectedUsers);
-                    // Anda bisa mengirim AJAX request untuk bulk delete
-                    bulkDeleteUsers(selectedUsers);
-                }
-            });
-        } else {
-            // Implement other bulk actions
-            console.log('Bulk action:', action, 'on users:', selectedUsers);
-            Swal.fire({
-                icon: 'info',
-                title: 'Bulk Action',
-                text: `Bulk action "${action}" would be performed on ${selectedUsers.length} users`,
-                confirmButtonColor: '#4f46e5'
-            });
-        }
-    }
-
-    function bulkDeleteUsers(userIds) {
-        // Implement AJAX untuk bulk delete
-        fetch('{{ route("admin.users.bulk-delete") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ user_ids: userIds })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                    confirmButtonColor: '#10b981'
-                }).then(() => {
-                    location.reload();
-                });
             } else {
+                // Implement other bulk actions
+                console.log('Bulk action:', action, 'on users:', selectedUsers);
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: data.message,
-                    confirmButtonColor: '#ef4444'
+                    icon: 'info',
+                    title: 'Bulk Action',
+                    text: `Bulk action "${action}" would be performed on ${selectedUsers.length} users`,
+                    confirmButtonColor: '#4f46e5'
                 });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'An error occurred while deleting users.',
-                confirmButtonColor: '#ef4444'
-            });
-        });
-    }
+        }
 
-    function exportUsers() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Export Users',
-            text: 'Export functionality would be implemented here',
-            confirmButtonColor: '#4f46e5'
-        });
-    }
-</script>
+        function bulkDeleteUsers(userIds) {
+            // Implement AJAX untuk bulk delete
+            fetch('{{ route('admin.users.bulk-delete') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        user_ids: userIds
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message,
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message,
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'An error occurred while deleting users.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                });
+        }
+
+        function exportUsers() {
+            // Build export URL dengan parameter filter saat ini
+            const currentParams = new URLSearchParams(window.location.search);
+            const exportUrl = '{{ route('admin.users.index') }}?' + currentParams.toString() + '&export=true';
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Export Users',
+                text: 'Preparing your export file...',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                // Redirect ke URL export
+                window.location.href = exportUrl;
+            });
+        }
+    </script>
 @endpush
