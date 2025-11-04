@@ -2,8 +2,11 @@
 
 @section('title', 'Dashboard SuperAdmin | Sales Management')
 @section('page-title', 'Dashboard Overview')
-@section('page-description', 'Selamat datang kembali, ' . auth()->user()->name . '. Berikut ringkasan performa sistem
-    hari ini.')
+@section('page-description',
+    'Selamat datang kembali, ' .
+    auth()->user()->name .
+    '. Monitor kinerja sales dan
+    transaksi.')
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -180,141 +183,147 @@
                 color: var(--error-color);
             }
 
-            /* Charts Container */
-            .charts-container {
+            /* Sales Performance Section */
+            .sales-performance {
+                background: white;
+                border-radius: 16px;
+                padding: 1.5rem;
+                box-shadow: var(--card-shadow);
+                margin-bottom: 2rem;
+            }
+
+            .performance-header {
+                display: flex;
+                justify-content: between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .filter-controls {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .form-select {
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 0.5rem 1rem;
+                min-width: 200px;
+            }
+
+            /* Sales Grid */
+            .sales-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 1.5rem;
                 margin-bottom: 2rem;
             }
 
-            .chart-card {
+            .sales-card {
                 background: white;
                 border: 1px solid #e2e8f0;
                 border-radius: 16px;
                 padding: 1.5rem;
-                box-shadow: var(--card-shadow);
                 transition: var(--transition);
+                box-shadow: var(--card-shadow);
             }
 
-            .chart-card:hover {
+            .sales-card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             }
 
-            .chart-header {
+            .sales-header {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
+                gap: 1rem;
                 margin-bottom: 1rem;
             }
 
-            .chart-title {
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: var(--dark-color);
-                margin: 0;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .chart-body {
-                position: relative;
-                height: 300px;
-            }
-
-            /* Activity Feed */
-            .activity-feed {
-                background: white;
-                border-radius: 16px;
-                padding: 1.5rem;
-                box-shadow: var(--card-shadow);
-                margin-bottom: 2rem;
-            }
-
-            .activity-item {
-                display: flex;
-                align-items: center;
-                padding: 1rem;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-                transition: var(--transition);
-            }
-
-            .activity-item:last-child {
-                border-bottom: none;
-            }
-
-            .activity-item:hover {
-                background: rgba(79, 70, 229, 0.02);
-                transform: translateX(5px);
-            }
-
-            .activity-icon {
-                width: 40px;
-                height: 40px;
-                border-radius: 10px;
+            .sales-avatar {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: var(--gradient-primary);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-right: 1rem;
-                flex-shrink: 0;
-                background: var(--gradient-primary);
                 color: white;
+                font-size: 1.5rem;
+                font-weight: 600;
             }
 
-            .activity-content {
+            .sales-info {
                 flex: 1;
             }
 
-            .activity-title {
+            .sales-name {
                 font-weight: 600;
                 color: var(--dark-color);
                 margin-bottom: 0.25rem;
             }
 
-            .activity-time {
+            .sales-role {
                 font-size: 0.8rem;
                 color: #64748b;
             }
 
-            /* Card Styles */
-            .card {
+            .sales-stats {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+
+            .stat-item {
+                text-align: center;
+                padding: 0.75rem;
+                background: #f8fafc;
+                border-radius: 10px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--primary-color);
+                display: block;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+                color: #64748b;
+            }
+
+            /* Transactions Section */
+            .transactions-section {
                 background: white;
-                border: 1px solid #e2e8f0;
                 border-radius: 16px;
+                padding: 1.5rem;
                 box-shadow: var(--card-shadow);
                 margin-bottom: 2rem;
-                overflow: hidden;
-                transition: var(--transition);
             }
 
-            .card:hover {
-                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-                transform: translateY(-5px);
-            }
-
-            .card-header {
-                background: #f8fafc;
-                border-bottom: 1px solid #e2e8f0;
-                padding: 1.25rem 1.5rem;
+            .section-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+                gap: 1rem;
             }
 
-            .card-title {
-                font-size: 1.1rem;
+            .section-title {
+                font-size: 1.25rem;
                 font-weight: 600;
                 color: var(--dark-color);
                 margin: 0;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-            }
-
-            .card-body {
-                padding: 1.5rem;
             }
 
             /* Table Styles */
@@ -385,18 +394,18 @@
                 border: 1px solid rgba(79, 70, 229, 0.2);
             }
 
-            /* User Avatar */
-            .user-avatar {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: 600;
-                font-size: 0.8rem;
-                flex-shrink: 0;
+            /* Progress Bar */
+            .progress {
+                height: 8px;
+                border-radius: 4px;
+                background: #e2e8f0;
+                overflow: hidden;
+            }
+
+            .progress-bar {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.6s ease;
             }
 
             /* Quick Actions */
@@ -465,25 +474,7 @@
                 }
             }
 
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
             /* Responsive */
-            @media (max-width: 1200px) {
-                .charts-container {
-                    grid-template-columns: 1fr;
-                }
-            }
-
             @media (max-width: 768px) {
                 .metrics-grid {
                     grid-template-columns: 1fr;
@@ -500,18 +491,22 @@
                     margin-bottom: 0.75rem;
                 }
 
-                .charts-container {
+                .sales-grid {
                     grid-template-columns: 1fr;
                 }
 
-                .chart-card {
-                    min-width: auto;
-                }
-
-                .card-header {
+                .performance-header {
                     flex-direction: column;
                     align-items: stretch;
-                    gap: 1rem;
+                }
+
+                .filter-controls {
+                    justify-content: center;
+                }
+
+                .section-header {
+                    flex-direction: column;
+                    align-items: stretch;
                 }
 
                 .quick-actions {
@@ -520,22 +515,16 @@
             }
 
             @media (max-width: 576px) {
-                .chart-body {
-                    height: 250px;
-                }
-
-                .activity-item {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    text-align: left;
-                }
-
-                .activity-icon {
-                    margin-bottom: 0.5rem;
+                .sales-stats {
+                    grid-template-columns: 1fr;
                 }
 
                 .quick-actions {
                     grid-template-columns: 1fr;
+                }
+
+                .table-responsive {
+                    font-size: 0.8rem;
                 }
             }
         </style>
@@ -558,34 +547,33 @@
             <div class="action-icon">
                 <i class="fas fa-user-plus"></i>
             </div>
-            <div class="action-title">Tambah User</div>
-            <div class="action-description">Buat akun pengguna baru</div>
+            <div class="action-title">Tambah Sales</div>
+            <div class="action-description">Tambah sales person baru</div>
         </a>
 
         <a href="{{ route('admin.users.index') }}" class="action-card" data-aos="fade-up" data-aos-delay="200">
             <div class="action-icon">
                 <i class="fas fa-users-cog"></i>
             </div>
-            <div class="action-title">Kelola User</div>
-            <div class="action-description">Kelola semua pengguna</div>
+            <div class="action-title">Kelola Sales</div>
+            <div class="action-description">Kelola semua tim sales</div>
         </a>
 
-        <a href="{{ route('products.index') }}" class="action-card" data-aos="fade-up" data-aos-delay="300">
+        <a href="{{ route('admin.transactions.create') }}" class="action-card" data-aos="fade-up" data-aos-delay="300">
             <div class="action-icon">
-                <i class="fas fa-box"></i>
+                <i class="fas fa-plus-circle"></i>
             </div>
-            <div class="action-title">Produk</div>
-            <div class="action-description">Kelola katalog produk</div>
+            <div class="action-title">Tambah Transaksi</div>
+            <div class="action-description">Input transaksi baru</div>
         </a>
 
-        <a href="#" class="action-card" data-aos="fade-up" data-aos-delay="400">
+        <a href="{{ route('admin.transactions.index') }}" class="action-card" data-aos="fade-up" data-aos-delay="400">
             <div class="action-icon">
-                <i class="fas fa-user-friends"></i>
+                <i class="fas fa-list"></i>
             </div>
-            <div class="action-title">Transaksi</div>
-            <div class="action-description">Kelola data transaksi</div>
+            <div class="action-title">Semua Transaksi</div>
+            <div class="action-description">Lihat semua transaksi</div>
         </a>
-        
     </div>
 
     <!-- Metrics Grid -->
@@ -595,308 +583,333 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="metric-info">
-                <div class="metric-title">Total Pengguna</div>
-                <div class="metric-value">{{ $totalUsers }}</div>
+                <div class="metric-title">Total Sales Team</div>
+                <div class="metric-value">{{ $totalSalesUsers }}</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    {{ round(($totalUsers / max($totalUsers - 5, 1) - 1) * 100) }}% growth
+                    Active: {{ $activeSalesUsers }}
                 </div>
             </div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="200">
             <div class="metric-icon" style="background: var(--gradient-success);">
-                <i class="fas fa-box"></i>
+                <i class="fas fa-chart-line"></i>
             </div>
             <div class="metric-info">
-                <div class="metric-title">Total Produk</div>
-                <div class="metric-value">{{ $totalProducts }}</div>
+                <div class="metric-title">Total Penjualan Bulan Ini</div>
+                <div class="metric-value">Rp {{ number_format($currentMonthRevenue / 1000000, 1) }}JT</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    {{ round(($totalProducts / max($totalProducts - 3, 1) - 1) * 100) }}% vs last month
+                    {{ round(($currentMonthRevenue / max($lastMonthRevenue, 1) - 1) * 100) }}% vs last month
                 </div>
             </div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="300">
             <div class="metric-icon" style="background: var(--gradient-warning);">
-                <i class="fas fa-user-friends"></i>
+                <i class="fas fa-shopping-cart"></i>
             </div>
             <div class="metric-info">
-                <div class="metric-title">Total Pelanggan</div>
-                <div class="metric-value">{{ $totalCustomers }}</div>
+                <div class="metric-title">Transaksi Bulan Ini</div>
+                <div class="metric-value">{{ $currentMonthTransactions }}</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    {{ round(($totalCustomers / max($totalCustomers - 2, 1) - 1) * 100) }}% growth
+                    {{ round(($currentMonthTransactions / max($lastMonthTransactions, 1) - 1) * 100) }}% growth
                 </div>
             </div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="400">
             <div class="metric-icon" style="background: var(--gradient-danger);">
-                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-user-check"></i>
             </div>
             <div class="metric-info">
-                <div class="metric-title">Total Pendapatan</div>
-                <div class="metric-value">Rp {{ number_format($totalRevenue / 1000000, 1) }}JT</div>
+                <div class="metric-title">Avg. Sales per Person</div>
+                <div class="metric-value">Rp {{ number_format($averageSalesPerPerson / 1000000, 1) }}JT</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    {{ round(($totalRevenue / max($totalRevenue - 10000000, 1) - 1) * 100) }}% vs last month
+                    Top performer: Rp {{ number_format($topPerformerRevenue / 1000000, 1) }}JT
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="charts-container">
-        <div class="chart-card" data-aos="fade-up" data-aos-delay="300">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-chart-bar"></i>
-                    Grafik Penjualan per Bulan
-                </h3>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="updateChart(this.value)">
+    <!-- Sales Performance Section -->
+    <div class="sales-performance" data-aos="fade-up" data-aos-delay="500">
+        <div class="performance-header">
+            <h2 class="section-title">
+                <i class="fas fa-trophy"></i>
+                Performance Sales Team
+            </h2>
+            <div class="filter-controls">
+                <select class="form-select" id="timeFilter">
+                    <option value="month">Bulan Ini</option>
+                    <option value="week">Minggu Ini</option>
+                    <option value="quarter">Kuartal Ini</option>
+                    <option value="year">Tahun Ini</option>
+                </select>
+                <select class="form-select" id="metricFilter">
                     <option value="revenue">Berdasarkan Revenue</option>
                     <option value="transactions">Berdasarkan Transaksi</option>
+                    <option value="customers">Berdasarkan Customer</option>
                 </select>
             </div>
-            <div class="chart-body">
-                <canvas id="salesChart"></canvas>
-            </div>
         </div>
 
-        <div class="chart-card" data-aos="fade-up" data-aos-delay="400">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-chart-pie"></i>
-                    Distribusi Status Transaksi
-                </h3>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="updatePieChart(this.value)">
-                    <option value="status">Berdasarkan Status</option>
-                    <option value="products">Berdasarkan Produk</option>
-                </select>
-            </div>
-            <div class="chart-body">
-                <canvas id="distributionChart"></canvas>
-            </div>
-        </div>
-    </div>
+        <div class="sales-grid">
+            @forelse($salesPerformance as $sales)
+                <div class="sales-card">
+                    <div class="sales-header">
+                        <div class="sales-avatar">
+                            {{ strtoupper(substr($sales->name, 0, 1)) }}
+                        </div>
+                        <div class="sales-info">
+                            <div class="sales-name">{{ $sales->name }}</div>
+                            <div class="sales-role">{{ $sales->role }}</div>
+                            <div class="text-muted small">
+                                <i class="fas fa-envelope me-1"></i>{{ $sales->email }}
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- Recent Activity Section -->
-    <div class="activity-feed" data-aos="fade-up" data-aos-delay="500">
-        <h3 class="mb-3">
-            <i class="fas fa-history"></i>
-            Aktivitas Terbaru
-        </h3>
-        @forelse ($recentActivities as $activity)
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i
-                        class="fas fa-{{ $activity->type === 'transaction' ? 'shopping-cart' : ($activity->type === 'user' ? 'user-plus' : 'info-circle') }}"></i>
+                    <div class="sales-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ $sales->transactions_count }}</span>
+                            <span class="stat-label">Transaksi</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">Rp {{ number_format($sales->total_revenue / 1000000, 1) }}JT</span>
+                            <span class="stat-label">Revenue</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>Target Achievement</small>
+                            <small>{{ round(($sales->total_revenue / max($sales->target_revenue, 1)) * 100) }}%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success"
+                                style="width: {{ min(($sales->total_revenue / max($sales->target_revenue, 1)) * 100, 100) }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <span
+                            class="badge badge-{{ $sales->performance_status === 'exceeded' ? 'success' : ($sales->performance_status === 'met' ? 'primary' : 'warning') }}">
+                            {{ $sales->performance_status === 'exceeded' ? 'Exceeded Target' : ($sales->performance_status === 'met' ? 'Met Target' : 'Below Target') }}
+                        </span>
+                    </div>
                 </div>
-                <div class="activity-content">
-                    <div class="activity-title">{{ $activity->activity }}</div>
-                    <div class="activity-time">{{ $activity->created_at->diffForHumans() }}</div>
+            @empty
+                <div class="col-12 text-center py-4">
+                    <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">Belum ada data performance sales</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Transactions by Sales Section -->
+        <div class="transactions-section" data-aos="fade-up" data-aos-delay="600">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-receipt"></i>
+                    Transaksi per Sales
+                </h2>
+                <div class="filter-controls">
+                    <select class="form-select" id="salesFilter" onchange="filterTransactionsBySales(this.value)">
+                        <option value="">Semua Sales</option>
+                        @foreach ($salesUsers as $sales)
+                            <option value="{{ $sales->id }}">{{ $sales->name }}</option>
+                        @endforeach
+                    </select>
+                    <select class="form-select" id="dateFilter" onchange="filterTransactionsByDate(this.value)">
+                        <option value="today">Hari Ini</option>
+                        <option value="week">Minggu Ini</option>
+                        <option value="month" selected>Bulan Ini</option>
+                        <option value="quarter">Kuartal Ini</option>
+                    </select>
                 </div>
             </div>
-        @empty
-            <div class="text-center py-4">
-                <i class="fas fa-history fa-2x text-muted mb-2"></i>
-                <p class="text-muted">Belum ada aktivitas</p>
-            </div>
-        @endforelse
-    </div>
 
-    <!-- Recent Transactions Section -->
-    <div class="card" data-aos="fade-up" data-aos-delay="600">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-receipt"></i>
-                Transaksi Terbaru
-            </h2>
-            <a href="#" class="btn btn-primary btn-sm">
-                <i class="fas fa-list me-1"></i>Lihat Semua
-            </a>
-        </div>
-        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="transactionsTable">
                     <thead>
                         <tr>
+                            <th>Sales</th>
                             <th>Customer</th>
                             <th>Produk</th>
-                            <th>Jumlah</th>
+                            <th>Qty</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Tanggal</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($recentTransactions as $t)
-                            <tr>
+                        @foreach ($recentTransactions as $transaction)
+                            <tr data-sales-id="{{ $transaction->user_id }}">
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-2" style="background: var(--gradient-primary);">
-                                            {{ strtoupper(substr($t->customer->name ?? 'C', 0, 1)) }}
+                                        <div class="sales-avatar me-2"
+                                            style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                            {{ strtoupper(substr($transaction->user->name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div style="font-weight: 600;">{{ $t->customer->name ?? '-' }}</div>
-                                            @if ($t->customer->phone ?? false)
-                                                <small class="text-muted">{{ $t->customer->phone }}</small>
-                                            @endif
+                                            <div style="font-weight: 600; font-size: 0.9rem;">
+                                                {{ $transaction->user->name }}
+                                            </div>
+                                            <small class="text-muted">{{ $transaction->user->role }}</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div style="font-weight: 600;">{{ $t->product->name ?? '-' }}</div>
-                                    @if ($t->product->sku ?? false)
-                                        <small class="text-muted">SKU: {{ $t->product->sku }}</small>
+                                    <div style="font-weight: 600;">{{ $transaction->customer->name ?? '-' }}</div>
+                                    @if ($transaction->customer->phone ?? false)
+                                        <small class="text-muted">{{ $transaction->customer->phone }}</small>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge badge-primary">{{ $t->quantity }} pcs</span>
+                                    <div style="font-weight: 600;">{{ $transaction->product->name ?? '-' }}</div>
+                                    @if ($transaction->product->sku ?? false)
+                                        <small class="text-muted">SKU: {{ $transaction->product->sku }}</small>
+                                    @endif
                                 </td>
                                 <td>
-                                    <strong>Rp {{ number_format($t->total_price, 0, ',', '.') }}</strong>
+                                    <span class="badge badge-primary">{{ $transaction->quantity }} pcs</span>
+                                </td>
+                                <td>
+                                    <strong>Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</strong>
                                 </td>
                                 <td>
                                     <span
-                                        class="badge badge-{{ $t->status === 'completed' ? 'success' : ($t->status === 'pending' ? 'warning' : 'secondary') }}">
-                                        {{ ucfirst($t->status) }}
+                                        class="badge badge-{{ $transaction->status === 'completed' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'secondary') }}">
+                                        {{ ucfirst($transaction->status) }}
                                     </span>
                                 </td>
                                 <td>
-                                    {{ $t->created_at->format('d M Y') }}
+                                    {{ $transaction->created_at->format('d M Y') }}
                                     <br>
-                                    <small class="text-muted">{{ $t->created_at->format('H:i') }}</small>
+                                    <small class="text-muted">{{ $transaction->created_at->format('H:i') }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.transactions.show', $transaction) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-4">
-                                    <i class="fas fa-receipt fa-2x text-muted mb-2"></i>
-                                    <p class="text-muted">Belum ada transaksi</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+
+            @if ($recentTransactions->count() == 0)
+                <div class="text-center py-4">
+                    <i class="fas fa-receipt fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">Belum ada transaksi</p>
+                </div>
+            @endif
         </div>
-    </div>
-@endsection
+    @endsection
 
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
-
-        // Sales Chart
-        const salesCtx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(salesCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode(array_keys($salesChart)) !!},
-                datasets: [{
-                    label: 'Total Penjualan (Rp)',
-                    data: {!! json_encode(array_values($salesChart)) !!},
-                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                    borderColor: 'rgba(79, 70, 229, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + value.toLocaleString('id-ID');
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-
-        // Distribution Chart
-        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-        const distributionChart = new Chart(distributionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Completed', 'Pending', 'Cancelled'],
-                datasets: [{
-                    data: [70, 20, 10],
-                    backgroundColor: [
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                cutout: '60%'
-            }
-        });
-
-        function updateChart(type) {
-            // Update chart based on selection
-            console.log('Updating chart with type:', type);
-        }
-
-        function updatePieChart(type) {
-            // Update pie chart based on selection
-            console.log('Updating pie chart with type:', type);
-        }
-
-        // Add hover effects to metric cards
-        document.querySelectorAll('.metric-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-8px)';
+    @push('scripts')
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+        <script>
+            // Initialize AOS
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100
             });
 
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+            // Filter transactions by sales
+            function filterTransactionsBySales(salesId) {
+                const rows = document.querySelectorAll('#transactionsTable tbody tr');
+
+                rows.forEach(row => {
+                    if (!salesId || row.getAttribute('data-sales-id') === salesId) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            // Filter transactions by date (simulated)
+            function filterTransactionsByDate(range) {
+                // In a real implementation, this would make an API call
+                console.log('Filtering by date range:', range);
+
+                // Show loading state
+                const tableBody = document.querySelector('#transactionsTable tbody');
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Memuat data...</p>
+                    </td>
+                </tr>
+            `;
+
+                // Simulate API call
+                setTimeout(() => {
+                    // This would be replaced with actual data from server
+                    alert(`Filter transaksi untuk ${range} akan diimplementasi dengan API call`);
+                    location.reload(); // Temporary reload for demo
+                }, 1000);
+            }
+
+            // Update performance metrics when filters change
+            document.getElementById('timeFilter').addEventListener('change', function() {
+                updatePerformanceMetrics(this.value, document.getElementById('metricFilter').value);
             });
-        });
-    </script>
-@endpush
+
+            document.getElementById('metricFilter').addEventListener('change', function() {
+                updatePerformanceMetrics(document.getElementById('timeFilter').value, this.value);
+            });
+
+            function updatePerformanceMetrics(timeRange, metric) {
+                // Show loading state
+                const salesGrid = document.querySelector('.sales-grid');
+                const originalContent = salesGrid.innerHTML;
+
+                salesGrid.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Memperbarui data performance...</p>
+                </div>
+            `;
+
+                // Simulate API call
+                setTimeout(() => {
+                    // This would be replaced with actual data from server
+                    alert(`Filter performance: ${timeRange} - ${metric} akan diimplementasi dengan API call`);
+                    salesGrid.innerHTML = originalContent; // Restore for demo
+                }, 1500);
+            }
+
+            // Add hover effects
+            document.querySelectorAll('.sales-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Auto-refresh data every 2 minutes
+            setInterval(() => {
+                console.log('Auto-refreshing dashboard data...');
+                // In production, this would fetch new data via AJAX
+            }, 120000);
+        </script>
+    @endpush

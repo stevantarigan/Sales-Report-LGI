@@ -78,4 +78,15 @@ class User extends Authenticatable
     {
         return $this->is_active;
     }
+    // Tambahkan relationship untuk transactions
+    public function transactions()
+    {
+        return $this->hasMany(SalesTransaction::class, 'user_id');
+    }
+
+    // Relationship untuk activity logs (jika ada)
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id');
+    }
 }

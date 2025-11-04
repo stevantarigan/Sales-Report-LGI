@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\SalesTransaction;
 use App\Models\ActivityLog;
 
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,20 +21,84 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // Statistik
+        // Basic stats
         $totalUsers = User::count();
         $totalProducts = Product::count();
         $totalCustomers = Customer::count();
         $totalRevenue = SalesTransaction::sum('total_price');
 
-        // Aktivitas terbaru
-        $recentActivities = ActivityLog::latest()->limit(5)->get();
+        // Sales-specific stats
+        $totalSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->count();
+        $activeSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->where('is_active', true)->count();
 
-        // Transaksi terbaru
-        $recentTransactions = SalesTransaction::with(['customer', 'product'])
-            ->latest()->limit(5)->get();
+        // Monthly performance
+        $currentMonthRevenue = SalesTransaction::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_price');
 
-        // Grafik penjualan per bulan
+        $lastMonthRevenue = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('total_price');
+
+        $currentMonthTransactions = SalesTransaction::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $lastMonthTransactions = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        // Sales performance data
+        $salesPerformance = User::whereIn('role', ['sales', 'adminsales'])
+            ->where('is_active', true)
+            ->withCount([
+                'transactions' => function ($query) {
+                    $query->whereMonth('created_at', now()->month);
+                }
+            ])
+            ->withSum([
+                'transactions' => function ($query) {
+                    $query->whereMonth('created_at', now()->month);
+                }
+            ], 'total_price')
+            ->get()
+            ->map(function ($user) {
+                $targetRevenue = 100000000; // 100 juta target per sales
+                $performancePercentage = ($user->transactions_sum_total_price / $targetRevenue) * 100;
+
+                return (object) [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'transactions_count' => $user->transactions_count,
+                    'total_revenue' => $user->transactions_sum_total_price,
+                    'target_revenue' => $targetRevenue,
+                    'performance_status' => $performancePercentage >= 100 ? 'exceeded' :
+                        ($performancePercentage >= 80 ? 'met' : 'below'),
+                    'performance_percentage' => $performancePercentage
+                ];
+            });
+
+        // Average sales per person
+        $averageSalesPerPerson = $currentMonthRevenue / max($activeSalesUsers, 1);
+        $topPerformerRevenue = $salesPerformance->max('total_revenue');
+
+        // Sales users for filter
+        $salesUsers = User::whereIn('role', ['sales', 'adminsales'])
+            ->where('is_active', true)
+            ->get(['id', 'name', 'email']);
+
+        // Recent transactions with sales info
+        $recentTransactions = SalesTransaction::with(['user', 'customer', 'product'])
+            ->latest()
+            ->limit(20)
+            ->get();
+
+        // Recent activities
+        $recentActivities = ActivityLog::latest()->limit(10)->get();
+
+        // Sales chart data (for future use)
         $salesChartRaw = SalesTransaction::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
             ->groupBy('month')
             ->orderBy('month')
@@ -65,8 +130,18 @@ class SuperAdminController extends Controller
             'totalProducts',
             'totalCustomers',
             'totalRevenue',
-            'recentActivities',
+            'totalSalesUsers',
+            'activeSalesUsers',
+            'currentMonthRevenue',
+            'lastMonthRevenue',
+            'currentMonthTransactions',
+            'lastMonthTransactions',
+            'salesPerformance',
+            'averageSalesPerPerson',
+            'topPerformerRevenue',
+            'salesUsers',
             'recentTransactions',
+            'recentActivities',
             'salesChart'
         ));
     }
