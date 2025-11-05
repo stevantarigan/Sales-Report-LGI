@@ -359,17 +359,73 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
     }
-    public function transactions()
+    // Di SuperAdminController - ganti method transactions() dengan ini:
+    public function transactions(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {
             abort(403, 'Unauthorized access.');
         }
 
-        $transactions = SalesTransaction::with(['user', 'customer', 'product'])
-            ->latest()
-            ->paginate(10);
+        $query = SalesTransaction::with(['user', 'customer', 'product']);
 
-        return view('superadmin.transactions.index', compact('transactions'));
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('customer', function ($customerQuery) use ($searchTerm) {
+                    $customerQuery->where('name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                })
+                    ->orWhereHas('product', function ($productQuery) use ($searchTerm) {
+                        $productQuery->where('name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('sku', 'like', '%' . $searchTerm . '%');
+                    })
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                        $userQuery->where('name', 'like', '%' . $searchTerm . '%');
+                    });
+            });
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by payment status
+        if ($request->has('payment_status') && $request->payment_status != '') {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Filter by date range
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $sortDirection = 'desc';
+
+        $query->orderBy($sort, $sortDirection);
+
+        $transactions = $query->paginate(10);
+
+        // Stats untuk dashboard
+        $totalTransactions = $transactions->total();
+        $completedTransactions = SalesTransaction::where('status', 'completed')->count();
+        $pendingTransactions = SalesTransaction::where('status', 'pending')->count();
+        $cancelledTransactions = SalesTransaction::where('status', 'cancelled')->count();
+
+        return view('superadmin.transactions.index', compact(
+            'transactions',
+            'totalTransactions',
+            'completedTransactions',
+            'pendingTransactions',
+            'cancelledTransactions'
+        ));
     }
 
     public function createTransaction()

@@ -88,45 +88,50 @@
             font-weight: 500;
         }
 
-        /* Filter Section */
+        /* Filter Section - Diperkecil */
         .filter-section {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 1.8rem;
+            padding: 1.2rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--card-shadow);
         }
 
         .filter-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
             align-items: end;
         }
 
         .form-label {
             font-weight: 600;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             display: block;
+            font-size: 0.85rem;
         }
 
-        .form-control {
+        .form-control,
+        .form-select {
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
             width: 100%;
             transition: var(--transition);
+            font-size: 0.85rem;
+            height: 38px;
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
             outline: none;
         }
 
-        /* Action Bar */
+        /* Action Bar - Diperkecil */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -138,33 +143,36 @@
 
         .search-box {
             position: relative;
-            min-width: 320px;
+            min-width: 280px;
         }
 
         .search-box input {
-            padding-left: 3rem;
-            border-radius: 10px;
+            padding-left: 2.5rem;
+            border-radius: 8px;
             border: 1px solid #e2e8f0;
             transition: var(--transition);
             background: white;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .search-box input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
         }
 
         .search-box i {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+            font-size: 0.9rem;
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
             border: none;
@@ -172,7 +180,9 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .btn-primary {
@@ -181,8 +191,8 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
         }
 
         .btn-success {
@@ -191,8 +201,8 @@
         }
 
         .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
         }
 
         /* Table Styles */
@@ -207,20 +217,23 @@
             margin-bottom: 0;
             border-collapse: separate;
             border-spacing: 0;
+            font-size: 0.9rem;
         }
 
         .table thead th {
             background: #f8fafc;
             border-bottom: 2px solid #e2e8f0;
-            padding: 1rem;
+            padding: 0.8rem;
             font-weight: 600;
             color: var(--dark-color);
+            font-size: 0.85rem;
         }
 
         .table tbody td {
-            padding: 1rem;
+            padding: 0.8rem;
             vertical-align: middle;
             border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
         }
 
         .table tbody tr:hover {
@@ -229,9 +242,9 @@
 
         /* Product Image */
         .product-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             object-fit: cover;
             border: 2px solid #e2e8f0;
             transition: var(--transition);
@@ -243,22 +256,23 @@
         }
 
         .product-img-placeholder {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             background: #f8fafc;
             border: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #94a3b8;
+            font-size: 0.8rem;
         }
 
         /* Badge Styles */
         .badge {
-            padding: 0.5rem 0.75rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
 
@@ -282,50 +296,52 @@
             color: #64748b;
         }
 
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
         /* Stock Status */
+        .stock-status {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
         .stock-status.in-stock {
             color: var(--success-color);
-            font-weight: 600;
             background: rgba(16, 185, 129, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .stock-status.low-stock {
             color: var(--warning-color);
-            font-weight: 600;
             background: rgba(245, 158, 11, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .stock-status.out-of-stock {
             color: var(--error-color);
-            font-weight: 600;
             background: rgba(239, 68, 68, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.4rem;
         }
 
         .btn-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             transition: var(--transition);
             border: 1px solid transparent;
+            font-size: 0.8rem;
         }
 
         .btn-icon-view {
@@ -364,41 +380,16 @@
             transform: scale(1.1);
         }
 
-        /* Bulk Actions */
-        .bulk-actions {
-            background: rgba(79, 70, 229, 0.05);
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: var(--transition);
-        }
-
-        .bulk-actions:hover {
-            background: rgba(79, 70, 229, 0.08);
-        }
-
-        .form-check-input {
-            margin-right: 0.5rem;
-        }
-
-        .form-select {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 0.5rem;
-        }
-
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             color: #64748b;
         }
 
         .empty-state i {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             opacity: 0.5;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
@@ -407,13 +398,13 @@
         }
 
         .empty-state h4 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-bottom: 1rem;
             color: var(--dark-color);
         }
 
         .empty-state p {
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 2rem;
             color: #64748b;
         }
@@ -423,8 +414,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-top: 1px solid #e2e8f0;
+            font-size: 0.85rem;
         }
 
         /* Responsive */
@@ -463,8 +455,8 @@
             }
 
             .btn-icon {
-                width: 32px;
-                height: 32px;
+                width: 28px;
+                height: 28px;
             }
         }
     </style>
@@ -477,7 +469,7 @@
             <div class="stat-icon" style="background: var(--gradient-primary);">
                 <i class="fas fa-boxes"></i>
             </div>
-            <div class="stat-value">{{ $totalProducts ?? 0 }}</div>
+            <div class="stat-value">{{ $totalProducts }}</div>
             <div class="stat-label">Total Products</div>
         </div>
 
@@ -485,7 +477,7 @@
             <div class="stat-icon" style="background: var(--gradient-success);">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <div class="stat-value">{{ $activeProducts ?? 0 }}</div>
+            <div class="stat-value">{{ $activeProducts }}</div>
             <div class="stat-label">Active Products</div>
         </div>
 
@@ -493,7 +485,7 @@
             <div class="stat-icon" style="background: var(--gradient-warning);">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <div class="stat-value">{{ $lowStockProducts ?? 0 }}</div>
+            <div class="stat-value">{{ $lowStockProducts }}</div>
             <div class="stat-label">Low Stock</div>
         </div>
 
@@ -501,29 +493,20 @@
             <div class="stat-icon" style="background: var(--gradient-danger);">
                 <i class="fas fa-times-circle"></i>
             </div>
-            <div class="stat-value">{{ $outOfStockProducts ?? 0 }}</div>
+            <div class="stat-value">{{ $outOfStockProducts }}</div>
             <div class="stat-label">Out of Stock</div>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section" data-aos="fade-up" data-aos-delay="500">
-        <form action="{{ route('products.index') }}" method="GET">
+        <form action="{{ route('products.index') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
-                    <label class="form-label">Search Products</label>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" class="form-control"
-                            placeholder="Search by name, SKU, category..." value="{{ request('search') }}">
-                    </div>
-                </div>
-
-                <div>
                     <label class="form-label">Category</label>
-                    <select name="category" class="form-control">
+                    <select name="category" class="form-select" id="categorySelect">
                         <option value="">All Categories</option>
-                        @foreach ($categories ?? [] as $category)
+                        @foreach ($categories as $category)
                             <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
                                 {{ $category }}
                             </option>
@@ -533,7 +516,7 @@
 
                 <div>
                     <label class="form-label">Status</label>
-                    <select name="status" class="form-control">
+                    <select name="status" class="form-select" id="statusSelect">
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -547,7 +530,7 @@
 
                 <div>
                     <label class="form-label">Sort By</label>
-                    <select name="sort" class="form-control">
+                    <select name="sort" class="form-select" id="sortSelect">
                         <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Newest First
                         </option>
                         <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
@@ -563,15 +546,36 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Hidden search input untuk maintain search value -->
+            @if (request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
         </form>
     </div>
 
     <!-- Action Bar -->
     <div class="action-bar" data-aos="fade-up" data-aos-delay="600">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="quickSearch" class="form-control" placeholder="Quick search...">
-        </div>
+        <form action="{{ route('products.index') }}" method="GET" class="d-flex gap-2 align-items-center">
+            <!-- Maintain existing filters -->
+            @if (request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
+            @if (request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+            @if (request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="form-control" placeholder="Search by name, SKU, category..."
+                    value="{{ request('search') }}" id="searchInput">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="display: none;" id="searchSubmit">Search</button>
+        </form>
 
         <div class="d-flex gap-2">
             <a href="{{ route('products.create') }}" class="btn btn-success">
@@ -580,38 +584,22 @@
             <button class="btn btn-primary" onclick="exportProducts()">
                 <i class="fas fa-download me-2"></i>Export
             </button>
+
+            <!-- Clear Filters Button -->
+            @if (request()->hasAny(['search', 'category', 'status', 'sort']))
+                <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </a>
+            @endif
         </div>
     </div>
 
     <!-- Products Table -->
     <div class="table-container" data-aos="fade-up" data-aos-delay="700">
-        @if (isset($products) && $products->count() > 0)
-            <!-- Bulk Actions -->
-            <div class="bulk-actions">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="selectAll">
-                    <label class="form-check-label" for="selectAll">
-                        Select All
-                    </label>
-                </div>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="handleBulkAction(this.value)">
-                    <option value="">Bulk Actions</option>
-                    <option value="activate">Activate</option>
-                    <option value="deactivate">Deactivate</option>
-                    <option value="feature">Mark as Featured</option>
-                    <option value="unfeature">Remove Featured</option>
-                    <option value="delete">Delete</option>
-                </select>
-            </div>
-        @endif
-
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th width="50">
-                            <input type="checkbox" class="form-check-input" id="selectAllHeader">
-                        </th>
                         <th>Product</th>
                         <th>SKU</th>
                         <th>Category</th>
@@ -624,19 +612,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($products ?? [] as $product)
+                    @forelse($products as $product)
                         <tr data-aos="fade-right" data-aos-delay="{{ $loop->index * 100 }}">
-                            <td>
-                                <input type="checkbox" class="form-check-input product-checkbox"
-                                    value="{{ $product->id }}">
-                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if ($product->image)
-                                        <img src="{{ Storage::disk('public')->exists($product->image) ? asset('storage/' . $product->image) : 'https://via.placeholder.com/60x60?text=No+Image' }}" 
-                                             alt="{{ $product->name }}"
-                                             class="product-img me-3"
-                                             onerror="this.src='https://via.placeholder.com/60x60?text=Image+Error'">
+                                        <img src="{{ Storage::disk('public')->exists($product->image) ? asset('storage/' . $product->image) : 'https://via.placeholder.com/60x60?text=No+Image' }}"
+                                            alt="{{ $product->name }}" class="product-img me-3"
+                                            onerror="this.src='https://via.placeholder.com/60x60?text=Image+Error'">
                                     @else
                                         <div class="product-img-placeholder me-3">
                                             <i class="fas fa-box"></i>
@@ -706,10 +689,9 @@
                                         title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn-icon btn-icon-delete delete-product-btn" 
-                                            title="Delete"
-                                            data-product-id="{{ $product->id }}"
-                                            data-product-name="{{ $product->name }}">
+                                    <button type="button" class="btn-icon btn-icon-delete delete-product-btn"
+                                        title="Delete" data-product-id="{{ $product->id }}"
+                                        data-product-name="{{ $product->name }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -717,14 +699,20 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10">
+                            <td colspan="9">
                                 <div class="empty-state">
                                     <i class="fas fa-box-open"></i>
                                     <h4>No products found</h4>
-                                    <p>Get started by adding your first product to the catalog.</p>
-                                    <a href="{{ route('products.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Add New Product
-                                    </a>
+                                    <p>No products match your current filters.</p>
+                                    @if (request()->hasAny(['search', 'category', 'status', 'sort']))
+                                        <a href="{{ route('products.index') }}" class="btn btn-primary">
+                                            <i class="fas fa-times me-2"></i>Clear Filters
+                                        </a>
+                                    @else
+                                        <a href="{{ route('products.create') }}" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Add New Product
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -734,190 +722,93 @@
         </div>
 
         <!-- Pagination -->
-        @if (isset($products) && $products->hasPages())
+        @if ($products->hasPages())
             <div class="pagination-container">
                 <div class="text-muted">
                     Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }}
                     products
                 </div>
                 <nav>
-                    {{ $products->links() }}
+                    {{ $products->appends(request()->query())->links() }}
                 </nav>
             </div>
         @endif
     </div>
 
     <!-- Delete Form (Hidden) -->
-    <form id="deleteForm" method="POST" style="display: none;">
+    <form id="deleteProductForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
     </form>
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Quick search functionality
-        const quickSearch = document.getElementById('quickSearch');
-        if (quickSearch) {
-            quickSearch.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-submit filter form ketika dropdown berubah
+            const filterSelects = document.querySelectorAll('#categorySelect, #statusSelect, #sortSelect');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    document.getElementById('filterForm').submit();
                 });
             });
-        }
 
-        // Select all functionality
-        const selectAllHeader = document.getElementById('selectAllHeader');
-        const selectAll = document.getElementById('selectAll');
-        
-        if (selectAllHeader) {
-            selectAllHeader.addEventListener('change', function(e) {
-                const checkboxes = document.querySelectorAll('.product-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
+            // Auto-submit search dengan debounce
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.closest('form').submit();
+                    }, 800);
                 });
-            });
-        }
+            }
 
-        if (selectAll) {
-            selectAll.addEventListener('change', function(e) {
-                const checkboxes = document.querySelectorAll('.product-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = e.target.checked;
-                });
-            });
-        }
+            // Delete button functionality dengan SweetAlert
+            const deleteButtons = document.querySelectorAll('.delete-product-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-product-id');
+                    const productName = this.getAttribute('data-product-name');
 
-        // Delete button functionality dengan SweetAlert
-        const deleteButtons = document.querySelectorAll('.delete-product-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.getAttribute('data-product-id');
-                const productName = this.getAttribute('data-product-name');
-                
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: `You are about to delete "${productName}". This action cannot be undone!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Create and submit delete form
-                        const form = document.getElementById('deleteForm');
-                        form.action = `/products/${productId}`;
-                        form.submit();
-                    }
-                });
-            });
-        });
-    });
-
-    function handleBulkAction(action) {
-        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
-            .map(checkbox => checkbox.value);
-
-        if (selectedProducts.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No products selected',
-                text: 'Please select at least one product.',
-                confirmButtonColor: '#4f46e5'
-            });
-            return;
-        }
-
-        if (action === 'delete') {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to delete ${selectedProducts.length} product(s). This action cannot be undone!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, delete them!',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit bulk delete form
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '{{ route("products.bulk-action") }}';
-                    
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = '{{ csrf_token() }}';
-                    form.appendChild(csrfToken);
-
-                    const actionInput = document.createElement('input');
-                    actionInput.type = 'hidden';
-                    actionInput.name = 'action';
-                    actionInput.value = 'delete';
-                    form.appendChild(actionInput);
-
-                    selectedProducts.forEach(productId => {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'product_ids[]';
-                        input.value = productId;
-                        form.appendChild(input);
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `You are about to delete product "${productName}". This action cannot be undone!`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('deleteProductForm');
+                            form.action = `/products/${productId}`;
+                            form.submit();
+                        }
                     });
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
+                });
             });
-        } else {
-            // For other bulk actions, submit directly
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route("products.bulk-action") }}';
-            
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            form.appendChild(csrfToken);
-
-            const actionInput = document.createElement('input');
-            actionInput.type = 'hidden';
-            actionInput.name = 'action';
-            actionInput.value = action;
-            form.appendChild(actionInput);
-
-            selectedProducts.forEach(productId => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'product_ids[]';
-                input.value = productId;
-                form.appendChild(input);
-            });
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    function exportProducts() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Export Products',
-            text: 'Export functionality would be implemented here',
-            confirmButtonColor: '#4f46e5'
         });
-    }
-</script>
+
+        function exportProducts() {
+            // Build export URL dengan parameter filter saat ini
+            const currentParams = new URLSearchParams(window.location.search);
+            const exportUrl = '{{ route('products.index') }}?' + currentParams.toString() + '&export=true';
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Export Products',
+                text: 'Preparing your export file...',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = exportUrl;
+            });
+        }
+    </script>
 @endpush

@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
     // =============================================
     // PRODUCT MANAGEMENT ROUTES
     // =============================================
+    // Di routes/web.php - Products routes sudah benar seperti ini:
     Route::prefix('products')->name('products.')->group(function () {
         // CRUD Routes
         Route::get('/', [ProductController::class, 'index'])->name('index');
@@ -92,8 +93,6 @@ Route::middleware(['auth'])->group(function () {
         // Additional Features
         Route::post('/bulk-action', [ProductController::class, 'bulkAction'])->name('bulk-action');
         Route::post('/{product}/update-stock', [ProductController::class, 'updateStock'])->name('update-stock');
-        Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
-        Route::post('/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('toggle-featured');
     });
 
     // =============================================

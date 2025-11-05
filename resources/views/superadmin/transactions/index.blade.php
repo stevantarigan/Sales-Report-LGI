@@ -88,45 +88,50 @@
             font-weight: 500;
         }
 
-        /* Filter Section */
+        /* Filter Section - Diperkecil */
         .filter-section {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 1.8rem;
+            padding: 1.2rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--card-shadow);
         }
 
         .filter-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
             align-items: end;
         }
 
         .form-label {
             font-weight: 600;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             display: block;
+            font-size: 0.85rem;
         }
 
-        .form-control {
+        .form-control,
+        .form-select {
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
             width: 100%;
             transition: var(--transition);
+            font-size: 0.85rem;
+            height: 38px;
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
             outline: none;
         }
 
-        /* Action Bar */
+        /* Action Bar - Diperkecil */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -138,33 +143,36 @@
 
         .search-box {
             position: relative;
-            min-width: 320px;
+            min-width: 280px;
         }
 
         .search-box input {
-            padding-left: 3rem;
-            border-radius: 10px;
+            padding-left: 2.5rem;
+            border-radius: 8px;
             border: 1px solid #e2e8f0;
             transition: var(--transition);
             background: white;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .search-box input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
         }
 
         .search-box i {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+            font-size: 0.9rem;
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
             border: none;
@@ -172,7 +180,9 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            height: 38px;
         }
 
         .btn-primary {
@@ -181,8 +191,8 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
         }
 
         .btn-success {
@@ -191,8 +201,8 @@
         }
 
         .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
         }
 
         /* Table Styles */
@@ -207,20 +217,23 @@
             margin-bottom: 0;
             border-collapse: separate;
             border-spacing: 0;
+            font-size: 0.9rem;
         }
 
         .table thead th {
             background: #f8fafc;
             border-bottom: 2px solid #e2e8f0;
-            padding: 1rem;
+            padding: 0.8rem;
             font-weight: 600;
             color: var(--dark-color);
+            font-size: 0.85rem;
         }
 
         .table tbody td {
-            padding: 1rem;
+            padding: 0.8rem;
             vertical-align: middle;
             border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
         }
 
         .table tbody tr:hover {
@@ -229,8 +242,8 @@
 
         /* Transaction Avatar */
         .transaction-avatar {
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #e2e8f0;
@@ -248,9 +261,9 @@
 
         /* Badge Styles */
         .badge {
-            padding: 0.5rem 0.75rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
 
@@ -280,77 +293,70 @@
         }
 
         /* Status Badge */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
         .status-badge.completed {
             color: var(--success-color);
-            font-weight: 600;
             background: rgba(16, 185, 129, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .status-badge.pending {
             color: var(--warning-color);
-            font-weight: 600;
             background: rgba(245, 158, 11, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .status-badge.cancelled {
             color: var(--error-color);
-            font-weight: 600;
             background: rgba(239, 68, 68, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         /* Payment Status Badge */
+        .payment-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
         .payment-badge.paid {
             color: var(--success-color);
-            font-weight: 600;
             background: rgba(16, 185, 129, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .payment-badge.pending {
             color: var(--warning-color);
-            font-weight: 600;
             background: rgba(245, 158, 11, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         .payment-badge.cancelled {
             color: var(--error-color);
-            font-weight: 600;
             background: rgba(239, 68, 68, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            display: inline-block;
         }
 
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.4rem;
         }
 
         .btn-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             transition: var(--transition);
             border: 1px solid transparent;
+            font-size: 0.8rem;
         }
 
         .btn-icon-view {
@@ -393,48 +399,25 @@
         .price {
             font-weight: 700;
             color: var(--dark-color);
+            font-size: 0.85rem;
         }
 
         .quantity {
             font-weight: 600;
             color: #64748b;
-        }
-
-        /* Bulk Actions */
-        .bulk-actions {
-            background: rgba(79, 70, 229, 0.05);
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: var(--transition);
-        }
-
-        .bulk-actions:hover {
-            background: rgba(79, 70, 229, 0.08);
-        }
-
-        .form-check-input {
-            margin-right: 0.5rem;
-        }
-
-        .form-select {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 0.5rem;
+            font-size: 0.8rem;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             color: #64748b;
         }
 
         .empty-state i {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             opacity: 0.5;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
@@ -443,13 +426,13 @@
         }
 
         .empty-state h4 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-bottom: 1rem;
             color: var(--dark-color);
         }
 
         .empty-state p {
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 2rem;
             color: #64748b;
         }
@@ -459,8 +442,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-top: 1px solid #e2e8f0;
+            font-size: 0.85rem;
         }
 
         /* Responsive */
@@ -499,8 +483,8 @@
             }
 
             .btn-icon {
-                width: 32px;
-                height: 32px;
+                width: 28px;
+                height: 28px;
             }
         }
     </style>
@@ -513,7 +497,7 @@
             <div class="stat-icon" style="background: var(--gradient-primary);">
                 <i class="fas fa-exchange-alt"></i>
             </div>
-            <div class="stat-value">{{ $totalTransactions ?? $transactions->total() }}</div>
+            <div class="stat-value">{{ $totalTransactions }}</div>
             <div class="stat-label">Total Transactions</div>
         </div>
 
@@ -521,8 +505,7 @@
             <div class="stat-icon" style="background: var(--gradient-success);">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <div class="stat-value">{{ $completedTransactions ?? $transactions->where('status', 'completed')->count() }}
-            </div>
+            <div class="stat-value">{{ $completedTransactions }}</div>
             <div class="stat-label">Completed</div>
         </div>
 
@@ -530,7 +513,7 @@
             <div class="stat-icon" style="background: var(--gradient-warning);">
                 <i class="fas fa-clock"></i>
             </div>
-            <div class="stat-value">{{ $pendingTransactions ?? $transactions->where('status', 'pending')->count() }}</div>
+            <div class="stat-value">{{ $pendingTransactions }}</div>
             <div class="stat-label">Pending</div>
         </div>
 
@@ -538,28 +521,18 @@
             <div class="stat-icon" style="background: var(--gradient-danger);">
                 <i class="fas fa-times-circle"></i>
             </div>
-            <div class="stat-value">{{ $cancelledTransactions ?? $transactions->where('status', 'cancelled')->count() }}
-            </div>
+            <div class="stat-value">{{ $cancelledTransactions }}</div>
             <div class="stat-label">Cancelled</div>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section" data-aos="fade-up" data-aos-delay="500">
-        <form action="{{ route('admin.transactions.index') }}" method="GET">
+        <form action="{{ route('admin.transactions.index') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
-                    <label class="form-label">Search Transactions</label>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" class="form-control"
-                            placeholder="Search by customer, product..." value="{{ request('search') }}">
-                    </div>
-                </div>
-
-                <div>
                     <label class="form-label">Status</label>
-                    <select name="status" class="form-control">
+                    <select name="status" class="form-select" id="statusSelect">
                         <option value="">All Status</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
                         </option>
@@ -571,7 +544,7 @@
 
                 <div>
                     <label class="form-label">Payment Status</label>
-                    <select name="payment_status" class="form-control">
+                    <select name="payment_status" class="form-select" id="paymentSelect">
                         <option value="">All Payment Status</option>
                         <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
                         <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending
@@ -582,13 +555,23 @@
                 </div>
 
                 <div>
-                    <label class="form-label">Date Range</label>
+                    <label class="form-label">Date From</label>
                     <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
                 </div>
 
                 <div>
-                    <label class="form-label">To</label>
+                    <label class="form-label">Date To</label>
                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                </div>
+
+                <div>
+                    <label class="form-label">Sort By</label>
+                    <select name="sort" class="form-select" id="sortSelect">
+                        <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Newest First
+                        </option>
+                        <option value="total_price" {{ request('sort') == 'total_price' ? 'selected' : '' }}>Highest Amount
+                        </option>
+                    </select>
                 </div>
 
                 <div>
@@ -597,15 +580,42 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Hidden search input untuk maintain search value -->
+            @if (request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
         </form>
     </div>
 
-    <!-- Action Bar - YANG SUDAH DIPERBAIKI -->
+    <!-- Action Bar -->
     <div class="action-bar" data-aos="fade-up" data-aos-delay="600">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="quickSearch" class="form-control" placeholder="Quick search...">
-        </div>
+        <form action="{{ route('admin.transactions.index') }}" method="GET" class="d-flex gap-2 align-items-center">
+            <!-- Maintain existing filters -->
+            @if (request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+            @if (request('payment_status'))
+                <input type="hidden" name="payment_status" value="{{ request('payment_status') }}">
+            @endif
+            @if (request('date_from'))
+                <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+            @endif
+            @if (request('date_to'))
+                <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+            @endif
+            @if (request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="form-control" placeholder="Search by customer, product..."
+                    value="{{ request('search') }}" id="searchInput">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="display: none;" id="searchSubmit">Search</button>
+        </form>
 
         <div class="d-flex gap-2">
             <a href="{{ route('admin.transactions.create') }}" class="btn btn-success">
@@ -614,36 +624,22 @@
             <button class="btn btn-primary" onclick="exportTransactions()">
                 <i class="fas fa-download me-2"></i>Export
             </button>
+
+            <!-- Clear Filters Button -->
+            @if (request()->hasAny(['search', 'status', 'payment_status', 'date_from', 'date_to', 'sort']))
+                <a href="{{ route('admin.transactions.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </a>
+            @endif
         </div>
     </div>
 
     <!-- Transactions Table -->
     <div class="table-container" data-aos="fade-up" data-aos-delay="700">
-        @if ($transactions->count() > 0)
-            <!-- Bulk Actions -->
-            <div class="bulk-actions">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="selectAll">
-                    <label class="form-check-label" for="selectAll">
-                        Select All
-                    </label>
-                </div>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="handleBulkAction(this.value)">
-                    <option value="">Bulk Actions</option>
-                    <option value="complete">Mark as Completed</option>
-                    <option value="cancel">Mark as Cancelled</option>
-                    <option value="delete">Delete</option>
-                </select>
-            </div>
-        @endif
-
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th width="50">
-                            <input type="checkbox" class="form-check-input">
-                        </th>
                         <th>Transaction</th>
                         <th>Customer</th>
                         <th>Product</th>
@@ -658,10 +654,6 @@
                 <tbody>
                     @forelse($transactions as $transaction)
                         <tr data-aos="fade-right" data-aos-delay="{{ $loop->index * 100 }}">
-                            <td>
-                                <input type="checkbox" class="form-check-input transaction-checkbox"
-                                    value="{{ $transaction->id }}">
-                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="transaction-avatar me-3">
@@ -714,28 +706,30 @@
                                         class="btn-icon btn-icon-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.transactions.destroy', $transaction) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon btn-icon-delete" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this transaction?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-icon btn-icon-delete delete-transaction-btn"
+                                        title="Delete" data-transaction-id="{{ $transaction->id }}"
+                                        data-transaction-code="TRX-{{ str_pad($transaction->id, 6, '0', STR_PAD_LEFT) }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10">
+                            <td colspan="9">
                                 <div class="empty-state">
                                     <i class="fas fa-exchange-alt"></i>
                                     <h4>No transactions found</h4>
-                                    <p>Get started by creating your first transaction.</p>
-                                    <a href="{{ route('admin.transactions.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Add New Transaction
-                                    </a>
+                                    <p>No transactions match your current filters.</p>
+                                    @if (request()->hasAny(['search', 'status', 'payment_status', 'date_from', 'date_to', 'sort']))
+                                        <a href="{{ route('admin.transactions.index') }}" class="btn btn-primary">
+                                            <i class="fas fa-times me-2"></i>Clear Filters
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.transactions.create') }}" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Add New Transaction
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -752,90 +746,86 @@
                     {{ $transactions->total() }} transactions
                 </div>
                 <nav>
-                    {{ $transactions->links() }}
+                    {{ $transactions->appends(request()->query())->links() }}
                 </nav>
             </div>
         @endif
     </div>
+
+    <!-- Delete Form (Hidden) -->
+    <form id="deleteTransactionForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Quick search functionality
-            const quickSearch = document.getElementById('quickSearch');
-            if (quickSearch) {
-                quickSearch.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('tbody tr');
+            // Auto-submit filter form ketika dropdown berubah
+            const filterSelects = document.querySelectorAll('#statusSelect, #paymentSelect, #sortSelect');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    document.getElementById('filterForm').submit();
+                });
+            });
 
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
+            // Auto-submit search dengan debounce
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.closest('form').submit();
+                    }, 800);
                 });
             }
 
-            // Select all functionality
-            const selectAll = document.getElementById('selectAll');
-            if (selectAll) {
-                selectAll.addEventListener('change', function(e) {
-                    const checkboxes = document.querySelectorAll('.transaction-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = e.target.checked;
+            // Delete button functionality dengan SweetAlert
+            const deleteButtons = document.querySelectorAll('.delete-transaction-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const transactionId = this.getAttribute('data-transaction-id');
+                    const transactionCode = this.getAttribute('data-transaction-code');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `You are about to delete transaction "${transactionCode}". This action cannot be undone!`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('deleteTransactionForm');
+                            form.action = `/admin/transactions/${transactionId}`;
+                            form.submit();
+                        }
                     });
                 });
-            }
+            });
         });
 
-        function handleBulkAction(action) {
-            const selectedTransactions = Array.from(document.querySelectorAll('.transaction-checkbox:checked'))
-                .map(checkbox => checkbox.value);
-
-            if (selectedTransactions.length === 0) {
-                showNotification('Please select at least one transaction.', 'error');
-                return;
-            }
-
-            if (action === 'delete') {
-                if (!confirm(`Are you sure you want to delete ${selectedTransactions.length} transaction(s)?`)) {
-                    return;
-                }
-            }
-
-            console.log('Bulk action:', action, 'on transactions:', selectedTransactions);
-
-            // Implement bulk action logic here
-            showNotification(`Bulk action "${action}" would be performed on ${selectedTransactions.length} transactions`,
-                'info');
-        }
-
         function exportTransactions() {
-            showNotification('Export functionality would be implemented here', 'info');
-        }
+            // Build export URL dengan parameter filter saat ini
+            const currentParams = new URLSearchParams(window.location.search);
+            const exportUrl = '{{ route('admin.transactions.index') }}?' + currentParams.toString() + '&export=true';
 
-        // Global helper function untuk notifications
-        function showNotification(message, type = 'info') {
-            const alertClass = type === 'success' ? 'alert-success' :
-                type === 'error' ? 'alert-danger' : 'alert-info';
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alertDiv.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 
-                             type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2"></i>
-                <div>${message}</div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-            document.body.appendChild(alertDiv);
-
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
+            Swal.fire({
+                icon: 'info',
+                title: 'Export Transactions',
+                text: 'Preparing your export file...',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = exportUrl;
+            });
         }
     </script>
 @endpush

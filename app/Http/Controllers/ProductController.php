@@ -11,67 +11,88 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized access.');
+        }
+
         $query = Product::query();
 
-        // Search functionality
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('brand', 'like', "%{$search}%");
-            });
+    // Search functionality
+    if ($request->has('search') && $request->search != '') {
+        $searchTerm = $request->search;
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('name', 'like', '%' . $searchTerm . '%')
+                ->orWhere('sku', 'like', '%' . $searchTerm . '%')
+                ->orWhere('category', 'like', '%' . $searchTerm . '%')
+                ->orWhere('brand', 'like', '%' . $searchTerm . '%');
+        });
+    }
+
+    // Filter by category
+    if ($request->has('category') && $request->category != '') {
+        $query->where('category', $request->category);
+    }
+
+    // Filter by status
+    if ($request->has('status') && $request->status != '') {
+        switch ($request->status) {
+            case 'active':
+                $query->where('is_active', true);
+                break;
+            case 'inactive':
+                $query->where('is_active', false);
+                break;
+            case 'featured':
+                $query->where('is_featured', true);
+                break;
+            case 'low_stock':
+                $query->where('stock_quantity', '<=', \DB::raw('min_stock'))
+                    ->where('stock_quantity', '>', 0);
+                break;
+            case 'out_of_stock':
+                $query->where('stock_quantity', 0);
+                break;
         }
+    }
 
-        // Filter by status
-        if ($request->has('status')) {
-            switch ($request->status) {
-                case 'active':
-                    $query->active();
-                    break;
-                case 'inactive':
-                    $query->where('is_active', false);
-                    break;
-                case 'featured':
-                    $query->featured();
-                    break;
-                case 'low_stock':
-                    $query->lowStock();
-                    break;
-                case 'out_of_stock':
-                    $query->where('stock_quantity', 0);
-                    break;
-            }
-        }
+    // Sorting
+    $sort = $request->get('sort', 'created_at');
+    $sortDirection = 'desc';
 
-        // Filter by category
-        if ($request->has('category') && !empty($request->category)) {
-            $query->where('category', $request->category);
-        }
+    if ($sort == 'name') {
+        $sortDirection = 'asc';
+    } elseif ($sort == 'price' || $sort == 'stock_quantity') {
+        $sortDirection = 'asc';
+    }
 
-        // Sort functionality
-        $sort = $request->get('sort', 'created_at');
-        $order = $request->get('order', 'desc');
-        $query->orderBy($sort, $order);
+    $query->orderBy($sort, $sortDirection);
 
-        $products = $query->paginate(15);
+    $products = $query->paginate(10);
 
-        // Get statistics
-        $totalProducts = Product::count();
-        $activeProducts = Product::active()->count();
-        $lowStockProducts = Product::lowStock()->count();
-        $outOfStockProducts = Product::where('stock_quantity', 0)->count();
-        $categories = Product::distinct()->pluck('category')->filter();
+    // Stats untuk dashboard
+    $totalProducts = Product::count();
+    $activeProducts = Product::where('is_active', true)->count();
+    $lowStockProducts = Product::where('stock_quantity', '<=', \DB::raw('min_stock'))
+        ->where('stock_quantity', '>', 0)
+        ->count();
+    $outOfStockProducts = Product::where('stock_quantity', 0)->count();
 
-        return view('products.index', compact(
-            'products',
-            'categories',
-            'totalProducts',
-            'activeProducts',
-            'lowStockProducts',
-            'outOfStockProducts'
-        ));
+    // Get unique categories for filter dropdown
+    $categories = Product::select('category')
+        ->whereNotNull('category')
+        ->where('category', '!=', '')
+        ->distinct()
+        ->pluck('category')
+        ->toArray();
+
+    return view('products.index', compact(
+        'products',
+        'totalProducts',
+        'activeProducts',
+        'lowStockProducts',
+        'outOfStockProducts',
+        'categories'
+    ));
     }
 
     public function create()
