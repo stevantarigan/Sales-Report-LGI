@@ -558,20 +558,61 @@ class SuperAdminController extends Controller
             ->with('success', 'Transaction deleted successfully.');
     }
     // Customers Management Methods
-    public function customers()
+    // Di SuperAdminController - ganti method customers() dengan ini:
+    // Di SuperAdminController
+    public function customers(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {
             abort(403, 'Unauthorized access.');
         }
 
-        $customers = Customer::withCount('transactions')
-            ->latest()
-            ->paginate(10);
+        $query = Customer::withCount('transactions');
 
-        // Stats untuk dashboard - SESUAI DENGAN FIELD YANG ADA
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('city', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('company', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $isActive = $request->status == 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        // Filter by phone availability
+        if ($request->has('has_phone') && $request->has_phone != '') {
+            if ($request->has_phone == 'yes') {
+                $query->whereNotNull('phone')->where('phone', '!=', '');
+            } elseif ($request->has_phone == 'no') {
+                $query->where(function ($q) {
+                    $q->whereNull('phone')->orWhere('phone', '');
+                });
+            }
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $sortDirection = 'desc';
+
+        if ($sort == 'name' || $sort == 'city') {
+            $sortDirection = 'asc';
+        }
+
+        $query->orderBy($sort, $sortDirection);
+
+        $customers = $query->paginate(10);
+
+        // Stats untuk dashboard
         $totalCustomers = $customers->total();
-        $customersWithPhone = Customer::whereNotNull('phone')->count();
-        $customersWithAddress = Customer::whereNotNull('address')->count();
+        $customersWithPhone = Customer::whereNotNull('phone')->where('phone', '!=', '')->count();
+        $customersWithAddress = Customer::whereNotNull('address')->where('address', '!=', '')->count();
         $newCustomersThisMonth = Customer::where('created_at', '>=', now()->startOfMonth())->count();
 
         return view('superadmin.customers.index', compact(

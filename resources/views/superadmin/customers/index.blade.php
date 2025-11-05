@@ -723,31 +723,10 @@
 
     <!-- Customers Table -->
     <div class="table-container" data-aos="fade-up" data-aos-delay="700">
-        @if ($customers->count() > 0)
-            <!-- Bulk Actions -->
-            <div class="bulk-actions">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="selectAll">
-                    <label class="form-check-label" for="selectAll">
-                        Select All
-                    </label>
-                </div>
-                <select class="form-select form-select-sm" style="width: auto;" onchange="handleBulkAction(this.value)">
-                    <option value="">Bulk Actions</option>
-                    <option value="activate">Activate</option>
-                    <option value="deactivate">Deactivate</option>
-                    <option value="delete">Delete</option>
-                </select>
-            </div>
-        @endif
-
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th width="50">
-                            <input type="checkbox" class="form-check-input" id="selectAllHeader">
-                        </th>
                         <th>Customer</th>
                         <th>Contact Information</th>
                         <th>Location</th>
@@ -760,10 +739,6 @@
                 <tbody>
                     @forelse($customers as $customer)
                         <tr data-aos="fade-right" data-aos-delay="{{ $loop->index * 100 }}">
-                            <td>
-                                <input type="checkbox" class="form-check-input customer-checkbox"
-                                    value="{{ $customer->id }}">
-                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="customer-avatar me-3">
@@ -852,7 +827,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">
+                            <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-user-friends"></i>
                                     <h4>No customers found</h4>
@@ -947,28 +922,6 @@
                 });
             });
 
-            // Select all functionality
-            const selectAllHeader = document.getElementById('selectAllHeader');
-            const selectAll = document.getElementById('selectAll');
-
-            if (selectAllHeader) {
-                selectAllHeader.addEventListener('change', function(e) {
-                    const checkboxes = document.querySelectorAll('.customer-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = e.target.checked;
-                    });
-                });
-            }
-
-            if (selectAll) {
-                selectAll.addEventListener('change', function(e) {
-                    const checkboxes = document.querySelectorAll('.customer-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = e.target.checked;
-                    });
-                });
-            }
-
             // WhatsApp link dengan SweetAlert2
             const whatsappLinks = document.querySelectorAll('.whatsapp-link, .btn-icon-whatsapp');
             whatsappLinks.forEach(link => {
@@ -976,7 +929,7 @@
                     e.preventDefault();
 
                     const customerName = this.closest('tr').querySelector(
-                        'td:nth-child(2) div div:first-child').textContent;
+                        'td:nth-child(1) div div:first-child').textContent;
                     const customerPhone = this.closest('tr').querySelector('.whatsapp-link')
                         ?.textContent ||
                         this.getAttribute('href')?.replace('https://wa.me/', '');
@@ -1025,91 +978,6 @@
                 });
             });
         });
-
-        function handleBulkAction(action) {
-            const selectedCustomers = Array.from(document.querySelectorAll('.customer-checkbox:checked'))
-                .map(checkbox => checkbox.value);
-
-            if (selectedCustomers.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No customers selected',
-                    text: 'Please select at least one customer.',
-                    confirmButtonColor: '#4f46e5'
-                });
-                return;
-            }
-
-            if (action === 'delete') {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: `You are about to delete ${selectedCustomers.length} customer(s). This action cannot be undone!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Yes, delete them!',
-                    cancelButtonText: 'Cancel',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        bulkDeleteCustomers(selectedCustomers);
-                    }
-                });
-            } else {
-                // Implement other bulk actions
-                console.log('Bulk action:', action, 'on customers:', selectedCustomers);
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Bulk Action',
-                    text: `Bulk action "${action}" would be performed on ${selectedCustomers.length} customers`,
-                    confirmButtonColor: '#4f46e5'
-                });
-            }
-        }
-
-        function bulkDeleteCustomers(customerIds) {
-            // Implement AJAX untuk bulk delete
-            fetch('{{ route('admin.customers.bulk-delete') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        customer_ids: customerIds
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: data.message,
-                            confirmButtonColor: '#10b981'
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: data.message,
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'An error occurred while deleting customers.',
-                        confirmButtonColor: '#ef4444'
-                    });
-                });
-        }
 
         function exportCustomers() {
             // Build export URL dengan parameter filter saat ini
