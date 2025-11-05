@@ -513,6 +513,88 @@
                 height: 32px;
             }
         }
+
+        /* SweetAlert2 Custom Styles */
+        .swal2-popup {
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .whatsapp-swal .swal2-title {
+            color: #25D366;
+            font-weight: 600;
+        }
+
+        .btn-whatsapp-swal {
+            background: #25D366 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .btn-whatsapp-swal:hover {
+            background: #128C7E !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .btn-cancel-swal {
+            background: #6c757d !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .btn-cancel-swal:hover {
+            background: #5a6268 !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .btn-export-swal {
+            background: #4f46e5 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+        }
+
+        /* WhatsApp link hover effects */
+        .whatsapp-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-link:hover::after {
+            content: 'Klik untuk chat WhatsApp';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #25D366;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .whatsapp-link:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #25D366;
+            margin-bottom: -5px;
+        }
     </style>
 @endpush
 
@@ -523,7 +605,7 @@
             <div class="stat-icon" style="background: var(--gradient-primary);">
                 <i class="fas fa-users"></i>
             </div>
-            <div class="stat-value">{{ $totalCustomers ?? $customers->total() }}</div>
+            <div class="stat-value">{{ $totalCustomers }}</div>
             <div class="stat-label">Total Customers</div>
         </div>
 
@@ -531,7 +613,7 @@
             <div class="stat-icon" style="background: var(--gradient-success);">
                 <i class="fab fa-whatsapp"></i>
             </div>
-            <div class="stat-value">{{ $customersWithPhone ?? $customers->whereNotNull('phone')->count() }}</div>
+            <div class="stat-value">{{ $customersWithPhone }}</div>
             <div class="stat-label">With WhatsApp</div>
         </div>
 
@@ -539,7 +621,7 @@
             <div class="stat-icon" style="background: var(--gradient-warning);">
                 <i class="fas fa-map-marker-alt"></i>
             </div>
-            <div class="stat-value">{{ $customersWithAddress ?? $customers->whereNotNull('address')->count() }}</div>
+            <div class="stat-value">{{ $customersWithAddress }}</div>
             <div class="stat-label">With Address</div>
         </div>
 
@@ -547,28 +629,18 @@
             <div class="stat-icon" style="background: var(--gradient-danger);">
                 <i class="fas fa-calendar"></i>
             </div>
-            <div class="stat-value">
-                {{ $newCustomersThisMonth ?? $customers->where('created_at', '>=', now()->startOfMonth())->count() }}</div>
+            <div class="stat-value">{{ $newCustomersThisMonth }}</div>
             <div class="stat-label">New This Month</div>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section" data-aos="fade-up" data-aos-delay="500">
-        <form action="{{ route('admin.customers.index') }}" method="GET">
+        <form action="{{ route('admin.customers.index') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
-                    <label class="form-label">Search Customers</label>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" class="form-control"
-                            placeholder="Search by name, email, city..." value="{{ request('search') }}">
-                    </div>
-                </div>
-
-                <div>
                     <label class="form-label">Status</label>
-                    <select name="status" class="form-control">
+                    <select name="status" class="form-select" id="statusSelect">
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -577,7 +649,7 @@
 
                 <div>
                     <label class="form-label">Has WhatsApp</label>
-                    <select name="has_phone" class="form-control">
+                    <select name="has_phone" class="form-select" id="phoneSelect">
                         <option value="">All</option>
                         <option value="yes" {{ request('has_phone') == 'yes' ? 'selected' : '' }}>With WhatsApp</option>
                         <option value="no" {{ request('has_phone') == 'no' ? 'selected' : '' }}>Without WhatsApp
@@ -587,7 +659,7 @@
 
                 <div>
                     <label class="form-label">Sort By</label>
-                    <select name="sort" class="form-control">
+                    <select name="sort" class="form-select" id="sortSelect">
                         <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Newest First
                         </option>
                         <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
@@ -601,15 +673,36 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Hidden search input untuk maintain search value -->
+            @if (request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
         </form>
     </div>
 
     <!-- Action Bar -->
     <div class="action-bar" data-aos="fade-up" data-aos-delay="600">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="quickSearch" class="form-control" placeholder="Quick search...">
-        </div>
+        <form action="{{ route('admin.customers.index') }}" method="GET" class="d-flex gap-2 align-items-center">
+            <!-- Maintain existing filters -->
+            @if (request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+            @if (request('has_phone'))
+                <input type="hidden" name="has_phone" value="{{ request('has_phone') }}">
+            @endif
+            @if (request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="form-control" placeholder="Search by name, email, city..."
+                    value="{{ request('search') }}" id="searchInput">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="display: none;" id="searchSubmit">Search</button>
+        </form>
 
         <div class="d-flex gap-2">
             <a href="{{ route('admin.customers.create') }}" class="btn btn-success">
@@ -618,6 +711,13 @@
             <button class="btn btn-primary" onclick="exportCustomers()">
                 <i class="fas fa-download me-2"></i>Export
             </button>
+
+            <!-- Clear Filters Button -->
+            @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </a>
+            @endif
         </div>
     </div>
 
@@ -646,7 +746,7 @@
                 <thead>
                     <tr>
                         <th width="50">
-                            <input type="checkbox" class="form-check-input">
+                            <input type="checkbox" class="form-check-input" id="selectAllHeader">
                         </th>
                         <th>Customer</th>
                         <th>Contact Information</th>
@@ -742,15 +842,11 @@
                                         class="btn-icon btn-icon-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.customers.destroy', $customer) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon btn-icon-delete" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this customer?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-icon btn-icon-delete delete-customer-btn"
+                                        title="Delete" data-customer-id="{{ $customer->id }}"
+                                        data-customer-name="{{ $customer->name }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -760,10 +856,16 @@
                                 <div class="empty-state">
                                     <i class="fas fa-user-friends"></i>
                                     <h4>No customers found</h4>
-                                    <p>Get started by adding your first customer to the system.</p>
-                                    <a href="{{ route('admin.customers.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Add New Customer
-                                    </a>
+                                    <p>No customers match your current filters.</p>
+                                    @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))
+                                        <a href="{{ route('admin.customers.index') }}" class="btn btn-primary">
+                                            <i class="fas fa-times me-2"></i>Clear Filters
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.customers.create') }}" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Add New Customer
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -780,33 +882,84 @@
                     customers
                 </div>
                 <nav>
-                    {{ $customers->links() }}
+                    {{ $customers->appends(request()->query())->links() }}
                 </nav>
             </div>
         @endif
     </div>
+
+    <!-- Delete Form (Hidden) -->
+    <form id="deleteCustomerForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Quick search functionality
-            const quickSearch = document.getElementById('quickSearch');
-            if (quickSearch) {
-                quickSearch.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const rows = document.querySelectorAll('tbody tr');
+            // Auto-submit filter form ketika dropdown berubah
+            const filterSelects = document.querySelectorAll('#statusSelect, #phoneSelect, #sortSelect');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    document.getElementById('filterForm').submit();
+                });
+            });
 
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+            // Auto-submit search dengan debounce
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.closest('form').submit();
+                    }, 800);
+                });
+            }
+
+            // Delete button functionality dengan SweetAlert
+            const deleteButtons = document.querySelectorAll('.delete-customer-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const customerId = this.getAttribute('data-customer-id');
+                    const customerName = this.getAttribute('data-customer-name');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `You are about to delete customer "${customerName}". This action cannot be undone!`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('deleteCustomerForm');
+                            form.action = `/admin/customers/${customerId}`;
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Select all functionality
+            const selectAllHeader = document.getElementById('selectAllHeader');
+            const selectAll = document.getElementById('selectAll');
+
+            if (selectAllHeader) {
+                selectAllHeader.addEventListener('change', function(e) {
+                    const checkboxes = document.querySelectorAll('.customer-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = e.target.checked;
                     });
                 });
             }
 
-            // Select all functionality
-            const selectAll = document.getElementById('selectAll');
             if (selectAll) {
                 selectAll.addEventListener('change', function(e) {
                     const checkboxes = document.querySelectorAll('.customer-checkbox');
@@ -854,33 +1007,18 @@
                         cancelButtonText: 'Batal',
                         confirmButtonColor: '#25D366',
                         cancelButtonColor: '#6c757d',
-                        reverseButtons: true,
-                        customClass: {
-                            popup: 'whatsapp-swal',
-                            confirmButton: 'btn-whatsapp-swal',
-                            cancelButton: 'btn-cancel-swal'
-                        },
-                        buttonsStyling: false,
-                        showClass: {
-                            popup: 'animate__animated animate__fadeInDown'
-                        },
-                        hideClass: {
-                            popup: 'animate__animated animate__fadeOutUp'
-                        }
+                        reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.open(whatsappUrl, '_blank');
 
-                            // Tampilkan notifikasi sukses
                             Swal.fire({
                                 title: 'Berhasil!',
                                 text: `WhatsApp dibuka untuk ${customerName}`,
                                 icon: 'success',
                                 timer: 2000,
                                 showConfirmButton: false,
-                                timerProgressBar: true,
-                                toast: true,
-                                position: 'top-end'
+                                timerProgressBar: true
                             });
                         }
                     });
@@ -893,156 +1031,100 @@
                 .map(checkbox => checkbox.value);
 
             if (selectedCustomers.length === 0) {
-                showNotification('Please select at least one customer.', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No customers selected',
+                    text: 'Please select at least one customer.',
+                    confirmButtonColor: '#4f46e5'
+                });
                 return;
             }
 
             if (action === 'delete') {
                 Swal.fire({
-                    title: 'Hapus Customer?',
-                    text: `Anda akan menghapus ${selectedCustomers.length} customer. Tindakan ini tidak dapat dibatalkan!`,
+                    title: 'Are you sure?',
+                    text: `You are about to delete ${selectedCustomers.length} customer(s). This action cannot be undone!`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, delete them!',
+                    cancelButtonText: 'Cancel',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Implement delete logic here
-                        showNotification(`${selectedCustomers.length} customer berhasil dihapus`, 'success');
+                        bulkDeleteCustomers(selectedCustomers);
                     }
                 });
-                return;
+            } else {
+                // Implement other bulk actions
+                console.log('Bulk action:', action, 'on customers:', selectedCustomers);
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Bulk Action',
+                    text: `Bulk action "${action}" would be performed on ${selectedCustomers.length} customers`,
+                    confirmButtonColor: '#4f46e5'
+                });
             }
+        }
 
-            // Implement other bulk actions
-            showNotification(`Bulk action "${action}" would be performed on ${selectedCustomers.length} customers`, 'info');
+        function bulkDeleteCustomers(customerIds) {
+            // Implement AJAX untuk bulk delete
+            fetch('{{ route('admin.customers.bulk-delete') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        customer_ids: customerIds
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message,
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message,
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'An error occurred while deleting customers.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                });
         }
 
         function exportCustomers() {
+            // Build export URL dengan parameter filter saat ini
+            const currentParams = new URLSearchParams(window.location.search);
+            const exportUrl = '{{ route('admin.customers.index') }}?' + currentParams.toString() + '&export=true';
+
             Swal.fire({
-                title: 'Export Data Customer',
-                text: 'Data customer akan diexport dalam format Excel',
                 icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Export',
-                cancelButtonText: 'Batal',
-                confirmButtonColor: '#4f46e5',
-                customClass: {
-                    confirmButton: 'btn-export-swal'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Implement export logic here
-                    showNotification('Data customer berhasil diexport', 'success');
-                }
-            });
-        }
-
-        // Global helper function untuk notifications dengan SweetAlert2
-        function showNotification(message, type = 'info') {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
+                title: 'Export Customers',
+                text: 'Preparing your export file...',
                 showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-
-            Toast.fire({
-                icon: type,
-                title: message
+                timer: 1500
+            }).then(() => {
+                window.location.href = exportUrl;
             });
         }
     </script>
-
-    <style>
-        /* SweetAlert2 Custom Styles */
-        .swal2-popup {
-            border-radius: 16px;
-            padding: 2rem;
-        }
-
-        .whatsapp-swal .swal2-title {
-            color: #25D366;
-            font-weight: 600;
-        }
-
-        .btn-whatsapp-swal {
-            background: #25D366 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .btn-whatsapp-swal:hover {
-            background: #128C7E !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .btn-cancel-swal {
-            background: #6c757d !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .btn-cancel-swal:hover {
-            background: #5a6268 !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .btn-export-swal {
-            background: #4f46e5 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-        }
-
-        /* WhatsApp link hover effects */
-        .whatsapp-link {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .whatsapp-link:hover::after {
-            content: 'Klik untuk chat WhatsApp';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #25D366;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 1000;
-        }
-
-        .whatsapp-link:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #25D366;
-            margin-bottom: -5px;
-        }
-    </style>
 @endpush

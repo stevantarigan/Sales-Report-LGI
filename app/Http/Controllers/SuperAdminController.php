@@ -147,14 +147,45 @@ class SuperAdminController extends Controller
     }
 
     // User Management Methods
-    public function users()
+    public function users(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {
             abort(403, 'Unauthorized access.');
         }
 
-        $users = User::latest()->paginate(10);
-        return view('superadmin.user.index', compact('users')); // DIUBAH: superadmin.user.index
+        $query = User::query();
+
+        // Filter berdasarkan role
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Filter berdasarkan status
+        if ($request->has('status') && $request->status != '') {
+            $isActive = $request->status == 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        // Search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Sorting
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = 'desc';
+
+        if ($sortField == 'name' || $sortField == 'email') {
+            $sortDirection = 'asc';
+        }
+
+        $users = $query->orderBy($sortField, $sortDirection)->paginate(10);
+
+        return view('superadmin.user.index', compact('users'));
     }
 
     public function createUser()
@@ -672,15 +703,15 @@ class SuperAdminController extends Controller
 
         // Sorting
         $sort = $request->get('sort', 'created_at');
-        $query->orderBy($sort, 'desc');
+        $sortDirection = 'desc';
+
+        if ($sort == 'name' || $sort == 'email') {
+            $sortDirection = 'asc';
+        }
+
+        $query->orderBy($sort, $sortDirection);
 
         $users = $query->paginate(10);
-
-        // Untuk export functionality (opsional)
-        if ($request->has('export') && $request->export == 'true') {
-            // Logic untuk export Excel/PDF
-            return $this->exportUsers($users);
-        }
 
         return view('superadmin.user.index', compact('users'));
     }

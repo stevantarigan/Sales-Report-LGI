@@ -57,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{customer}/edit', [SuperAdminController::class, 'editCustomer'])->name('edit');
             Route::put('/{customer}', [SuperAdminController::class, 'updateCustomer'])->name('update');
             Route::delete('/{customer}', [SuperAdminController::class, 'destroyCustomer'])->name('destroy');
+            // Bulk actions (opsional)
+            Route::post('/customers/bulk-delete', [SuperAdminController::class, 'bulkDeleteCustomers'])->name('admin.customers.bulk-delete');
         });
 
         // Transaction Management Routes
