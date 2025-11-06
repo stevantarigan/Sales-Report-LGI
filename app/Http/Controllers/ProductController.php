@@ -17,82 +17,82 @@ class ProductController extends Controller
 
         $query = Product::query();
 
-    // Search functionality
-    if ($request->has('search') && $request->search != '') {
-        $searchTerm = $request->search;
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('name', 'like', '%' . $searchTerm . '%')
-                ->orWhere('sku', 'like', '%' . $searchTerm . '%')
-                ->orWhere('category', 'like', '%' . $searchTerm . '%')
-                ->orWhere('brand', 'like', '%' . $searchTerm . '%');
-        });
-    }
-
-    // Filter by category
-    if ($request->has('category') && $request->category != '') {
-        $query->where('category', $request->category);
-    }
-
-    // Filter by status
-    if ($request->has('status') && $request->status != '') {
-        switch ($request->status) {
-            case 'active':
-                $query->where('is_active', true);
-                break;
-            case 'inactive':
-                $query->where('is_active', false);
-                break;
-            case 'featured':
-                $query->where('is_featured', true);
-                break;
-            case 'low_stock':
-                $query->where('stock_quantity', '<=', \DB::raw('min_stock'))
-                    ->where('stock_quantity', '>', 0);
-                break;
-            case 'out_of_stock':
-                $query->where('stock_quantity', 0);
-                break;
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('sku', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('category', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('brand', 'like', '%' . $searchTerm . '%');
+            });
         }
-    }
 
-    // Sorting
-    $sort = $request->get('sort', 'created_at');
-    $sortDirection = 'desc';
+        // Filter by category
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category', $request->category);
+        }
 
-    if ($sort == 'name') {
-        $sortDirection = 'asc';
-    } elseif ($sort == 'price' || $sort == 'stock_quantity') {
-        $sortDirection = 'asc';
-    }
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            switch ($request->status) {
+                case 'active':
+                    $query->where('is_active', true);
+                    break;
+                case 'inactive':
+                    $query->where('is_active', false);
+                    break;
+                case 'featured':
+                    $query->where('is_featured', true);
+                    break;
+                case 'low_stock':
+                    $query->where('stock_quantity', '<=', \DB::raw('min_stock'))
+                        ->where('stock_quantity', '>', 0);
+                    break;
+                case 'out_of_stock':
+                    $query->where('stock_quantity', 0);
+                    break;
+            }
+        }
 
-    $query->orderBy($sort, $sortDirection);
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $sortDirection = 'desc';
 
-    $products = $query->paginate(10);
+        if ($sort == 'name') {
+            $sortDirection = 'asc';
+        } elseif ($sort == 'price' || $sort == 'stock_quantity') {
+            $sortDirection = 'asc';
+        }
 
-    // Stats untuk dashboard
-    $totalProducts = Product::count();
-    $activeProducts = Product::where('is_active', true)->count();
-    $lowStockProducts = Product::where('stock_quantity', '<=', \DB::raw('min_stock'))
-        ->where('stock_quantity', '>', 0)
-        ->count();
-    $outOfStockProducts = Product::where('stock_quantity', 0)->count();
+        $query->orderBy($sort, $sortDirection);
 
-    // Get unique categories for filter dropdown
-    $categories = Product::select('category')
-        ->whereNotNull('category')
-        ->where('category', '!=', '')
-        ->distinct()
-        ->pluck('category')
-        ->toArray();
+        $products = $query->paginate(10);
 
-    return view('products.index', compact(
-        'products',
-        'totalProducts',
-        'activeProducts',
-        'lowStockProducts',
-        'outOfStockProducts',
-        'categories'
-    ));
+        // Stats untuk dashboard
+        $totalProducts = Product::count();
+        $activeProducts = Product::where('is_active', true)->count();
+        $lowStockProducts = Product::where('stock_quantity', '<=', \DB::raw('min_stock'))
+            ->where('stock_quantity', '>', 0)
+            ->count();
+        $outOfStockProducts = Product::where('stock_quantity', 0)->count();
+
+        // Get unique categories for filter dropdown
+        $categories = Product::select('category')
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->pluck('category')
+            ->toArray();
+
+        return view('products.index', compact(
+            'products',
+            'totalProducts',
+            'activeProducts',
+            'lowStockProducts',
+            'outOfStockProducts',
+            'categories'
+        ));
     }
 
     public function create()
@@ -124,16 +124,23 @@ class ProductController extends Controller
             $validated['image'] = $imagePath;
         }
 
-        // Handle specifications
+        // Handle specifications - PERBAIKI BAGIAN INI
+        $specifications = [];
         if ($request->has('specifications')) {
-            $specs = [];
-            foreach ($request->specifications as $key => $value) {
-                if (!empty($key) && !empty($value)) {
-                    $specs[$key] = $value;
+            foreach ($request->specifications as $spec) {
+                if (!empty($spec['key']) && !empty($spec['value'])) {
+                    $specifications[] = [
+                        'key' => $spec['key'],
+                        'value' => $spec['value']
+                    ];
                 }
             }
-            $validated['specifications'] = $specs;
+            $validated['specifications'] = $specifications;
         }
+
+        // Handle checkbox fields
+        $validated['is_active'] = $request->has('is_active');
+        $validated['is_featured'] = $request->has('is_featured');
 
         $product = Product::create($validated);
 
@@ -155,7 +162,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|unique:products,sku,' . $product->id,
+            'sku' => 'nullable|string|unique:products,sku,' . $product->id, // ubah ke nullable
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
@@ -169,7 +176,7 @@ class ProductController extends Controller
             'is_featured' => 'boolean',
         ]);
 
-        // Handle image upload
+        // Handle image upload - PERBAIKI BAGIAN INI
         if ($request->hasFile('image')) {
             // Delete old image
             if ($product->image) {
@@ -178,18 +185,31 @@ class ProductController extends Controller
 
             $imagePath = $request->file('image')->store('products', 'public');
             $validated['image'] = $imagePath;
+        } else {
+            // Keep the current image if no new image uploaded
+            $validated['image'] = $product->image;
         }
 
-        // Handle specifications
+        // Handle specifications - PERBAIKI BAGIAN INI
+        $specifications = [];
         if ($request->has('specifications')) {
-            $specs = [];
-            foreach ($request->specifications as $key => $value) {
-                if (!empty($key) && !empty($value)) {
-                    $specs[$key] = $value;
+            foreach ($request->specifications as $spec) {
+                if (!empty($spec['key']) && !empty($spec['value'])) {
+                    $specifications[] = [
+                        'key' => $spec['key'],
+                        'value' => $spec['value']
+                    ];
                 }
             }
-            $validated['specifications'] = $specs;
+            $validated['specifications'] = $specifications;
+        } else {
+            // Keep existing specifications if no new ones provided
+            $validated['specifications'] = $product->specifications;
         }
+
+        // Handle checkbox fields
+        $validated['is_active'] = $request->has('is_active');
+        $validated['is_featured'] = $request->has('is_featured');
 
         $product->update($validated);
 

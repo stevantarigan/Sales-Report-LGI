@@ -240,32 +240,79 @@
             background: #f8fafc;
         }
 
-        /* Product Image */
+        /* Product Image - DIPERBESAR */
         .product-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            width: 80px;
+            /* Diperbesar dari 40px */
+            height: 80px;
+            /* Diperbesar dari 40px */
+            border-radius: 12px;
+            /* Diperbesar dari 8px */
             object-fit: cover;
-            border: 2px solid #e2e8f0;
+            border: 3px solid #e2e8f0;
+            /* Dipertebal border */
             transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .product-img:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         .product-img-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
+            width: 80px;
+            /* Diperbesar dari 40px */
+            height: 80px;
+            /* Diperbesar dari 40px */
+            border-radius: 12px;
+            /* Diperbesar dari 8px */
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px solid #e2e8f0;
+            /* Dipertebal border */
             display: flex;
             align-items: center;
             justify-content: center;
             color: #94a3b8;
+            font-size: 1.2rem;
+            /* Diperbesar dari 0.8rem */
+            transition: var(--transition);
+        }
+
+        .product-img-placeholder:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        /* Product Info Container */
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            /* Diperbesar dari 0.75rem */
+        }
+
+        .product-details {
+            flex: 1;
+            min-width: 0;
+            /* Untuk text truncate */
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            /* Sedikit lebih besar */
+            color: var(--dark-color);
+            margin-bottom: 0.2rem;
+            line-height: 1.3;
+        }
+
+        .product-brand {
             font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
         }
 
         /* Badge Styles */
@@ -443,6 +490,21 @@
                 gap: 1rem;
                 text-align: center;
             }
+
+            /* Responsive untuk gambar di mobile */
+            .product-img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .product-img-placeholder {
+                width: 60px;
+                height: 60px;
+            }
+
+            .product-info {
+                gap: 0.75rem;
+            }
         }
 
         @media (max-width: 576px) {
@@ -457,6 +519,22 @@
             .btn-icon {
                 width: 28px;
                 height: 28px;
+            }
+
+            /* Lebih kecil lagi di mobile sangat kecil */
+            .product-img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .product-img-placeholder {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+
+            .product-info {
+                gap: 0.5rem;
             }
         }
     </style>
@@ -615,20 +693,20 @@
                     @forelse($products as $product)
                         <tr data-aos="fade-right" data-aos-delay="{{ $loop->index * 100 }}">
                             <td>
-                                <div class="d-flex align-items-center">
-                                    @if ($product->image)
-                                        <img src="{{ Storage::disk('public')->exists($product->image) ? asset('storage/' . $product->image) : 'https://via.placeholder.com/60x60?text=No+Image' }}"
-                                            alt="{{ $product->name }}" class="product-img me-3"
-                                            onerror="this.src='https://via.placeholder.com/60x60?text=Image+Error'">
+                                <div class="product-info">
+                                    @if ($product->image && Storage::disk('public')->exists($product->image))
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                                            class="product-img"
+                                            onerror="this.src='https://via.placeholder.com/80x80?text=Image+Error'">
                                     @else
-                                        <div class="product-img-placeholder me-3">
+                                        <div class="product-img-placeholder">
                                             <i class="fas fa-box"></i>
                                         </div>
                                     @endif
-                                    <div>
-                                        <div style="font-weight: 600;">{{ $product->name }}</div>
+                                    <div class="product-details">
+                                        <div class="product-name">{{ $product->name }}</div>
                                         @if ($product->brand)
-                                            <small class="text-muted">{{ $product->brand }}</small>
+                                            <div class="product-brand">{{ $product->brand }}</div>
                                         @endif
                                     </div>
                                 </div>

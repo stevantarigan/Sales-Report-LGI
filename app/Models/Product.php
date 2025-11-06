@@ -106,4 +106,9 @@ class Product extends Model
 
         return (($this->price - $this->cost_price) / $this->cost_price) * 100;
     }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
 }
