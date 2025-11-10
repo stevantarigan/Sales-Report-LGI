@@ -179,7 +179,8 @@ class SuperAdminController extends Controller
     // User Management Methods
     public function users(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -220,7 +221,8 @@ class SuperAdminController extends Controller
 
     public function createUser()
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -229,7 +231,8 @@ class SuperAdminController extends Controller
 
     public function storeUser(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -263,7 +266,8 @@ class SuperAdminController extends Controller
 
     public function editUser(User $user)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -286,7 +290,8 @@ class SuperAdminController extends Controller
 
     public function updateUser(Request $request, User $user)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -333,7 +338,8 @@ class SuperAdminController extends Controller
     }
     public function resetPassword(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -352,7 +358,8 @@ class SuperAdminController extends Controller
 
     public function toggleStatus(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -374,7 +381,8 @@ class SuperAdminController extends Controller
 
     public function destroyUser(User $user)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -392,7 +400,8 @@ class SuperAdminController extends Controller
     // Di SuperAdminController - ganti method transactions() dengan ini:
     public function transactions(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -460,7 +469,8 @@ class SuperAdminController extends Controller
 
     public function createTransaction()
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -473,7 +483,8 @@ class SuperAdminController extends Controller
 
     public function storeTransaction(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -539,7 +550,8 @@ class SuperAdminController extends Controller
 
     public function showTransaction(SalesTransaction $transaction)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -551,7 +563,8 @@ class SuperAdminController extends Controller
 
     public function editTransaction(SalesTransaction $transaction)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -564,7 +577,8 @@ class SuperAdminController extends Controller
 
     public function updateTransaction(Request $request, SalesTransaction $transaction)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -634,7 +648,8 @@ class SuperAdminController extends Controller
 
     public function destroyTransaction(SalesTransaction $transaction)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -648,7 +663,8 @@ class SuperAdminController extends Controller
     // Di SuperAdminController
     public function customers(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -712,7 +728,8 @@ class SuperAdminController extends Controller
 
     public function createCustomer()
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -721,7 +738,8 @@ class SuperAdminController extends Controller
 
     public function storeCustomer(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -747,7 +765,8 @@ class SuperAdminController extends Controller
 
     public function showCustomer(Customer $customer)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -756,7 +775,8 @@ class SuperAdminController extends Controller
 
     public function editCustomer(Customer $customer)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -765,7 +785,8 @@ class SuperAdminController extends Controller
 
     public function updateCustomer(Request $request, Customer $customer)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -791,7 +812,8 @@ class SuperAdminController extends Controller
 
     public function destroyCustomer(Customer $customer)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -802,7 +824,8 @@ class SuperAdminController extends Controller
     }
     public function index(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 
