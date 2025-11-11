@@ -1,6 +1,10 @@
-@extends('layouts.app')
+@php
+    $layout = auth()->user()->role === 'adminsales' ? 'layouts.app2' : 'layouts.app';
+@endphp
 
-@section('title', 'Edit Product | SuperAdmin')
+@extends($layout)
+
+@section('title', 'Edit Product | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Edit Product')
 @section('page-description', 'Update product information and details')
 

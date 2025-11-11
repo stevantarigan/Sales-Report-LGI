@@ -1,6 +1,13 @@
-@extends('layouts.app')
+@php
+    $layout = auth()->user()->role === 'adminsales' ? 'layouts.app2' : 'layouts.app';
+@endphp
 
-@section('title', 'Tambah Customer Baru - Super Admin')
+@extends($layout)
+
+@section('title', 'Tambah Customer Baru | ' . ucfirst(auth()->user()->role))
+@section('page-title', 'Tambah Customer')
+@section('page-description', 'Tambahkan data pelanggan baru ke sistem')
+
 
 @push('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

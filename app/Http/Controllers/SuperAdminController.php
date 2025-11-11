@@ -12,6 +12,9 @@ use App\Models\ActivityLog;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB; // TAMBAHKAN INI
+use Illuminate\Support\Facades\Storage; // JIKA PERLU
+
 
 class SuperAdminController extends Controller
 {
@@ -33,34 +36,35 @@ class SuperAdminController extends Controller
             $totalSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->count();
             $activeSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->where('is_active', true)->count();
 
-            // Monthly performance
-            $currentMonthRevenue = SalesTransaction::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
+            // Monthly performance - FIXED DATE CALCULATION
+            $currentMonthStart = now()->startOfMonth();
+            $currentMonthEnd = now()->endOfMonth();
+            $lastMonthStart = now()->subMonth()->startOfMonth();
+            $lastMonthEnd = now()->subMonth()->endOfMonth();
+
+            $currentMonthRevenue = SalesTransaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
                 ->sum('total_price') ?? 0;
 
-            $lastMonthRevenue = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
-                ->whereYear('created_at', now()->subMonth()->year)
+            $lastMonthRevenue = SalesTransaction::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
                 ->sum('total_price') ?? 0;
 
-            $currentMonthTransactions = SalesTransaction::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
+            $currentMonthTransactions = SalesTransaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
                 ->count();
 
-            $lastMonthTransactions = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
-                ->whereYear('created_at', now()->subMonth()->year)
+            $lastMonthTransactions = SalesTransaction::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
                 ->count();
 
-            // Sales performance data
+            // Sales performance data - FIXED QUERY
             $salesPerformance = User::whereIn('role', ['sales', 'adminsales'])
                 ->where('is_active', true)
                 ->withCount([
-                    'transactions' => function ($query) {
-                        $query->whereMonth('created_at', now()->month);
+                    'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                        $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd]);
                     }
                 ])
                 ->withSum([
-                    'transactions' => function ($query) {
-                        $query->whereMonth('created_at', now()->month);
+                    'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                        $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd]);
                     }
                 ], 'total_price')
                 ->get()
@@ -92,7 +96,7 @@ class SuperAdminController extends Controller
                 ->where('is_active', true)
                 ->get(['id', 'name', 'email']);
 
-            // Recent transactions with sales info
+            // Recent transactions with sales info - FIXED RELATIONSHIPS
             $recentTransactions = SalesTransaction::with(['user', 'customer', 'product'])
                 ->latest()
                 ->limit(20)
@@ -101,11 +105,12 @@ class SuperAdminController extends Controller
             // Recent activities
             $recentActivities = ActivityLog::latest()->limit(10)->get();
 
-            // Sales chart data
+            // Sales chart data - FIXED
             $salesChartRaw = SalesTransaction::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
                 ->whereYear('created_at', now()->year)
                 ->groupBy('month')
                 ->orderBy('month')
+                ->get()
                 ->pluck('total', 'month')
                 ->toArray();
 
@@ -129,29 +134,37 @@ class SuperAdminController extends Controller
                 $salesChart[$name] = $salesChartRaw[$num] ?? 0;
             }
 
-            // Pastikan SEMUA variabel dikirim ke view
-            return view('superadmin.dashboard', [
-                'totalUsers' => $totalUsers,
-                'totalProducts' => $totalProducts,
-                'totalCustomers' => $totalCustomers,
-                'totalRevenue' => $totalRevenue,
+            // Debug data untuk memastikan semua variabel terisi
+            \Log::info('Dashboard Data:', [
                 'totalSalesUsers' => $totalSalesUsers,
-                'activeSalesUsers' => $activeSalesUsers,
                 'currentMonthRevenue' => $currentMonthRevenue,
-                'lastMonthRevenue' => $lastMonthRevenue,
-                'currentMonthTransactions' => $currentMonthTransactions,
-                'lastMonthTransactions' => $lastMonthTransactions,
-                'salesPerformance' => $salesPerformance,
-                'averageSalesPerPerson' => $averageSalesPerPerson,
-                'topPerformerRevenue' => $topPerformerRevenue,
-                'salesUsers' => $salesUsers,
-                'recentTransactions' => $recentTransactions,
-                'recentActivities' => $recentActivities,
-                'salesChart' => $salesChart
+                'salesPerformance_count' => $salesPerformance->count(),
+                'recentTransactions_count' => $recentTransactions->count()
             ]);
+
+            return view('superadmin.dashboard', compact(
+                'totalUsers',
+                'totalProducts',
+                'totalCustomers',
+                'totalRevenue',
+                'totalSalesUsers',
+                'activeSalesUsers',
+                'currentMonthRevenue',
+                'lastMonthRevenue',
+                'currentMonthTransactions',
+                'lastMonthTransactions',
+                'salesPerformance',
+                'averageSalesPerPerson',
+                'topPerformerRevenue',
+                'salesUsers',
+                'recentTransactions',
+                'recentActivities',
+                'salesChart'
+            ));
 
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
 
             // Fallback values jika ada error
             return view('superadmin.dashboard', [
@@ -421,7 +434,8 @@ class SuperAdminController extends Controller
                     })
                     ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                         $userQuery->where('name', 'like', '%' . $searchTerm . '%');
-                    });
+                    })
+                    ->orWhere('id', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -446,11 +460,13 @@ class SuperAdminController extends Controller
 
         // Sorting
         $sort = $request->get('sort', 'created_at');
-        $sortDirection = 'desc';
+        $sortDirection = $request->get('sort_direction', 'desc');
 
         $query->orderBy($sort, $sortDirection);
 
-        $transactions = $query->paginate(10);
+        // Pagination dengan per page
+        $perPage = $request->get('per_page', 10);
+        $transactions = $query->paginate($perPage);
 
         // Stats untuk dashboard
         $totalTransactions = $transactions->total();
@@ -491,14 +507,15 @@ class SuperAdminController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'customer_id' => 'required|exists:customers,id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
             'payment_status' => 'required|in:pending,paid,cancelled',
             'status' => 'required|in:pending,completed,cancelled',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // TAMBAH VALIDASI FOTO
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         if ($validator->fails()) {
@@ -507,43 +524,77 @@ class SuperAdminController extends Controller
                 ->withInput();
         }
 
-        // Calculate total price
-        $totalPrice = $request->quantity * $request->price;
-
-        // Generate map link if coordinates exist - INI YANG DITAMBAH
+        // Generate map link if coordinates exist
         $mapLink = null;
         if (!empty($request->latitude) && !empty($request->longitude)) {
             $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
         }
 
-        // Handle photo upload - INI YANG DITAMBAH
+        // Handle photo upload
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('transaction-photos', 'public');
         }
 
         try {
-            SalesTransaction::create([
+            DB::beginTransaction();
+
+            // Calculate total price for ALL products
+            $totalPrice = 0;
+            $totalQuantity = 0;
+
+            foreach ($request->products as $productData) {
+                $totalPrice += $productData['quantity'] * $productData['price'];
+                $totalQuantity += $productData['quantity'];
+            }
+
+            // Validasi stok untuk SEMUA produk sebelum proses
+            foreach ($request->products as $productData) {
+                $product = Product::find($productData['product_id']);
+                if (!$product) {
+                    throw new \Exception("Product not found: {$productData['product_id']}");
+                }
+
+                if ($product->stock_quantity < $productData['quantity']) {
+                    throw new \Exception("Insufficient stock for product: {$product->name}. Available: {$product->stock_quantity}, Requested: {$productData['quantity']}");
+                }
+            }
+
+            // Create ONE main transaction dengan products_data
+            $transaction = SalesTransaction::create([
                 'user_id' => $request->user_id,
                 'customer_id' => $request->customer_id,
-                'product_id' => $request->product_id,
-                'quantity' => $request->quantity,
-                'price' => $request->price,
+                'product_id' => $request->products[0]['product_id'], // First product as reference
+                'quantity' => $totalQuantity, // Total semua quantity
+                'price' => $request->products[0]['price'], // First product price as reference
                 'total_price' => $totalPrice,
+                'products_data' => $request->products, // SIMPAN SEMUA PRODUK DI SINI
                 'payment_status' => $request->payment_status,
                 'status' => $request->status,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'map_link' => $mapLink, // SIMPAN MAP LINK
-                'photo' => $photoPath, // SIMPAN PATH FOTO
+                'map_link' => $mapLink,
+                'photo' => $photoPath,
             ]);
 
+            // Update stock untuk SEMUA produk
+            foreach ($request->products as $productData) {
+                $product = Product::find($productData['product_id']);
+                if ($product) {
+                    $product->decrement('stock_quantity', $productData['quantity']);
+                }
+            }
+
+            DB::commit();
+
+            $productCount = count($request->products);
             return redirect()->route('admin.transactions.index')
-                ->with('success', 'Transaction created successfully.');
+                ->with('success', "Transaksi berhasil dibuat dengan {$productCount} produk.");
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Failed to create transaction: ' . $e->getMessage())
+                ->with('error', 'Gagal membuat transaksi: ' . $e->getMessage())
                 ->withInput();
         }
     }

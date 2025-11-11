@@ -1,8 +1,13 @@
-@extends('layouts.app')
+@php
+    $layout = auth()->user()->role === 'adminsales' ? 'layouts.app2' : 'layouts.app';
+@endphp
 
-@section('title', 'Transactions Management | SuperAdmin')
+@extends($layout)
+
+@section('title', 'Transactions Management | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Transaction Management')
 @section('page-description', 'Kelola transaksi penjualan dan pembelian')
+
 
 @push('styles')
     <style>
@@ -205,6 +210,17 @@
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
         }
 
+        .btn-outline-secondary {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f8fafc;
+            color: #475569;
+        }
+
         /* Table Styles */
         .table-container {
             background: white;
@@ -257,39 +273,6 @@
         .transaction-avatar:hover {
             transform: scale(1.1);
             border-color: var(--primary-color);
-        }
-
-        /* Badge Styles */
-        .badge {
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success-color);
-        }
-
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error-color);
-        }
-
-        .badge-primary {
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-        }
-
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
-        }
-
-        .badge-secondary {
-            background: rgba(100, 116, 139, 0.1);
-            color: #64748b;
         }
 
         /* Status Badge */
@@ -437,14 +420,77 @@
             color: #64748b;
         }
 
-        /* Pagination */
+        /* Enhanced Pagination */
         .pagination-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.2rem;
+            padding: 1.5rem;
             border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
             font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .pagination-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .pagination {
+            margin-bottom: 0;
+            gap: 0.25rem;
+        }
+
+        .page-item .page-link {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.85rem;
+            min-width: 40px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .page-item .page-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .page-item.active .page-link {
+            background: var(--gradient-primary);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .page-size-selector .form-select {
+            width: auto;
+            display: inline-block;
+            padding: 0.3rem 1.5rem 0.3rem 0.5rem;
+            font-size: 0.8rem;
         }
 
         /* Responsive */
@@ -468,8 +514,19 @@
 
             .pagination-container {
                 flex-direction: column;
-                gap: 1rem;
                 text-align: center;
+            }
+
+            .pagination-info {
+                order: 3;
+            }
+
+            .page-size-selector {
+                order: 2;
+            }
+
+            .pagination-nav {
+                order: 1;
             }
         }
 
@@ -486,6 +543,37 @@
                 width: 28px;
                 height: 28px;
             }
+
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Products List Styles */
+        .products-list {
+            max-width: 200px;
+        }
+
+        .product-item {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .more-products {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+        }
+
+        /* Hover effect for products */
+        .products-list:hover .product-item {
+            background: #f8fafc;
+            border-radius: 4px;
         }
     </style>
 @endpush
@@ -581,9 +669,12 @@
                 </div>
             </div>
 
-            <!-- Hidden search input untuk maintain search value -->
+            <!-- Hidden inputs untuk maintain state -->
             @if (request('search'))
                 <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+            @if (request('per_page'))
+                <input type="hidden" name="per_page" value="{{ request('per_page') }}">
             @endif
         </form>
     </div>
@@ -606,6 +697,9 @@
             @endif
             @if (request('sort'))
                 <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+            @if (request('per_page'))
+                <input type="hidden" name="per_page" value="{{ request('per_page') }}">
             @endif
 
             <div class="search-box">
@@ -642,8 +736,8 @@
                     <tr>
                         <th>Transaction</th>
                         <th>Customer</th>
-                        <th>Product</th>
-                        <th>Quantity</th>
+                        <th>Products</th>
+                        <th>Total Quantity</th>
                         <th>Total Price</th>
                         <th>Status</th>
                         <th>Payment</th>
@@ -671,11 +765,45 @@
                                 <small class="text-muted">{{ $transaction->customer->email ?? '' }}</small>
                             </td>
                             <td>
-                                <div style="font-weight: 600;">{{ $transaction->product->name ?? 'N/A' }}</div>
-                                <small class="text-muted">Rp {{ number_format($transaction->price, 0, ',', '.') }}</small>
+                                <div class="products-list">
+                                    @php
+                                        $products = $transaction->getAllProducts();
+                                    @endphp
+                                    @if ($products->count() > 0)
+                                        @foreach ($products->take(2) as $productItem)
+                                            @php
+                                                $product = \App\Models\Product::find($productItem->product_id);
+                                            @endphp
+                                            <div class="product-item mb-1">
+                                                <div style="font-weight: 600; font-size: 0.8rem;">
+                                                    {{ $product->name ?? 'Product Not Found' }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ $productItem->quantity }} pcs × Rp
+                                                    {{ number_format($productItem->price, 0, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        @endforeach
+                                        @if ($products->count() > 2)
+                                            <div class="more-products">
+                                                <small class="text-primary">
+                                                    +{{ $products->count() - 2 }} more products
+                                                </small>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div style="font-weight: 600; color: #64748b; font-size: 0.8rem;">
+                                            {{ $transaction->product->name ?? 'N/A' }}
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ $transaction->quantity }} pcs × Rp
+                                            {{ number_format($transaction->price, 0, ',', '.') }}
+                                        </small>
+                                    @endif
+                                </div>
                             </td>
                             <td>
-                                <span class="quantity">{{ $transaction->quantity }} pcs</span>
+                                <span class="quantity">{{ $transaction->getTotalQuantityAttribute() }} pcs</span>
                             </td>
                             <td>
                                 <span class="price">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</span>
@@ -738,16 +866,107 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Enhanced Pagination -->
         @if ($transactions->hasPages())
             <div class="pagination-container">
-                <div class="text-muted">
-                    Showing {{ $transactions->firstItem() }} to {{ $transactions->lastItem() }} of
-                    {{ $transactions->total() }} transactions
+                <div class="pagination-info">
+                    Menampilkan
+                    <strong>{{ $transactions->firstItem() ?? 0 }}</strong>
+                    sampai
+                    <strong>{{ $transactions->lastItem() ?? 0 }}</strong>
+                    dari
+                    <strong>{{ $transactions->total() }}</strong>
+                    transaksi
                 </div>
-                <nav>
-                    {{ $transactions->appends(request()->query())->links() }}
+
+                <nav class="pagination-nav">
+                    <ul class="pagination">
+                        <!-- Previous Page Link -->
+                        @if ($transactions->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-left"></i>
+                                </span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $transactions->previousPageUrl() }}" rel="prev">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        @endif
+
+                        <!-- Pagination Elements -->
+                        @php
+                            $current = $transactions->currentPage();
+                            $last = $transactions->lastPage();
+                            $start = max(1, $current - 2);
+                            $end = min($last, $current + 2);
+                        @endphp
+
+                        <!-- First Page Link -->
+                        @if ($start > 1)
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $transactions->url(1) }}">1</a>
+                            </li>
+                            @if ($start > 2)
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            @endif
+                        @endif
+
+                        <!-- Page Number Links -->
+                        @for ($i = $start; $i <= $end; $i++)
+                            <li class="page-item {{ $i == $current ? 'active' : '' }}">
+                                @if ($i == $current)
+                                    <span class="page-link">{{ $i }}</span>
+                                @else
+                                    <a class="page-link" href="{{ $transactions->url($i) }}">{{ $i }}</a>
+                                @endif
+                            </li>
+                        @endfor
+
+                        <!-- Last Page Link -->
+                        @if ($end < $last)
+                            @if ($end < $last - 1)
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            @endif
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $transactions->url($last) }}">{{ $last }}</a>
+                            </li>
+                        @endif
+
+                        <!-- Next Page Link -->
+                        @if ($transactions->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $transactions->nextPageUrl() }}" rel="next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </li>
+                        @endif
+                    </ul>
                 </nav>
+
+                <!-- Page Size Selector -->
+                <div class="page-size-selector">
+                    <label class="form-label">Items per page:</label>
+                    <select class="form-select form-select-sm" id="perPageSelect"
+                        style="width: auto; display: inline-block;">
+                        <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                </div>
             </div>
         @endif
     </div>
@@ -810,6 +1029,17 @@
                     });
                 });
             });
+
+            // Per page selector
+            const perPageSelect = document.getElementById('perPageSelect');
+            if (perPageSelect) {
+                perPageSelect.addEventListener('change', function() {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('per_page', this.value);
+                    url.searchParams.set('page', '1'); // Reset ke page 1 ketika ganti per_page
+                    window.location.href = url.toString();
+                });
+            }
         });
 
         function exportTransactions() {

@@ -2,10 +2,7 @@
 
 @section('title', 'Dashboard SuperAdmin | Sales Management')
 @section('page-title', 'Dashboard Overview')
-@section('page-description',
-    'Selamat datang kembali, ' .
-    auth()->user()->name .
-    '. Monitor kinerja sales dan
+@section('page-description', 'Selamat datang kembali, ' . auth()->user()->name . '. Monitor kinerja sales dan
     transaksi.')
 
     @push('styles')
@@ -194,7 +191,7 @@
 
             .performance-header {
                 display: flex;
-                justify-content: between;
+                justify-content: space-between;
                 align-items: center;
                 margin-bottom: 1.5rem;
                 flex-wrap: wrap;
@@ -527,6 +524,32 @@
                     font-size: 0.8rem;
                 }
             }
+
+            /* Loading States */
+            .loading {
+                opacity: 0.7;
+                pointer-events: none;
+            }
+
+            .spinner {
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid var(--primary-color);
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
         </style>
     @endpush
 
@@ -584,10 +607,10 @@
             </div>
             <div class="metric-info">
                 <div class="metric-title">Total Sales Team</div>
-                <div class="metric-value">{{ $totalSalesUsers }}</div>
+                <div class="metric-value">{{ $totalSalesUsers ?? 0 }}</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    Active: {{ $activeSalesUsers }}
+                    Active: {{ $activeSalesUsers ?? 0 }}
                 </div>
             </div>
         </div>
@@ -598,10 +621,16 @@
             </div>
             <div class="metric-info">
                 <div class="metric-title">Total Penjualan Bulan Ini</div>
-                <div class="metric-value">Rp {{ number_format($currentMonthRevenue / 1000000, 1) }}JT</div>
-                <div class="metric-trend trend-up">
-                    <i class="fas fa-arrow-up"></i>
-                    {{ round(($currentMonthRevenue / max($lastMonthRevenue, 1) - 1) * 100) }}% vs last month
+                <div class="metric-value">Rp
+                    {{ isset($currentMonthRevenue) ? number_format($currentMonthRevenue / 1000000, 1) : '0' }}JT</div>
+                <div
+                    class="metric-trend {{ ($currentMonthRevenue ?? 0) >= ($lastMonthRevenue ?? 0) ? 'trend-up' : 'trend-down' }}">
+                    <i
+                        class="fas fa-arrow-{{ ($currentMonthRevenue ?? 0) >= ($lastMonthRevenue ?? 0) ? 'up' : 'down' }}"></i>
+                    {{ isset($currentMonthRevenue) && isset($lastMonthRevenue) && $lastMonthRevenue > 0
+                        ? round((($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100)
+                        : 0 }}%
+                    vs last month
                 </div>
             </div>
         </div>
@@ -612,10 +641,15 @@
             </div>
             <div class="metric-info">
                 <div class="metric-title">Transaksi Bulan Ini</div>
-                <div class="metric-value">{{ $currentMonthTransactions }}</div>
-                <div class="metric-trend trend-up">
-                    <i class="fas fa-arrow-up"></i>
-                    {{ round(($currentMonthTransactions / max($lastMonthTransactions, 1) - 1) * 100) }}% growth
+                <div class="metric-value">{{ $currentMonthTransactions ?? 0 }}</div>
+                <div
+                    class="metric-trend {{ ($currentMonthTransactions ?? 0) >= ($lastMonthTransactions ?? 0) ? 'trend-up' : 'trend-down' }}">
+                    <i
+                        class="fas fa-arrow-{{ ($currentMonthTransactions ?? 0) >= ($lastMonthTransactions ?? 0) ? 'up' : 'down' }}"></i>
+                    {{ isset($currentMonthTransactions) && isset($lastMonthTransactions) && $lastMonthTransactions > 0
+                        ? round((($currentMonthTransactions - $lastMonthTransactions) / $lastMonthTransactions) * 100)
+                        : 0 }}%
+                    growth
                 </div>
             </div>
         </div>
@@ -626,10 +660,12 @@
             </div>
             <div class="metric-info">
                 <div class="metric-title">Avg. Sales per Person</div>
-                <div class="metric-value">Rp {{ number_format($averageSalesPerPerson / 1000000, 1) }}JT</div>
+                <div class="metric-value">Rp
+                    {{ isset($averageSalesPerPerson) ? number_format($averageSalesPerPerson / 1000000, 1) : '0' }}JT</div>
                 <div class="metric-trend trend-up">
                     <i class="fas fa-arrow-up"></i>
-                    Top performer: Rp {{ number_format($topPerformerRevenue / 1000000, 1) }}JT
+                    Top performer: Rp
+                    {{ isset($topPerformerRevenue) ? number_format($topPerformerRevenue / 1000000, 1) : '0' }}JT
                 </div>
             </div>
         </div>
@@ -657,8 +693,8 @@
             </div>
         </div>
 
-        <div class="sales-grid">
-            @forelse($salesPerformance as $sales)
+        <div class="sales-grid" id="salesPerformanceGrid">
+            @forelse($salesPerformance ?? [] as $sales)
                 <div class="sales-card">
                     <div class="sales-header">
                         <div class="sales-avatar">
@@ -687,12 +723,11 @@
                     <div class="mt-3">
                         <div class="d-flex justify-content-between mb-1">
                             <small>Target Achievement</small>
-                            <small>{{ round(($sales->total_revenue / max($sales->target_revenue, 1)) * 100) }}%</small>
+                            <small>{{ round($sales->performance_percentage) }}%</small>
                         </div>
                         <div class="progress">
                             <div class="progress-bar bg-success"
-                                style="width: {{ min(($sales->total_revenue / max($sales->target_revenue, 1)) * 100, 100) }}%">
-                            </div>
+                                style="width: {{ min($sales->performance_percentage, 100) }}%"></div>
                         </div>
                     </div>
 
@@ -710,206 +745,251 @@
                 </div>
             @endforelse
         </div>
+    </div>
 
-        <!-- Transactions by Sales Section -->
-        <div class="transactions-section" data-aos="fade-up" data-aos-delay="600">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-receipt"></i>
-                    Transaksi per Sales
-                </h2>
-                <div class="filter-controls">
-                    <select class="form-select" id="salesFilter" onchange="filterTransactionsBySales(this.value)">
-                        <option value="">Semua Sales</option>
-                        @foreach ($salesUsers as $sales)
-                            <option value="{{ $sales->id }}">{{ $sales->name }}</option>
-                        @endforeach
-                    </select>
-                    <select class="form-select" id="dateFilter" onchange="filterTransactionsByDate(this.value)">
-                        <option value="today">Hari Ini</option>
-                        <option value="week">Minggu Ini</option>
-                        <option value="month" selected>Bulan Ini</option>
-                        <option value="quarter">Kuartal Ini</option>
-                    </select>
-                </div>
+    <!-- Transactions by Sales Section -->
+    <div class="transactions-section" data-aos="fade-up" data-aos-delay="600">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-receipt"></i>
+                Transaksi Terbaru
+            </h2>
+            <div class="filter-controls">
+                <select class="form-select" id="salesFilter" onchange="filterTransactionsBySales(this.value)">
+                    <option value="">Semua Sales</option>
+                    @foreach ($salesUsers ?? [] as $sales)
+                        <option value="{{ $sales->id }}">{{ $sales->name }}</option>
+                    @endforeach
+                </select>
+                <select class="form-select" id="dateFilter" onchange="filterTransactionsByDate(this.value)">
+                    <option value="today">Hari Ini</option>
+                    <option value="week">Minggu Ini</option>
+                    <option value="month" selected>Bulan Ini</option>
+                    <option value="quarter">Kuartal Ini</option>
+                </select>
             </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover" id="transactionsTable">
-                    <thead>
-                        <tr>
-                            <th>Sales</th>
-                            <th>Customer</th>
-                            <th>Produk</th>
-                            <th>Qty</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Tanggal</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($recentTransactions as $transaction)
-                            <tr data-sales-id="{{ $transaction->user_id }}">
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="sales-avatar me-2"
-                                            style="width: 35px; height: 35px; font-size: 0.8rem;">
-                                            {{ strtoupper(substr($transaction->user->name, 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 600; font-size: 0.9rem;">
-                                                {{ $transaction->user->name }}
-                                            </div>
-                                            <small class="text-muted">{{ $transaction->user->role }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 600;">{{ $transaction->customer->name ?? '-' }}</div>
-                                    @if ($transaction->customer->phone ?? false)
-                                        <small class="text-muted">{{ $transaction->customer->phone }}</small>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div style="font-weight: 600;">{{ $transaction->product->name ?? '-' }}</div>
-                                    @if ($transaction->product->sku ?? false)
-                                        <small class="text-muted">SKU: {{ $transaction->product->sku }}</small>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge badge-primary">{{ $transaction->quantity }} pcs</span>
-                                </td>
-                                <td>
-                                    <strong>Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</strong>
-                                </td>
-                                <td>
-                                    <span
-                                        class="badge badge-{{ $transaction->status === 'completed' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'secondary') }}">
-                                        {{ ucfirst($transaction->status) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {{ $transaction->created_at->format('d M Y') }}
-                                    <br>
-                                    <small class="text-muted">{{ $transaction->created_at->format('H:i') }}</small>
-                                </td>
-                                <td>
-                                    <a href="{{ route('admin.transactions.show', $transaction) }}"
-                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            @if ($recentTransactions->count() == 0)
-                <div class="text-center py-4">
-                    <i class="fas fa-receipt fa-2x text-muted mb-2"></i>
-                    <p class="text-muted">Belum ada transaksi</p>
-                </div>
-            @endif
         </div>
-    @endsection
 
-    @push('scripts')
-        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-        <script>
-            // Initialize AOS
-            AOS.init({
-                duration: 800,
-                once: true,
-                offset: 100
+        <div class="table-responsive">
+            <table class="table table-hover" id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Sales</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentTransactions ?? [] as $transaction)
+                        <tr data-sales-id="{{ $transaction->user_id }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="sales-avatar me-2" style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                        {{ strtoupper(substr($transaction->user->name ?? '?', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.9rem;">
+                                            {{ $transaction->user->name ?? 'N/A' }}
+                                        </div>
+                                        <small class="text-muted">{{ $transaction->user->role ?? 'N/A' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600;">{{ $transaction->customer->name ?? '-' }}</div>
+                                @if ($transaction->customer->phone ?? false)
+                                    <small class="text-muted">{{ $transaction->customer->phone }}</small>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</strong>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge badge-{{ $transaction->status === 'completed' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'secondary') }}">
+                                    {{ ucfirst($transaction->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ $transaction->created_at->format('d M Y') }}
+                                <br>
+                                <small class="text-muted">{{ $transaction->created_at->format('H:i') }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.transactions.show', $transaction) }}"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <i class="fas fa-receipt fa-2x text-muted mb-2"></i>
+                                <p class="text-muted">Belum ada transaksi</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Filter transactions by sales
+        function filterTransactionsBySales(salesId) {
+            const rows = document.querySelectorAll('#transactionsTable tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (!salesId || row.getAttribute('data-sales-id') === salesId) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
             });
 
-            // Filter transactions by sales
-            function filterTransactionsBySales(salesId) {
-                const rows = document.querySelectorAll('#transactionsTable tbody tr');
-
-                rows.forEach(row => {
-                    if (!salesId || row.getAttribute('data-sales-id') === salesId) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-
-            // Filter transactions by date (simulated)
-            function filterTransactionsByDate(range) {
-                // In a real implementation, this would make an API call
-                console.log('Filtering by date range:', range);
-
-                // Show loading state
-                const tableBody = document.querySelector('#transactionsTable tbody');
-                tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Memuat data...</p>
+            // Show message if no results
+            const tbody = document.querySelector('#transactionsTable tbody');
+            if (visibleCount === 0) {
+                if (!tbody.querySelector('.no-results')) {
+                    const noResults = document.createElement('tr');
+                    noResults.className = 'no-results';
+                    noResults.innerHTML = `
+                    <td colspan="6" class="text-center py-4">
+                        <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Tidak ada transaksi untuk sales yang dipilih</p>
                     </td>
-                </tr>
-            `;
-
-                // Simulate API call
-                setTimeout(() => {
-                    // This would be replaced with actual data from server
-                    alert(`Filter transaksi untuk ${range} akan diimplementasi dengan API call`);
-                    location.reload(); // Temporary reload for demo
-                }, 1000);
+                `;
+                    tbody.appendChild(noResults);
+                }
+            } else {
+                const noResults = tbody.querySelector('.no-results');
+                if (noResults) {
+                    noResults.remove();
+                }
             }
+        }
 
-            // Update performance metrics when filters change
-            document.getElementById('timeFilter').addEventListener('change', function() {
-                updatePerformanceMetrics(this.value, document.getElementById('metricFilter').value);
-            });
+        // Filter transactions by date (simulated)
+        function filterTransactionsByDate(range) {
+            const tableBody = document.querySelector('#transactionsTable tbody');
+            const originalContent = tableBody.innerHTML;
 
-            document.getElementById('metricFilter').addEventListener('change', function() {
-                updatePerformanceMetrics(document.getElementById('timeFilter').value, this.value);
-            });
+            // Show loading state
+            tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    <div class="spinner"></div>
+                    <p class="mt-2 text-muted">Memuat data...</p>
+                </td>
+            </tr>
+        `;
 
-            function updatePerformanceMetrics(timeRange, metric) {
-                // Show loading state
-                const salesGrid = document.querySelector('.sales-grid');
-                const originalContent = salesGrid.innerHTML;
+            // Simulate API call
+            setTimeout(() => {
+                // In real implementation, this would fetch data from server
+                console.log(`Filtering transactions for: ${range}`);
+                tableBody.innerHTML = originalContent;
 
-                salesGrid.innerHTML = `
-                <div class="col-12 text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Memperbarui data performance...</p>
-                </div>
-            `;
+                // Show success message
+                showNotification(`Data transaksi untuk ${range} berhasil dimuat`, 'success');
+            }, 1000);
+        }
 
-                // Simulate API call
-                setTimeout(() => {
-                    // This would be replaced with actual data from server
-                    alert(`Filter performance: ${timeRange} - ${metric} akan diimplementasi dengan API call`);
-                    salesGrid.innerHTML = originalContent; // Restore for demo
-                }, 1500);
-            }
+        // Update performance metrics when filters change
+        document.getElementById('timeFilter').addEventListener('change', function() {
+            updatePerformanceMetrics(this.value, document.getElementById('metricFilter').value);
+        });
 
-            // Add hover effects
-            document.querySelectorAll('.sales-card').forEach(card => {
+        document.getElementById('metricFilter').addEventListener('change', function() {
+            updatePerformanceMetrics(document.getElementById('timeFilter').value, this.value);
+        });
+
+        function updatePerformanceMetrics(timeRange, metric) {
+            const salesGrid = document.getElementById('salesPerformanceGrid');
+            const originalContent = salesGrid.innerHTML;
+
+            // Show loading state
+            salesGrid.innerHTML = `
+            <div class="col-12 text-center py-4">
+                <div class="spinner"></div>
+                <p class="mt-2 text-muted">Memperbarui data performance...</p>
+            </div>
+        `;
+
+            // Simulate API call
+            setTimeout(() => {
+                // In real implementation, this would fetch data from server
+                console.log(`Updating performance metrics: ${timeRange} - ${metric}`);
+                salesGrid.innerHTML = originalContent;
+
+                // Show success message
+                showNotification(`Data performance berhasil diperbarui`, 'success');
+            }, 1500);
+        }
+
+        // Notification function
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        `;
+            notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        // Auto-refresh data every 2 minutes
+        setInterval(() => {
+            console.log('Auto-refreshing dashboard data...');
+            // In production, this would fetch new data via AJAX
+            showNotification('Dashboard data refreshed', 'info');
+        }, 120000);
+
+        // Add hover effects to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.sales-card, .metric-card, .action-card');
+            cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px)';
+                    this.style.transform = this.classList.contains('metric-card') ?
+                        'translateY(-8px)' : 'translateY(-5px)';
                 });
 
                 card.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                 });
             });
-
-            // Auto-refresh data every 2 minutes
-            setInterval(() => {
-                console.log('Auto-refreshing dashboard data...');
-                // In production, this would fetch new data via AJAX
-            }, 120000);
-        </script>
-    @endpush
+        });
+    </script>
+@endpush

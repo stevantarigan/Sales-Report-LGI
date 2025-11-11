@@ -11,7 +11,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        if (auth()->user()->role !== 'superadmin') {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
             abort(403, 'Unauthorized access.');
         }
 

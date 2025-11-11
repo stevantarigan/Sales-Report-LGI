@@ -20,138 +20,211 @@ class AdminSalesController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // Basic stats - focus on sales team performance
-        $totalUsers = User::count();
-        $totalProducts = Product::where('is_active', true)->count();
-        $totalCustomers = Customer::count();
-        $totalRevenue = SalesTransaction::sum('total_price');
+        try {
+            // Basic stats - focus on sales team performance
+            $totalUsers = User::count();
+            $totalProducts = Product::where('is_active', true)->count();
+            $totalCustomers = Customer::count();
+            $totalRevenue = SalesTransaction::sum('total_price');
 
-        // Sales team stats
-        $salesTeam = User::where('role', 'sales')->where('is_active', true)->get();
-        $totalSalesUsers = $salesTeam->count();
-        $activeSalesUsers = $salesTeam->count(); // All are active
+            // Sales team stats
+            $salesTeam = User::where('role', 'sales')->where('is_active', true)->get();
+            $totalSalesUsers = $salesTeam->count();
+            $activeSalesUsers = $salesTeam->count(); // All are active
 
-        // Monthly performance for sales team
-        $currentMonthRevenue = SalesTransaction::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->sum('total_price');
+            // Monthly performance for sales team
+            $currentMonthStart = now()->startOfMonth();
+            $currentMonthEnd = now()->endOfMonth();
+            $lastMonthStart = now()->subMonth()->startOfMonth();
+            $lastMonthEnd = now()->subMonth()->endOfMonth();
 
-        $lastMonthRevenue = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
-            ->whereYear('created_at', now()->subMonth()->year)
-            ->sum('total_price');
+            $currentMonthRevenue = SalesTransaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+                ->sum('total_price');
 
-        $currentMonthTransactions = SalesTransaction::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+            $lastMonthRevenue = SalesTransaction::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+                ->sum('total_price');
 
-        $lastMonthTransactions = SalesTransaction::whereMonth('created_at', now()->subMonth()->month)
-            ->whereYear('created_at', now()->subMonth()->year)
-            ->count();
+            $currentMonthTransactions = SalesTransaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+                ->count();
 
-        // Sales performance data - focus on sales team only
-        $salesPerformance = User::where('role', 'sales')
-            ->where('is_active', true)
-            ->withCount([
-                'transactions' => function ($query) {
-                    $query->whereMonth('created_at', now()->month);
-                }
-            ])
-            ->withSum([
-                'transactions' => function ($query) {
-                    $query->whereMonth('created_at', now()->month);
-                }
-            ], 'total_price')
-            ->get()
-            ->map(function ($user) {
-                $targetRevenue = 50000000; // 50 juta target per sales
-                $achievedRevenue = $user->transactions_sum_total_price ?? 0;
-                $performancePercentage = $targetRevenue > 0 ? ($achievedRevenue / $targetRevenue) * 100 : 0;
+            $lastMonthTransactions = SalesTransaction::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+                ->count();
 
-                return (object) [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'transactions_count' => $user->transactions_count,
-                    'total_revenue' => $achievedRevenue,
-                    'target_revenue' => $targetRevenue,
-                    'performance_status' => $performancePercentage >= 100 ? 'exceeded' :
-                        ($performancePercentage >= 80 ? 'met' : 'below'),
-                    'performance_percentage' => $performancePercentage
-                ];
-            });
+            // Sales performance data - focus on sales team only
+            $salesPerformance = User::where('role', 'sales')
+                ->where('is_active', true)
+                ->withCount([
+                    'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                        $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd]);
+                    }
+                ])
+                ->withSum([
+                    'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                        $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd]);
+                    }
+                ], 'total_price')
+                ->get()
+                ->map(function ($user) {
+                    $targetRevenue = 50000000; // 50 juta target per sales
+                    $achievedRevenue = $user->transactions_sum_total_price ?? 0;
+                    $performancePercentage = $targetRevenue > 0 ? ($achievedRevenue / $targetRevenue) * 100 : 0;
 
-        // Average sales per person
-        $averageSalesPerPerson = $totalSalesUsers > 0 ? $currentMonthRevenue / $totalSalesUsers : 0;
-        $topPerformerRevenue = $salesPerformance->max('total_revenue') ?? 0;
+                    return (object) [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->role,
+                        'transactions_count' => $user->transactions_count,
+                        'total_revenue' => $achievedRevenue,
+                        'target_revenue' => $targetRevenue,
+                        'performance_status' => $performancePercentage >= 100 ? 'exceeded' :
+                            ($performancePercentage >= 80 ? 'met' : 'below'),
+                        'performance_percentage' => $performancePercentage
+                    ];
+                });
 
-        // Sales users for filter
-        $salesUsers = User::where('role', 'sales')
-            ->where('is_active', true)
-            ->get(['id', 'name', 'email']);
+            // Average sales per person
+            $averageSalesPerPerson = $totalSalesUsers > 0 ? $currentMonthRevenue / $totalSalesUsers : 0;
+            $topPerformerRevenue = $salesPerformance->max('total_revenue') ?? 0;
 
-        // Recent transactions from sales team
-        $recentTransactions = SalesTransaction::with(['user', 'customer', 'product'])
-            ->whereHas('user', function ($query) {
+            // Sales users for filter
+            $salesUsers = User::where('role', 'sales')
+                ->where('is_active', true)
+                ->get(['id', 'name', 'email']);
+
+            // Recent transactions from sales team
+            $recentTransactions = SalesTransaction::with(['user', 'customer', 'product'])
+                ->whereHas('user', function ($query) {
+                    $query->where('role', 'sales');
+                })
+                ->latest()
+                ->limit(20)
+                ->get();
+
+            // Recent activities - FIXED: menggunakan get() untuk mendapatkan Collection
+            $recentActivities = ActivityLog::with('user')
+                ->whereHas('user', function ($query) {
+                    $query->where('role', 'sales');
+                })
+                ->latest()
+                ->limit(10)
+                ->get();
+
+            // Sales chart data
+            $salesChartRaw = SalesTransaction::whereHas('user', function ($query) {
                 $query->where('role', 'sales');
             })
-            ->latest()
-            ->limit(20)
-            ->get();
+                ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+                ->whereYear('created_at', now()->year)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->pluck('total', 'month')
+                ->toArray();
 
-        // Recent activities
-        $recentActivities = ActivityLog::latest()->limit(10)->get();
+            $months = [
+                1 => 'Jan',
+                2 => 'Feb',
+                3 => 'Mar',
+                4 => 'Apr',
+                5 => 'May',
+                6 => 'Jun',
+                7 => 'Jul',
+                8 => 'Aug',
+                9 => 'Sep',
+                10 => 'Oct',
+                11 => 'Nov',
+                12 => 'Dec'
+            ];
 
-        // Sales chart data
-        $salesChartRaw = SalesTransaction::whereHas('user', function ($query) {
-            $query->where('role', 'sales');
-        })
-            ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month')
-            ->toArray();
+            $salesChart = [];
+            foreach ($months as $num => $name) {
+                $salesChart[$name] = $salesChartRaw[$num] ?? 0;
+            }
 
-        $months = [
-            1 => 'Jan',
-            2 => 'Feb',
-            3 => 'Mar',
-            4 => 'Apr',
-            5 => 'May',
-            6 => 'Jun',
-            7 => 'Jul',
-            8 => 'Aug',
-            9 => 'Sep',
-            10 => 'Oct',
-            11 => 'Nov',
-            12 => 'Dec'
-        ];
+            // Additional stats for AdminSales dashboard
+            $teamTargetRevenue = 500000000; // 500 juta target tim
+            $teamAchievementPercentage = $teamTargetRevenue > 0 ? ($currentMonthRevenue / $teamTargetRevenue) * 100 : 0;
 
-        $salesChart = [];
-        foreach ($months as $num => $name) {
-            $salesChart[$name] = $salesChartRaw[$num] ?? 0;
+            // Top performers (top 3)
+            $topPerformers = $salesPerformance->sortByDesc('total_revenue')->take(3);
+
+            // Products performance
+            $topProducts = Product::withCount([
+                'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                    $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+                        ->whereHas('user', function ($q) {
+                            $q->where('role', 'sales');
+                        });
+                }
+            ])
+                ->withSum([
+                    'transactions' => function ($query) use ($currentMonthStart, $currentMonthEnd) {
+                        $query->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+                            ->whereHas('user', function ($q) {
+                                $q->where('role', 'sales');
+                            });
+                    }
+                ], 'quantity')
+                ->orderBy('transactions_count', 'desc')
+                ->limit(5)
+                ->get();
+
+            return view('adminsales.dashboard', compact(
+                'totalUsers',
+                'totalProducts',
+                'totalCustomers',
+                'totalRevenue',
+                'totalSalesUsers',
+                'activeSalesUsers',
+                'currentMonthRevenue',
+                'lastMonthRevenue',
+                'currentMonthTransactions',
+                'lastMonthTransactions',
+                'salesPerformance',
+                'averageSalesPerPerson',
+                'topPerformerRevenue',
+                'salesUsers',
+                'recentTransactions',
+                'recentActivities',
+                'salesChart',
+                'salesTeam',
+                'teamTargetRevenue',
+                'teamAchievementPercentage',
+                'topPerformers',
+                'topProducts'
+            ));
+
+        } catch (\Exception $e) {
+            \Log::error('AdminSales Dashboard error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            // Fallback values jika ada error
+            return view('adminsales.dashboard', [
+                'totalUsers' => 0,
+                'totalProducts' => 0,
+                'totalCustomers' => 0,
+                'totalRevenue' => 0,
+                'totalSalesUsers' => 0,
+                'activeSalesUsers' => 0,
+                'currentMonthRevenue' => 0,
+                'lastMonthRevenue' => 0,
+                'currentMonthTransactions' => 0,
+                'lastMonthTransactions' => 0,
+                'salesPerformance' => collect(),
+                'averageSalesPerPerson' => 0,
+                'topPerformerRevenue' => 0,
+                'salesUsers' => collect(),
+                'recentTransactions' => collect(),
+                'recentActivities' => collect(),
+                'salesChart' => [],
+                'salesTeam' => collect(),
+                'teamTargetRevenue' => 500000000,
+                'teamAchievementPercentage' => 0,
+                'topPerformers' => collect(),
+                'topProducts' => collect()
+            ]);
         }
-
-        return view('adminsales.dashboard', compact(
-            'totalUsers',
-            'totalProducts',
-            'totalCustomers',
-            'totalRevenue',
-            'totalSalesUsers',
-            'activeSalesUsers',
-            'currentMonthRevenue',
-            'lastMonthRevenue',
-            'currentMonthTransactions',
-            'lastMonthTransactions',
-            'salesPerformance',
-            'averageSalesPerPerson',
-            'topPerformerRevenue',
-            'salesUsers',
-            'recentTransactions',
-            'recentActivities',
-            'salesChart',
-            'salesTeam'
-        ));
     }
 
     // =============================================

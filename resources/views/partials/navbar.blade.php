@@ -4,18 +4,20 @@
         <div class="sidebar-logo">
             <i class="fas fa-chart-line"></i>
         </div>
-        <div class="sidebar-title">AdminSales Panel</div>
+        <div class="sidebar-title">SuperAdmin Panel</div>
     </div>
 
     <div class="sidebar-menu">
-        <a href="{{ route('adminsales.welcome') }}"
-            class="menu-item {{ request()->routeIs('adminsales.welcome') ? 'active' : '' }}">
+        <!-- Dashboard Link untuk SuperAdmin -->
+        <a href="{{ route('superadmin.welcome') }}"
+            class="menu-item {{ request()->routeIs('superadmin.welcome') ? 'active' : '' }}">
             <i class="fas fa-home"></i>
             <span class="menu-text">Dashboard</span>
         </a>
 
         <div class="menu-divider"></div>
 
+        <!-- User Management - Hanya SuperAdmin -->
         <a href="#" class="menu-item" id="userManagementMenu">
             <i class="fas fa-users"></i>
             <span class="menu-text">User Management</span>
@@ -53,6 +55,7 @@
             </a>
         </div>
 
+        <!-- PRODUCT MANAGEMENT MENU -->
         <a href="#" class="menu-item" id="productManagementMenu">
             <i class="fas fa-box"></i>
             <span class="menu-text">Product Management</span>
@@ -92,6 +95,7 @@
 
         <div class="menu-divider"></div>
 
+        <!-- Settings Menu -->
         <a href="#" class="menu-item">
             <i class="fas fa-cog"></i>
             <span class="menu-text">Settings</span>
