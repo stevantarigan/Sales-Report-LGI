@@ -16,7 +16,7 @@ class SalesTransaction extends Model
         'quantity',
         'price',
         'total_price',
-        'products_data', // TAMBAH INI
+        'products_data',
         'payment_status',
         'photo',
         'latitude',
@@ -25,7 +25,6 @@ class SalesTransaction extends Model
         'status'
     ];
 
-    // Tambahkan casting untuk products_data
     protected $casts = [
         'products_data' => 'array'
     ];
@@ -46,21 +45,22 @@ class SalesTransaction extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    // Method untuk mendapatkan semua produk
+    // Method untuk mendapatkan semua produk - PERBAIKI INI
     public function getAllProducts()
     {
-        if ($this->products_data) {
+        // Prioritaskan products_data jika ada
+        if ($this->products_data && !empty($this->products_data)) {
             return collect($this->products_data)->map(function ($item) {
                 return (object) [
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['quantity'] * $item['price']
+                    'product_id' => $item['product_id'] ?? null,
+                    'quantity' => $item['quantity'] ?? 0,
+                    'price' => $item['price'] ?? 0,
+                    'subtotal' => ($item['quantity'] ?? 0) * ($item['price'] ?? 0)
                 ];
             });
         }
 
-        // Fallback ke product utama
+        // Fallback ke product utama untuk data lama
         return collect([
             (object) [
                 'product_id' => $this->product_id,
@@ -71,12 +71,24 @@ class SalesTransaction extends Model
         ]);
     }
 
-    // Method untuk mendapatkan total quantity semua produk
+    // Accessor untuk total quantity
     public function getTotalQuantityAttribute()
     {
-        if ($this->products_data) {
+        if ($this->products_data && !empty($this->products_data)) {
             return collect($this->products_data)->sum('quantity');
         }
         return $this->quantity;
+    }
+
+    // Accessor untuk calculated total (untuk validasi)
+    public function getCalculatedTotalAttribute()
+    {
+        return $this->getAllProducts()->sum('subtotal');
+    }
+
+    // Method untuk cek apakah transaksi multi-produk
+    public function getIsMultiProductAttribute()
+    {
+        return $this->products_data && count($this->products_data) > 1;
     }
 }

@@ -144,14 +144,8 @@ Route::middleware(['auth'])->group(function () {
     // =============================================
     Route::get('/welcome', [SuperAdminController::class, 'welcome'])->name('superadmin.welcome');
 
-
-    Route::get('/welcome2', function () {
-        $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
-            abort(403, 'Unauthorized access. Your role: ' . $userRole);
-        }
-        return view('adminsales.dashboard');
-    })->name('adminsales.welcome');
+    // PERBAIKI ROUTE INI: Gunakan AdminSalesController
+    Route::get('/welcome2', [AdminSalesController::class, 'welcome'])->name('adminsales.welcome');
 
     Route::get('/welcome3', function () {
         if (auth()->user()->role !== 'sales') {

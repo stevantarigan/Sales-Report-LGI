@@ -623,9 +623,11 @@ class SuperAdminController extends Controller
         $customers = Customer::all();
         $products = Product::all();
 
+        // Load products_data untuk memastikan data produk tersedia
+        $transaction->load(['user', 'customer', 'product']);
+
         return view('superadmin.transactions.edit', compact('transaction', 'users', 'customers', 'products'));
     }
-
     public function updateTransaction(Request $request, SalesTransaction $transaction)
     {
         $userRole = auth()->user()->role;
@@ -636,14 +638,16 @@ class SuperAdminController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'customer_id' => 'required|exists:customers,id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
             'payment_status' => 'required|in:pending,paid,cancelled',
             'status' => 'required|in:pending,completed,cancelled',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // TAMBAH VALIDASI FOTO
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'notes' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -652,45 +656,60 @@ class SuperAdminController extends Controller
                 ->withInput();
         }
 
-        // Calculate total price
-        $totalPrice = $request->quantity * $request->price;
-
-        // Generate map link if coordinates exist - INI YANG DITAMBAH
-        $mapLink = $transaction->map_link; // keep existing if no new coordinates
-        if (!empty($request->latitude) && !empty($request->longitude)) {
-            $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
-        }
-
-        // Handle photo upload - INI YANG DITAMBAH
-        $photoPath = $transaction->photo; // keep existing photo
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($transaction->photo && Storage::disk('public')->exists($transaction->photo)) {
-                Storage::disk('public')->delete($transaction->photo);
-            }
-            $photoPath = $request->file('photo')->store('transaction-photos', 'public');
-        }
-
         try {
+            DB::beginTransaction();
+
+            // Calculate total price from ALL products
+            $totalPrice = 0;
+            $totalQuantity = 0;
+
+            foreach ($request->products as $productData) {
+                $totalPrice += $productData['quantity'] * $productData['price'];
+                $totalQuantity += $productData['quantity'];
+            }
+
+            // Generate map link if coordinates exist
+            $mapLink = $transaction->map_link;
+            if (!empty($request->latitude) && !empty($request->longitude)) {
+                $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
+            }
+
+            // Handle photo upload
+            $photoPath = $transaction->photo;
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
+                if ($transaction->photo && Storage::disk('public')->exists($transaction->photo)) {
+                    Storage::disk('public')->delete($transaction->photo);
+                }
+                $photoPath = $request->file('photo')->store('transaction-photos', 'public');
+            }
+
+            // Update transaction dengan products_data
             $transaction->update([
                 'user_id' => $request->user_id,
                 'customer_id' => $request->customer_id,
-                'product_id' => $request->product_id,
-                'quantity' => $request->quantity,
-                'price' => $request->price,
+                'product_id' => $request->products[0]['product_id'], // First product as reference for backward compatibility
+                'quantity' => $totalQuantity, // Total quantity semua produk
+                'price' => $request->products[0]['price'], // First product price as reference
                 'total_price' => $totalPrice,
+                'products_data' => $request->products, // SIMPAN SEMUA PRODUK DI SINI
                 'payment_status' => $request->payment_status,
                 'status' => $request->status,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'map_link' => $mapLink, // UPDATE MAP LINK
-                'photo' => $photoPath, // UPDATE PATH FOTO
+                'map_link' => $mapLink,
+                'photo' => $photoPath,
+                'notes' => $request->notes,
             ]);
 
+            DB::commit();
+
+            $productCount = count($request->products);
             return redirect()->route('admin.transactions.index')
-                ->with('success', 'Transaction updated successfully.');
+                ->with('success', "Transaction updated successfully with {$productCount} products.");
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Failed to update transaction: ' . $e->getMessage())
                 ->withInput();
