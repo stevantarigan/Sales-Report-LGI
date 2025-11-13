@@ -5,11 +5,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminSalesController;
+use App\Http\Controllers\SalesController;
 
 // =============================================
 // PUBLIC ROUTES
 // =============================================
-Route::get('/', function () {
+Route::get('/', function() {
     return redirect('/login');
 });
 
@@ -77,14 +78,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/dashboard', [SuperAdminController::class, 'welcome'])->name('dashboard');
         });
 
-        // ADMINSALES ROUTES - juga menggunakan SuperAdminController
+        // ADMINSALES ROUTES
         Route::prefix('adminsales')->name('adminsales.')->group(function () {
 
             // Dashboard khusus untuk AdminSales
             Route::get('/dashboard', [AdminSalesController::class, 'welcome'])->name('dashboard');
             Route::get('/welcome', [AdminSalesController::class, 'welcome'])->name('welcome');
 
-            // Route lainnya menggunakan SuperAdminController sama seperti di admin
+            // Customers Routes
             Route::prefix('customers')->name('customers.')->group(function () {
                 Route::get('/', [SuperAdminController::class, 'customers'])->name('index');
                 Route::get('/create', [SuperAdminController::class, 'createCustomer'])->name('create');
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/bulk-delete', [SuperAdminController::class, 'bulkDeleteCustomers'])->name('bulk-delete');
             });
 
+            // Transactions Routes
             Route::prefix('transactions')->name('transactions.')->group(function () {
                 Route::get('/', [SuperAdminController::class, 'transactions'])->name('index');
                 Route::get('/create', [SuperAdminController::class, 'createTransaction'])->name('create');
@@ -106,13 +108,14 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/{transaction}', [SuperAdminController::class, 'destroyTransaction'])->name('destroy');
             });
 
+            // Reports Routes
             Route::prefix('reports')->name('reports.')->group(function () {
                 Route::get('/sales', [SuperAdminController::class, 'salesReport'])->name('sales');
                 Route::get('/customers', [SuperAdminController::class, 'customersReport'])->name('customers');
             });
         });
 
-        // PRODUCT MANAGEMENT ROUTES (Shared: SuperAdmin & AdminSales)
+        // PRODUCT MANAGEMENT ROUTES (Shared)
         Route::prefix('products')->name('products.')->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index');
             Route::get('/create', [ProductController::class, 'create'])->name('create');
@@ -126,40 +129,35 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // =============================================
-    // SALES ROUTES (Only for Sales)
-    // =============================================
+    // SALES ROUTES
     Route::middleware(['role:sales'])->prefix('sales')->name('sales.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('sales.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [SalesController::class, 'dashboard'])->name('dashboard');
 
-        Route::get('/welcome', function () {
-            return view('sales.dashboard');
-        })->name('welcome');
+        // Products
+        Route::get('/products', [SalesController::class, 'products'])->name('products');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+
+        // Customers
+        Route::get('/customers', [SalesController::class, 'customers'])->name('customers');
+        Route::get('/customers/{customer}', [SuperAdminController::class, 'showCustomer'])->name('customers.show');
+
+        // Transactions
+        Route::get('/transactions', [SalesController::class, 'transactions'])->name('transactions');
+        Route::get('/transactions/{transaction}', [SuperAdminController::class, 'showTransaction'])->name('transactions.show');
     });
 
     // =============================================
     // WELCOME PAGES
     // =============================================
     Route::get('/welcome', [SuperAdminController::class, 'welcome'])->name('superadmin.welcome');
-
-    // PERBAIKI ROUTE INI: Gunakan AdminSalesController
     Route::get('/welcome2', [AdminSalesController::class, 'welcome'])->name('adminsales.welcome');
-
-    Route::get('/welcome3', function () {
-        if (auth()->user()->role !== 'sales') {
-            abort(403, 'Unauthorized access. Your role: ' . auth()->user()->role);
-        }
-        return view('sales.dashboard');
-    })->name('sales.welcome');
+    Route::get('/welcome3', [SalesController::class, 'dashboard'])->middleware('role:sales')->name('sales.welcome');
 
     // =============================================
     // GENERAL DASHBOARD ROUTE (Auto-redirect based on role)
     // =============================================
-    Route::get('/dashboard', function () {
+    Route::get('/dashboard', function() {
         $user = auth()->user();
-
         switch ($user->role) {
             case 'superadmin':
                 return redirect()->route('superadmin.welcome');
@@ -176,6 +174,6 @@ Route::middleware(['auth'])->group(function () {
 // =============================================
 // FALLBACK ROUTE
 // =============================================
-Route::fallback(function () {
+Route::fallback(function() {
     return response()->view('errors.404', [], 404);
 });

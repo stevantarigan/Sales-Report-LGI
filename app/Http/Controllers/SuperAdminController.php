@@ -8,20 +8,17 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesTransaction;
 use App\Models\ActivityLog;
-
-
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB; // TAMBAHKAN INI
-use Illuminate\Support\Facades\Storage; // JIKA PERLU
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SuperAdminController extends Controller
 {
     public function welcome()
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -36,7 +33,7 @@ class SuperAdminController extends Controller
             $totalSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->count();
             $activeSalesUsers = User::whereIn('role', ['sales', 'adminsales'])->where('is_active', true)->count();
 
-            // Monthly performance - FIXED DATE CALCULATION
+            // Monthly performance
             $currentMonthStart = now()->startOfMonth();
             $currentMonthEnd = now()->endOfMonth();
             $lastMonthStart = now()->subMonth()->startOfMonth();
@@ -54,7 +51,7 @@ class SuperAdminController extends Controller
             $lastMonthTransactions = SalesTransaction::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
                 ->count();
 
-            // Sales performance data - FIXED QUERY
+            // Sales performance data
             $salesPerformance = User::whereIn('role', ['sales', 'adminsales'])
                 ->where('is_active', true)
                 ->withCount([
@@ -69,7 +66,7 @@ class SuperAdminController extends Controller
                 ], 'total_price')
                 ->get()
                 ->map(function ($user) {
-                    $targetRevenue = 100000000; // 100 juta target per sales
+                    $targetRevenue = 100000000;
                     $revenue = $user->transactions_sum_total_price ?? 0;
                     $performancePercentage = $targetRevenue > 0 ? ($revenue / $targetRevenue) * 100 : 0;
 
@@ -96,7 +93,7 @@ class SuperAdminController extends Controller
                 ->where('is_active', true)
                 ->get(['id', 'name', 'email']);
 
-            // Recent transactions with sales info - FIXED RELATIONSHIPS
+            // Recent transactions with sales info
             $recentTransactions = SalesTransaction::with(['user', 'customer', 'product'])
                 ->latest()
                 ->limit(20)
@@ -105,7 +102,7 @@ class SuperAdminController extends Controller
             // Recent activities
             $recentActivities = ActivityLog::latest()->limit(10)->get();
 
-            // Sales chart data - FIXED
+            // Sales chart data
             $salesChartRaw = SalesTransaction::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
                 ->whereYear('created_at', now()->year)
                 ->groupBy('month')
@@ -134,14 +131,6 @@ class SuperAdminController extends Controller
                 $salesChart[$name] = $salesChartRaw[$num] ?? 0;
             }
 
-            // Debug data untuk memastikan semua variabel terisi
-            \Log::info('Dashboard Data:', [
-                'totalSalesUsers' => $totalSalesUsers,
-                'currentMonthRevenue' => $currentMonthRevenue,
-                'salesPerformance_count' => $salesPerformance->count(),
-                'recentTransactions_count' => $recentTransactions->count()
-            ]);
-
             return view('superadmin.dashboard', compact(
                 'totalUsers',
                 'totalProducts',
@@ -164,9 +153,7 @@ class SuperAdminController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
 
-            // Fallback values jika ada error
             return view('superadmin.dashboard', [
                 'totalUsers' => 0,
                 'totalProducts' => 0,
@@ -189,7 +176,7 @@ class SuperAdminController extends Controller
         }
     }
 
-    // User Management Methods
+    // User Management Methods - HANYA superadmin & adminsales
     public function users(Request $request)
     {
         $userRole = auth()->user()->role;
@@ -239,7 +226,7 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.user.create'); // DIUBAH: superadmin.user.create
+        return view('superadmin.user.create');
     }
 
     public function storeUser(Request $request)
@@ -284,7 +271,6 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // For AJAX requests, return JSON
         if (request()->ajax()) {
             return response()->json([
                 'id' => $user->id,
@@ -316,7 +302,6 @@ class SuperAdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Untuk AJAX request, return JSON errors
             if ($request->ajax()) {
                 return response()->json([
                     'errors' => $validator->errors(),
@@ -334,10 +319,9 @@ class SuperAdminController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'phone' => $request->phone,
-            'is_active' => $request->boolean('is_active'), // Gunakan boolean() untuk konsistensi
+            'is_active' => $request->boolean('is_active'),
         ]);
 
-        // Untuk AJAX request, return JSON success
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -349,6 +333,7 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully.');
     }
+
     public function resetPassword(Request $request)
     {
         $userRole = auth()->user()->role;
@@ -399,7 +384,6 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        // Prevent self-deletion
         if ($user->id === auth()->id()) {
             return redirect()->back()
                 ->with('error', 'You cannot delete your own account.');
@@ -410,11 +394,12 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
     }
-    // Di SuperAdminController - ganti method transactions() dengan ini:
+
+    // Transactions Management - BOLEH diakses sales
     public function transactions(Request $request)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -464,7 +449,6 @@ class SuperAdminController extends Controller
 
         $query->orderBy($sort, $sortDirection);
 
-        // Pagination dengan per page
         $perPage = $request->get('per_page', 10);
         $transactions = $query->paginate($perPage);
 
@@ -486,7 +470,7 @@ class SuperAdminController extends Controller
     public function createTransaction()
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -500,7 +484,7 @@ class SuperAdminController extends Controller
     public function storeTransaction(Request $request)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -524,13 +508,11 @@ class SuperAdminController extends Controller
                 ->withInput();
         }
 
-        // Generate map link if coordinates exist
         $mapLink = null;
         if (!empty($request->latitude) && !empty($request->longitude)) {
             $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
         }
 
-        // Handle photo upload
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('transaction-photos', 'public');
@@ -539,7 +521,6 @@ class SuperAdminController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate total price for ALL products
             $totalPrice = 0;
             $totalQuantity = 0;
 
@@ -548,7 +529,6 @@ class SuperAdminController extends Controller
                 $totalQuantity += $productData['quantity'];
             }
 
-            // Validasi stok untuk SEMUA produk sebelum proses
             foreach ($request->products as $productData) {
                 $product = Product::find($productData['product_id']);
                 if (!$product) {
@@ -560,15 +540,14 @@ class SuperAdminController extends Controller
                 }
             }
 
-            // Create ONE main transaction dengan products_data
             $transaction = SalesTransaction::create([
                 'user_id' => $request->user_id,
                 'customer_id' => $request->customer_id,
-                'product_id' => $request->products[0]['product_id'], // First product as reference
-                'quantity' => $totalQuantity, // Total semua quantity
-                'price' => $request->products[0]['price'], // First product price as reference
+                'product_id' => $request->products[0]['product_id'],
+                'quantity' => $totalQuantity,
+                'price' => $request->products[0]['price'],
                 'total_price' => $totalPrice,
-                'products_data' => $request->products, // SIMPAN SEMUA PRODUK DI SINI
+                'products_data' => $request->products,
                 'payment_status' => $request->payment_status,
                 'status' => $request->status,
                 'latitude' => $request->latitude,
@@ -577,7 +556,6 @@ class SuperAdminController extends Controller
                 'photo' => $photoPath,
             ]);
 
-            // Update stock untuk SEMUA produk
             foreach ($request->products as $productData) {
                 $product = Product::find($productData['product_id']);
                 if ($product) {
@@ -602,11 +580,10 @@ class SuperAdminController extends Controller
     public function showTransaction(SalesTransaction $transaction)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
-        // Load relationships to avoid N+1 queries
         $transaction->load(['user', 'customer', 'product']);
 
         return view('superadmin.transactions.show', compact('transaction'));
@@ -615,7 +592,7 @@ class SuperAdminController extends Controller
     public function editTransaction(SalesTransaction $transaction)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -623,15 +600,15 @@ class SuperAdminController extends Controller
         $customers = Customer::all();
         $products = Product::all();
 
-        // Load products_data untuk memastikan data produk tersedia
         $transaction->load(['user', 'customer', 'product']);
 
         return view('superadmin.transactions.edit', compact('transaction', 'users', 'customers', 'products'));
     }
+
     public function updateTransaction(Request $request, SalesTransaction $transaction)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -659,7 +636,6 @@ class SuperAdminController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate total price from ALL products
             $totalPrice = 0;
             $totalQuantity = 0;
 
@@ -668,31 +644,27 @@ class SuperAdminController extends Controller
                 $totalQuantity += $productData['quantity'];
             }
 
-            // Generate map link if coordinates exist
             $mapLink = $transaction->map_link;
             if (!empty($request->latitude) && !empty($request->longitude)) {
                 $mapLink = "https://maps.google.com/?q={$request->latitude},{$request->longitude}";
             }
 
-            // Handle photo upload
             $photoPath = $transaction->photo;
             if ($request->hasFile('photo')) {
-                // Delete old photo if exists
                 if ($transaction->photo && Storage::disk('public')->exists($transaction->photo)) {
                     Storage::disk('public')->delete($transaction->photo);
                 }
                 $photoPath = $request->file('photo')->store('transaction-photos', 'public');
             }
 
-            // Update transaction dengan products_data
             $transaction->update([
                 'user_id' => $request->user_id,
                 'customer_id' => $request->customer_id,
-                'product_id' => $request->products[0]['product_id'], // First product as reference for backward compatibility
-                'quantity' => $totalQuantity, // Total quantity semua produk
-                'price' => $request->products[0]['price'], // First product price as reference
+                'product_id' => $request->products[0]['product_id'],
+                'quantity' => $totalQuantity,
+                'price' => $request->products[0]['price'],
                 'total_price' => $totalPrice,
-                'products_data' => $request->products, // SIMPAN SEMUA PRODUK DI SINI
+                'products_data' => $request->products,
                 'payment_status' => $request->payment_status,
                 'status' => $request->status,
                 'latitude' => $request->latitude,
@@ -719,7 +691,7 @@ class SuperAdminController extends Controller
     public function destroyTransaction(SalesTransaction $transaction)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -728,13 +700,12 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.transactions.index')
             ->with('success', 'Transaction deleted successfully.');
     }
-    // Customers Management Methods
-    // Di SuperAdminController - ganti method customers() dengan ini:
-    // Di SuperAdminController
+
+    // Customers Management - BOLEH diakses sales
     public function customers(Request $request)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -799,7 +770,7 @@ class SuperAdminController extends Controller
     public function createCustomer()
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -809,7 +780,7 @@ class SuperAdminController extends Controller
     public function storeCustomer(Request $request)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -836,7 +807,7 @@ class SuperAdminController extends Controller
     public function showCustomer(Customer $customer)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -846,7 +817,7 @@ class SuperAdminController extends Controller
     public function editCustomer(Customer $customer)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -856,7 +827,7 @@ class SuperAdminController extends Controller
     public function updateCustomer(Request $request, Customer $customer)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -883,7 +854,7 @@ class SuperAdminController extends Controller
     public function destroyCustomer(Customer $customer)
     {
         $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -892,55 +863,4 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer deleted successfully.');
     }
-    public function index(Request $request)
-    {
-        $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales'])) {
-            abort(403, 'Unauthorized access.');
-        }
-
-        $query = User::query();
-
-        // Search functionality
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
-            });
-        }
-
-        // Filter by role
-        if ($request->has('role') && $request->role != '') {
-            $query->where('role', $request->role);
-        }
-
-        // Filter by status
-        if ($request->has('status') && $request->status != '') {
-            $isActive = $request->status == 'active';
-            $query->where('is_active', $isActive);
-        }
-
-        // Sorting
-        $sort = $request->get('sort', 'created_at');
-        $sortDirection = 'desc';
-
-        if ($sort == 'name' || $sort == 'email') {
-            $sortDirection = 'asc';
-        }
-
-        $query->orderBy($sort, $sortDirection);
-
-        $users = $query->paginate(10);
-
-        return view('superadmin.user.index', compact('users'));
-    }
-
-    // Method untuk export (opsional)
-    private function exportUsers($users)
-    {
-        // Implementasi export ke Excel atau PDF
-        // Contoh menggunakan Laravel Excel
-        return Excel::download(new UsersExport($users), 'users-' . date('Y-m-d') . '.xlsx');
-    }
-}
+}   

@@ -1,17 +1,4 @@
-@php
-    $role = auth()->user()->role;
-
-    // Tentukan layout berdasarkan role
-    if ($role === 'adminsales') {
-        $layout = 'layouts.app2';
-    } elseif ($role === 'sales') {
-        $layout = 'layouts.app3';
-    } else {
-        $layout = 'layouts.app';
-    }
-@endphp
-
-@extends($layout)
+@extends('layouts.app3')
 
 @section('title', 'Customers Management | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Customer Management')
@@ -650,7 +637,7 @@
 
     <!-- Filter Section -->
     <div class="filter-section" data-aos="fade-up" data-aos-delay="500">
-        <form action="{{ route('admin.customers.index') }}" method="GET" id="filterForm">
+        <form action="{{ route('sales.customers') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
                     <label class="form-label">Status</label>
@@ -728,7 +715,7 @@
 
             <!-- Clear Filters Button -->
             @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))
-                <a href="{{ route('admin.customers.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('sales.customers') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-times me-2"></i>Clear Filters
                 </a>
             @endif
