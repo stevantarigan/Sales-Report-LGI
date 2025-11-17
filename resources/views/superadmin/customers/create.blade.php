@@ -1,5 +1,14 @@
 @php
-    $layout = auth()->user()->role === 'adminsales' ? 'layouts.app2' : 'layouts.app';
+    $role = auth()->user()->role;
+
+    // Tentukan layout berdasarkan role
+    if ($role === 'adminsales') {
+        $layout = 'layouts.app2';
+    } elseif ($role === 'sales') {
+        $layout = 'layouts.app3';
+    } else {
+        $layout = 'layouts.app';
+    }
 @endphp
 
 @extends($layout)

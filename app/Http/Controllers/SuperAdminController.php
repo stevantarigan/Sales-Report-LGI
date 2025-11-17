@@ -718,8 +718,7 @@ class SuperAdminController extends Controller
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                     ->orWhere('email', 'like', '%' . $searchTerm . '%')
                     ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('city', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('company', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('city', 'like', '%' . $searchTerm . '%');
             });
         }
 

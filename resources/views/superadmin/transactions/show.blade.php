@@ -11,6 +11,7 @@
     }
 @endphp
 
+
 @extends($layout)
 
 @section('title', 'Transaction Details | ' . ucfirst(auth()->user()->role))

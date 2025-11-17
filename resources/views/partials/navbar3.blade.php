@@ -29,6 +29,11 @@
                 <i class="fas fa-list"></i>
                 All Products
             </a>
+            <a href="{{ route('products.create') }}"
+                class="submenu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
+                <i class="fas fa-plus"></i>
+                Add New Product
+            </a>
         </div>
 
         <!-- Customer Menu -->
@@ -42,6 +47,11 @@
                 class="submenu-item {{ request()->routeIs('sales.customers') ? 'active' : '' }}">
                 <i class="fas fa-list"></i>
                 All Customers
+            </a>
+            <a href="{{ route('admin.customers.create') }}"
+                class="submenu-item {{ request()->routeIs('admin.customers.create') ? 'active' : '' }}">
+                <i class="fas fa-plus"></i>
+                Add Customer
             </a>
         </div>
 
@@ -57,7 +67,12 @@
                 <i class="fas fa-list"></i>
                 All Transactions
             </a>
-            
+            <a href="{{ route('admin.transactions.create') }}"
+                class="submenu-item {{ request()->routeIs('admin.transactions.create') ? 'active' : '' }}">
+                <i class="fas fa-plus"></i>
+                Add Transaction
+            </a>
+
         </div>
 
         <div class="menu-divider"></div>
@@ -82,4 +97,3 @@
         });
     });
 </script>
-

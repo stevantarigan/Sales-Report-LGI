@@ -103,7 +103,7 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-    {   
+    {
         $userRole = auth()->user()->role;
         // Sales BOLEH store products (sesuai permission)
         if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
@@ -162,11 +162,19 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+            abort(403, 'Unauthorized access.');
+        }
         return view('products.edit', compact('product'));
     }
 
     public function update(Request $request, Product $product)
-    {   
+    {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+            abort(403, 'Unauthorized access.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'sku' => 'nullable|string|unique:products,sku,' . $product->id, // ubah ke nullable
