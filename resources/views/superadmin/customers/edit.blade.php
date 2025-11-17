@@ -823,25 +823,7 @@
             updatePreview();
         });
 
-        // Handle page before unload
-        window.addEventListener('beforeunload', function(e) {
-            const form = document.getElementById('editCustomerForm');
-            const formData = new FormData(form);
-            let hasChanges = false;
-
-            // Check if form has unsaved changes
-            formData.forEach((value, key) => {
-                if (value !== '' && key !== '_token' && key !== '_method') {
-                    hasChanges = true;
-                }
-            });
-
-            if (hasChanges) {
-                e.preventDefault();
-                e.returnValue =
-                'Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman ini?';
-            }
-        });
+       
     </script>
 
     <style>

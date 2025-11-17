@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin/transactions')->name('admin.transactions.')->group(function () {
         // Routes untuk semua role (superadmin, adminsales, sales)
         Route::middleware(['role:superadmin,adminsales,sales'])->group(function () {
+            Route::get('/export/pdf', [SuperAdminController::class, 'exportPDF'])->name('export.pdf');
             Route::get('/', [SuperAdminController::class, 'transactions'])->name('index');
             Route::get('/create', [SuperAdminController::class, 'createTransaction'])->name('create');
             Route::post('/', [SuperAdminController::class, 'storeTransaction'])->name('store');

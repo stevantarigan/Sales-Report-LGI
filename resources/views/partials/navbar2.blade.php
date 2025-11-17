@@ -92,9 +92,6 @@
 
         <div class="menu-divider"></div>
 
-        <a href="#" class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span class="menu-text">Settings</span>
-        </a>
+
     </div>
 </nav>

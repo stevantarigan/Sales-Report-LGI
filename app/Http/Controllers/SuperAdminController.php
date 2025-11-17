@@ -862,4 +862,89 @@ class SuperAdminController extends Controller
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer deleted successfully.');
     }
+    // Tambahkan method ini di SuperAdminController
+public function exportPDF(Request $request)
+{
+    $userRole = auth()->user()->role;
+    if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+        abort(403, 'Unauthorized access.');
+    }
+
+    try {
+        // Query data dengan filter yang sama seperti index
+        $query = SalesTransaction::with(['user', 'customer', 'product']);
+
+        // Apply filters sama seperti di method transactions
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('customer', function ($customerQuery) use ($searchTerm) {
+                    $customerQuery->where('name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                })
+                ->orWhereHas('product', function ($productQuery) use ($searchTerm) {
+                    $productQuery->where('name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('sku', 'like', '%' . $searchTerm . '%');
+                })
+                ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                    $userQuery->where('name', 'like', '%' . $searchTerm . '%');
+                })
+                ->orWhere('id', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('payment_status') && $request->payment_status != '') {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sort, $sortDirection);
+
+        $transactions = $query->get();
+
+        // Stats untuk header
+        $totalTransactions = $transactions->count();
+        $completedTransactions = $transactions->where('status', 'completed')->count();
+        $pendingTransactions = $transactions->where('status', 'pending')->count();
+        $cancelledTransactions = $transactions->where('status', 'cancelled')->count();
+        $totalRevenue = $transactions->sum('total_price');
+
+        // Generate PDF
+        $pdf = \PDF::loadView('exports.transactions-pdf', compact(
+            'transactions',
+            'totalTransactions',
+            'completedTransactions',
+            'pendingTransactions',
+            'cancelledTransactions',
+            'totalRevenue',
+            'request'
+        ));
+
+        // Set paper size and orientation
+        $pdf->setPaper('A4', 'landscape');
+        
+        // Filename dengan timestamp
+        $filename = 'transactions-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+        return $pdf->download($filename);
+
+    } catch (\Exception $e) {
+        \Log::error('PDF Export Error: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+    }
+}
 }   

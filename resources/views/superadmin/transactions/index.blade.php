@@ -1055,16 +1055,45 @@
         function exportTransactions() {
             // Build export URL dengan parameter filter saat ini
             const currentParams = new URLSearchParams(window.location.search);
-            const exportUrl = '{{ route('admin.transactions.index') }}?' + currentParams.toString() + '&export=true';
+            const exportUrl = '{{ route('admin.transactions.export.pdf') }}?' + currentParams.toString();
 
             Swal.fire({
-                icon: 'info',
                 title: 'Export Transactions',
-                text: 'Preparing your export file...',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                window.location.href = exportUrl;
+                text: 'Choose export format',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'PDF Format',
+                cancelButtonText: 'Cancel',
+                showDenyButton: true,
+                denyButtonText: 'Excel Format',
+                denyButtonColor: '#059669'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // PDF Export
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Generating PDF',
+                        text: 'Please wait while we prepare your PDF report...',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Trigger download
+                    window.location.href = exportUrl;
+
+                    // Close loading after a delay
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 2000);
+
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire('Cancelled', 'Export has been cancelled', 'info');
+                }
             });
         }
     </script>
