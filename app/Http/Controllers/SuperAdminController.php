@@ -494,7 +494,9 @@ class SuperAdminController extends Controller
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
-            'products.*.price' => 'required|numeric|min:0',
+            'products.*.price' => 'required|numeric|min:0', // Harga bisa diubah
+            'products.*.original_price' => 'required|numeric|min:0', // Simpan harga asli
+            'products.*.discount' => 'nullable|numeric|min:0', // Diskon jika ada
             'payment_status' => 'required|in:pending,paid,cancelled',
             'status' => 'required|in:pending,completed,cancelled',
             'latitude' => 'nullable|numeric',
@@ -523,10 +525,16 @@ class SuperAdminController extends Controller
 
             $totalPrice = 0;
             $totalQuantity = 0;
+            $totalDiscount = 0;
 
             foreach ($request->products as $productData) {
-                $totalPrice += $productData['quantity'] * $productData['price'];
+                $price = $productData['price'];
+                $originalPrice = $productData['original_price'];
+                $discount = $productData['discount'] ?? 0;
+
+                $totalPrice += $productData['quantity'] * $price;
                 $totalQuantity += $productData['quantity'];
+                $totalDiscount += $productData['quantity'] * ($originalPrice - $price);
             }
 
             foreach ($request->products as $productData) {
@@ -547,6 +555,7 @@ class SuperAdminController extends Controller
                 'quantity' => $totalQuantity,
                 'price' => $request->products[0]['price'],
                 'total_price' => $totalPrice,
+                'total_discount' => $totalDiscount,
                 'products_data' => $request->products,
                 'payment_status' => $request->payment_status,
                 'status' => $request->status,
@@ -567,7 +576,7 @@ class SuperAdminController extends Controller
 
             $productCount = count($request->products);
             return redirect()->route('admin.transactions.index')
-                ->with('success', "Transaksi berhasil dibuat dengan {$productCount} produk.");
+                ->with('success', "Transaksi berhasil dibuat dengan {$productCount} produk. Total diskon: Rp " . number_format($totalDiscount, 0, ',', '.'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -863,88 +872,88 @@ class SuperAdminController extends Controller
             ->with('success', 'Customer deleted successfully.');
     }
     // Tambahkan method ini di SuperAdminController
-public function exportPDF(Request $request)
-{
-    $userRole = auth()->user()->role;
-    if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
-        abort(403, 'Unauthorized access.');
-    }
-
-    try {
-        // Query data dengan filter yang sama seperti index
-        $query = SalesTransaction::with(['user', 'customer', 'product']);
-
-        // Apply filters sama seperti di method transactions
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->whereHas('customer', function ($customerQuery) use ($searchTerm) {
-                    $customerQuery->where('name', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
-                })
-                ->orWhereHas('product', function ($productQuery) use ($searchTerm) {
-                    $productQuery->where('name', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('sku', 'like', '%' . $searchTerm . '%');
-                })
-                ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                    $userQuery->where('name', 'like', '%' . $searchTerm . '%');
-                })
-                ->orWhere('id', 'like', '%' . $searchTerm . '%');
-            });
+    public function exportPDF(Request $request)
+    {
+        $userRole = auth()->user()->role;
+        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+            abort(403, 'Unauthorized access.');
         }
 
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
+        try {
+            // Query data dengan filter yang sama seperti index
+            $query = SalesTransaction::with(['user', 'customer', 'product']);
+
+            // Apply filters sama seperti di method transactions
+            if ($request->has('search') && $request->search != '') {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('customer', function ($customerQuery) use ($searchTerm) {
+                        $customerQuery->where('name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                    })
+                        ->orWhereHas('product', function ($productQuery) use ($searchTerm) {
+                            $productQuery->where('name', 'like', '%' . $searchTerm . '%')
+                                ->orWhere('sku', 'like', '%' . $searchTerm . '%');
+                        })
+                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                            $userQuery->where('name', 'like', '%' . $searchTerm . '%');
+                        })
+                        ->orWhere('id', 'like', '%' . $searchTerm . '%');
+                });
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->has('payment_status') && $request->payment_status != '') {
+                $query->where('payment_status', $request->payment_status);
+            }
+
+            if ($request->has('date_from') && $request->date_from != '') {
+                $query->whereDate('created_at', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to') && $request->date_to != '') {
+                $query->whereDate('created_at', '<=', $request->date_to);
+            }
+
+            // Sorting
+            $sort = $request->get('sort', 'created_at');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sort, $sortDirection);
+
+            $transactions = $query->get();
+
+            // Stats untuk header
+            $totalTransactions = $transactions->count();
+            $completedTransactions = $transactions->where('status', 'completed')->count();
+            $pendingTransactions = $transactions->where('status', 'pending')->count();
+            $cancelledTransactions = $transactions->where('status', 'cancelled')->count();
+            $totalRevenue = $transactions->sum('total_price');
+
+            // Generate PDF
+            $pdf = \PDF::loadView('exports.transactions-pdf', compact(
+                'transactions',
+                'totalTransactions',
+                'completedTransactions',
+                'pendingTransactions',
+                'cancelledTransactions',
+                'totalRevenue',
+                'request'
+            ));
+
+            // Set paper size and orientation
+            $pdf->setPaper('A4', 'landscape');
+
+            // Filename dengan timestamp
+            $filename = 'transactions-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
         }
-
-        if ($request->has('payment_status') && $request->payment_status != '') {
-            $query->where('payment_status', $request->payment_status);
-        }
-
-        if ($request->has('date_from') && $request->date_from != '') {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->has('date_to') && $request->date_to != '') {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        // Sorting
-        $sort = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        $query->orderBy($sort, $sortDirection);
-
-        $transactions = $query->get();
-
-        // Stats untuk header
-        $totalTransactions = $transactions->count();
-        $completedTransactions = $transactions->where('status', 'completed')->count();
-        $pendingTransactions = $transactions->where('status', 'pending')->count();
-        $cancelledTransactions = $transactions->where('status', 'cancelled')->count();
-        $totalRevenue = $transactions->sum('total_price');
-
-        // Generate PDF
-        $pdf = \PDF::loadView('exports.transactions-pdf', compact(
-            'transactions',
-            'totalTransactions',
-            'completedTransactions',
-            'pendingTransactions',
-            'cancelledTransactions',
-            'totalRevenue',
-            'request'
-        ));
-
-        // Set paper size and orientation
-        $pdf->setPaper('A4', 'landscape');
-        
-        // Filename dengan timestamp
-        $filename = 'transactions-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
-
-        return $pdf->download($filename);
-
-    } catch (\Exception $e) {
-        \Log::error('PDF Export Error: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
     }
 }
-}   

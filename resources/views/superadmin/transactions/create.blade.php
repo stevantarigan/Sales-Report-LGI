@@ -11,13 +11,11 @@
     }
 @endphp
 
-
 @extends($layout)
 
 @section('title', 'Tambah Transaksi Baru | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Tambah Transaksi Baru')
-@section('page-description', 'Form untuk menambahkan transaksi baru ke sistem')
-
+@section('page-description', 'Form untuk menambahkan transaksi baru ke sistem dengan harga yang bisa disesuaikan')
 
 @push('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -41,6 +39,7 @@
             --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -112,6 +111,7 @@
             background: white;
             transition: var(--transition);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+            position: relative;
         }
 
         .product-item:hover {
@@ -164,6 +164,17 @@
             transform: scale(1.05);
         }
 
+        .remove-product:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .remove-product:disabled:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            transform: none;
+        }
+
         .add-product-btn {
             background: var(--gradient-success);
             border: none;
@@ -207,11 +218,12 @@
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
+            flex-wrap: wrap;
         }
 
         /* Enhanced Form Elements */
         .form-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -256,6 +268,72 @@
             font-size: 0.85rem;
             margin-top: 0.5rem;
             font-weight: 500;
+        }
+
+        /* Price Input Groups */
+        .price-input-group {
+            position: relative;
+        }
+
+        .price-input-group .form-control {
+            padding-right: 120px;
+        }
+
+        .price-actions {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .price-action-btn {
+            background: rgba(79, 70, 229, 0.1);
+            border: none;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .price-action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Price Difference Indicator */
+        .price-difference {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .price-increased {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border-left: 3px solid var(--warning-color);
+        }
+
+        .price-decreased {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border-left: 3px solid var(--success-color);
+        }
+
+        .price-normal {
+            background: rgba(100, 116, 139, 0.1);
+            color: #64748b;
+            border-left: 3px solid #64748b;
         }
 
         /* Enhanced Price Calculation */
@@ -319,11 +397,11 @@
 
         .product-search-icon {
             position: absolute;
-            left: -5px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: #64748b;
-            z-index: 1;
+            z-index: 3;
         }
 
         .select2-selection__rendered {
@@ -599,6 +677,17 @@
             box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
         }
 
+        .btn-danger {
+            background: var(--gradient-danger);
+            border: none;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+
         .btn-secondary {
             background: rgba(100, 116, 139, 0.1);
             color: #64748b;
@@ -690,6 +779,17 @@
                 align-items: flex-start;
                 gap: 8px;
             }
+
+            .price-actions {
+                position: static;
+                transform: none;
+                margin-top: 0.5rem;
+                justify-content: flex-start;
+            }
+
+            .price-input-group .form-control {
+                padding-right: 1rem;
+            }
         }
 
         /* Loading States */
@@ -722,6 +822,19 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        /* Toast Notifications */
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 @endpush
@@ -833,6 +946,12 @@
                             <h6>Produk Transaksi</h6>
                         </div>
 
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Fitur Harga Fleksibel:</strong> Anda dapat mengubah harga jual produk sesuai kebutuhan.
+                            Harga normal hanya sebagai referensi, harga jual yang akan digunakan dalam transaksi.
+                        </div>
+
                         <div class="product-actions mb-3">
                             <button type="button" class="add-product-btn" id="addProductBtn">
                                 <i class="fas fa-plus me-1"></i> Tambah Produk Lain
@@ -855,7 +974,7 @@
                                     </button>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label required-field">Pilih Produk</label>
                                         <div class="product-search-container">
                                             <i class="fas fa-search product-search-icon"></i>
@@ -876,7 +995,7 @@
                                         </div>
                                         <div class="form-text product-stock-info">Pilih produk untuk melihat stok</div>
                                     </div>
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label required-field">Quantity</label>
                                         <input type="number" class="form-control product-quantity"
                                             name="products[0][quantity]" value="1" min="1" required
@@ -884,14 +1003,41 @@
                                         <div class="form-text">Jumlah yang dibeli</div>
                                     </div>
                                     <div class="col-md-3 mb-3">
-                                        <label class="form-label required-field">Harga per Unit</label>
+                                        <label class="form-label required-field">Harga Normal</label>
                                         <div class="input-group">
                                             <span class="input-group-text">Rp</span>
-                                            <input type="number" class="form-control product-price"
-                                                name="products[0][price]" value="0" min="0" step="1000"
-                                                required readonly>
+                                            <input type="number" class="form-control original-price"
+                                                name="products[0][original_price]" value="0" min="0"
+                                                step="1000" required readonly>
                                         </div>
-                                        <div class="form-text">Harga otomatis</div>
+                                        <div class="form-text">Harga referensi produk</div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label required-field">Harga Jual</label>
+                                        <div class="price-input-group">
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="number" class="form-control product-price"
+                                                    name="products[0][price]" value="0" min="0"
+                                                    step="1000" required onchange="updateProductTotal(0)">
+                                            </div>
+                                            <div class="price-actions">
+                                                <button type="button" class="price-action-btn"
+                                                    onclick="setSameAsNormalPrice(0)" title="Sama dengan harga normal">
+                                                    <i class="fas fa-equals"></i>
+                                                </button>
+                                                <button type="button" class="price-action-btn"
+                                                    onclick="increasePrice(0, 1000)" title="Naikkan Rp 1.000">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button type="button" class="price-action-btn"
+                                                    onclick="decreasePrice(0, 1000)" title="Turunkan Rp 1.000">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="form-text">Harga yang akan digunakan</div>
+                                        <div class="price-difference" id="price-diff-0"></div>
                                     </div>
                                 </div>
                                 <div class="price-calculation">
@@ -1051,14 +1197,27 @@
                         </div>
                     </div>
 
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label for="notes" class="form-label">Catatan Tambahan</label>
+                        <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3"
+                            placeholder="Tambahkan catatan khusus tentang transaksi ini (misal: alasan perubahan harga, dll)...">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Informasi Tambahan -->
                     <div class="alert alert-info mt-3">
                         <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Informasi Transaksi</h6>
                         <ul class="mb-0">
-                            <li>Total harga akan dihitung otomatis berdasarkan quantity dan harga per unit</li>
+                            <li><strong>Harga Bisa Diubah:</strong> Anda dapat menyesuaikan harga jual produk sesuai
+                                kebutuhan</li>
+                            <li><strong>Harga Normal:</strong> Harga referensi dari master data produk</li>
+                            <li><strong>Harga Jual:</strong> Harga aktual yang akan digunakan dalam transaksi</li>
+                            <li>Gunakan tombol panah untuk menaikkan/menurunkan harga dengan cepat</li>
                             <li>Pastikan stok produk mencukupi sebelum membuat transaksi</li>
                             <li>Gunakan fitur share location untuk mendapatkan koordinat lokasi yang akurat</li>
-                            <li>Foto transaksi akan membantu dalam verifikasi dan dokumentasi</li>
                         </ul>
                     </div>
 
@@ -1210,19 +1369,19 @@
                         </button>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label required-field">Pilih Produk</label>
                             <div class="product-search-container">
                                 <i class="fas fa-search product-search-icon"></i>
                                 <select class="form-select product-select" name="products[${index}][product_id]" required onchange="updateProductInfo(${index})">
-                                    <option value=""> Cari atau pilih produk...</option>
+                                    <option value="">Cari atau pilih produk...</option>
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}" 
-                                            data-price="{{ $product->price }}"
-                                            data-stock="{{ $product->stock_quantity }}"
-                                            data-name="{{ $product->name }}"
-                                            data-sku="{{ $product->sku }}"
-                                            data-category="{{ $product->category }}">
+                                                data-price="{{ $product->price }}"
+                                                data-stock="{{ $product->stock_quantity }}"
+                                                data-name="{{ $product->name }}"
+                                                data-sku="{{ $product->sku }}"
+                                                data-category="{{ $product->category }}">
                                             {{ $product->name }} - Rp {{ number_format($product->price, 0, ',', '.') }} (Stok: {{ $product->stock_quantity }})
                                         </option>
                                     @endforeach
@@ -1230,18 +1389,40 @@
                             </div>
                             <div class="form-text product-stock-info">Pilih produk untuk melihat stok</div>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-2 mb-3">
                             <label class="form-label required-field">Quantity</label>
                             <input type="number" class="form-control product-quantity" name="products[${index}][quantity]" value="1" min="1" required onchange="updateProductTotal(${index})">
                             <div class="form-text">Jumlah yang dibeli</div>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label required-field">Harga per Unit</label>
+                            <label class="form-label required-field">Harga Normal</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control product-price" name="products[${index}][price]" value="0" min="0" step="1000" required readonly>
+                                <input type="number" class="form-control original-price" name="products[${index}][original_price]" value="0" min="0" step="1000" required readonly>
                             </div>
-                            <div class="form-text">Harga otomatis</div>
+                            <div class="form-text">Harga referensi produk</div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required-field">Harga Jual</label>
+                            <div class="price-input-group">
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control product-price" name="products[${index}][price]" value="0" min="0" step="1000" required onchange="updateProductTotal(${index})">
+                                </div>
+                                <div class="price-actions">
+                                    <button type="button" class="price-action-btn" onclick="setSameAsNormalPrice(${index})" title="Sama dengan harga normal">
+                                        <i class="fas fa-equals"></i>
+                                    </button>
+                                    <button type="button" class="price-action-btn" onclick="increasePrice(${index}, 1000)" title="Naikkan Rp 1.000">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                    <button type="button" class="price-action-btn" onclick="decreasePrice(${index}, 1000)" title="Turunkan Rp 1.000">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-text">Harga yang akan digunakan</div>
+                            <div class="price-difference" id="price-diff-${index}"></div>
                         </div>
                     </div>
                     <div class="price-calculation">
@@ -1308,15 +1489,36 @@
                 // Update input names
                 const select = item.querySelector('.product-select');
                 const quantity = item.querySelector('.product-quantity');
+                const originalPrice = item.querySelector('.original-price');
                 const price = item.querySelector('.product-price');
 
                 select.name = `products[${index}][product_id]`;
                 quantity.name = `products[${index}][quantity]`;
+                originalPrice.name = `products[${index}][original_price]`;
                 price.name = `products[${index}][price]`;
 
                 // Update event listeners
                 select.onchange = () => updateProductInfo(index);
                 quantity.onchange = () => updateProductTotal(index);
+                price.onchange = () => updateProductTotal(index);
+
+                // Update price actions
+                const priceActions = item.querySelector('.price-actions');
+                priceActions.innerHTML = `
+                    <button type="button" class="price-action-btn" onclick="setSameAsNormalPrice(${index})" title="Sama dengan harga normal">
+                        <i class="fas fa-equals"></i>
+                    </button>
+                    <button type="button" class="price-action-btn" onclick="increasePrice(${index}, 1000)" title="Naikkan Rp 1.000">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button type="button" class="price-action-btn" onclick="decreasePrice(${index}, 1000)" title="Turunkan Rp 1.000">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                `;
+
+                // Update price diff element ID
+                const priceDiff = item.querySelector('.price-difference');
+                priceDiff.id = `price-diff-${index}`;
             });
             productCount = productItems.length;
         }
@@ -1337,19 +1539,22 @@
             const select = productItem.querySelector('.product-select');
             const selectedOption = select.options[select.selectedIndex];
             const priceInput = productItem.querySelector('.product-price');
+            const originalPriceInput = productItem.querySelector('.original-price');
             const stockInfo = productItem.querySelector('.product-stock-info');
             const quantityInput = productItem.querySelector('.product-quantity');
             const productName = productItem.querySelector('.product-name');
+            const priceDiffElement = document.getElementById(`price-diff-${index}`);
 
             if (selectedOption && selectedOption.value) {
                 const price = selectedOption.getAttribute('data-price');
                 const stock = parseInt(selectedOption.getAttribute('data-stock'));
                 const name = selectedOption.getAttribute('data-name');
 
-                // Update price
-                priceInput.value = price;
+                // Update harga asli dan harga jual
+                originalPriceInput.value = price;
+                priceInput.value = price; // Default sama dengan harga asli
 
-                // Update stock info with status
+                // Update stock info
                 let stockClass = 'stock-available';
                 let stockMessage = `Stok tersedia: ${stock}`;
                 let icon = 'fa-check';
@@ -1381,14 +1586,78 @@
                     showToast('Quantity disesuaikan dengan stok tersedia', 'warning');
                 }
 
+                // Update price difference
+                updatePriceDifference(index);
+
                 // Update product total
                 updateProductTotal(index);
             } else {
+                originalPriceInput.value = 0;
                 priceInput.value = 0;
                 stockInfo.innerHTML = '<div class="form-text">Pilih produk untuk melihat stok</div>';
                 quantityInput.removeAttribute('max');
                 productName.textContent = `Produk #${parseInt(index) + 1}`;
+                if (priceDiffElement) priceDiffElement.textContent = '';
                 updateProductTotal(index);
+            }
+        }
+
+        // Set price same as normal price
+        function setSameAsNormalPrice(index) {
+            const productItem = document.querySelector(`[data-index="${index}"]`);
+            const originalPriceInput = productItem.querySelector('.original-price');
+            const priceInput = productItem.querySelector('.product-price');
+
+            priceInput.value = originalPriceInput.value;
+            updateProductTotal(index);
+            showToast('Harga jual disamakan dengan harga normal', 'info');
+        }
+
+        // Increase price
+        function increasePrice(index, amount) {
+            const productItem = document.querySelector(`[data-index="${index}"]`);
+            const priceInput = productItem.querySelector('.product-price');
+            const currentPrice = parseInt(priceInput.value) || 0;
+
+            priceInput.value = currentPrice + amount;
+            updateProductTotal(index);
+            showToast(`Harga dinaikkan Rp ${amount.toLocaleString('id-ID')}`, 'info');
+        }
+
+        // Decrease price
+        function decreasePrice(index, amount) {
+            const productItem = document.querySelector(`[data-index="${index}"]`);
+            const priceInput = productItem.querySelector('.product-price');
+            const currentPrice = parseInt(priceInput.value) || 0;
+            const newPrice = Math.max(0, currentPrice - amount);
+
+            priceInput.value = newPrice;
+            updateProductTotal(index);
+            showToast(`Harga diturunkan Rp ${amount.toLocaleString('id-ID')}`, 'info');
+        }
+
+        // Update perbedaan harga
+        function updatePriceDifference(index) {
+            const productItem = document.querySelector(`[data-index="${index}"]`);
+            const originalPriceInput = productItem.querySelector('.original-price');
+            const priceInput = productItem.querySelector('.product-price');
+            const priceDiffElement = document.getElementById(`price-diff-${index}`);
+
+            if (!priceDiffElement) return;
+
+            const originalPrice = parseInt(originalPriceInput.value) || 0;
+            const currentPrice = parseInt(priceInput.value) || 0;
+            const difference = currentPrice - originalPrice;
+
+            if (difference > 0) {
+                priceDiffElement.textContent = `+Rp ${difference.toLocaleString('id-ID')} dari harga normal`;
+                priceDiffElement.className = 'price-difference price-increased';
+            } else if (difference < 0) {
+                priceDiffElement.textContent = `-Rp ${Math.abs(difference).toLocaleString('id-ID')} dari harga normal`;
+                priceDiffElement.className = 'price-difference price-decreased';
+            } else {
+                priceDiffElement.textContent = 'Sama dengan harga normal';
+                priceDiffElement.className = 'price-difference price-normal';
             }
         }
 
@@ -1406,6 +1675,9 @@
             subtotalElement.textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
             subtotalElement.style.fontWeight = '600';
             subtotalElement.style.color = 'var(--primary-color)';
+
+            // Update price difference
+            updatePriceDifference(index);
 
             updateTotals();
         }
@@ -1436,25 +1708,20 @@
             const existingToasts = document.querySelectorAll('.custom-toast');
             existingToasts.forEach(toast => toast.remove());
 
+            const icons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+
             const toast = document.createElement('div');
             toast.className = `custom-toast alert alert-${type} alert-dismissible fade show`;
             toast.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info'}-circle me-2"></i>
+                <i class="fas ${icons[type] || 'fa-info-circle'} me-2"></i>
                 ${message}
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
             `;
-
-            // Toast styles
-            Object.assign(toast.style, {
-                position: 'fixed',
-                top: '20px',
-                right: '20px',
-                zIndex: '9999',
-                minWidth: '300px',
-                borderRadius: '10px',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-                border: 'none'
-            });
 
             document.body.appendChild(toast);
 
@@ -1485,9 +1752,11 @@
                 const select = item.querySelector('.product-select');
                 const quantityInput = item.querySelector('.product-quantity');
                 const priceInput = item.querySelector('.product-price');
+                const originalPriceInput = item.querySelector('.original-price');
                 const maxQuantity = parseInt(quantityInput.getAttribute('max'));
                 const quantity = parseInt(quantityInput.value);
                 const price = parseFloat(priceInput.value);
+                const originalPrice = parseFloat(originalPriceInput.value);
 
                 if (!select.value) {
                     e.preventDefault();
@@ -1517,7 +1786,14 @@
 
                 if (!price || price <= 0) {
                     e.preventDefault();
-                    showToast(`Harga tidak valid untuk Produk #${index + 1}`, 'warning');
+                    showToast(`Harga jual tidak valid untuk Produk #${index + 1}`, 'warning');
+                    hasErrors = true;
+                    return;
+                }
+
+                if (!originalPrice || originalPrice <= 0) {
+                    e.preventDefault();
+                    showToast(`Harga normal tidak valid untuk Produk #${index + 1}`, 'warning');
                     hasErrors = true;
                     return;
                 }
@@ -1563,7 +1839,7 @@
 
                         setTimeout(() => {
                             getLocationBtn.innerHTML =
-                            '<i class="fas fa-crosshairs me-1"></i> Dapatkan';
+                                '<i class="fas fa-crosshairs me-1"></i> Dapatkan';
                             getLocationBtn.classList.remove('btn-success');
                             getLocationBtn.classList.add('btn-primary');
                             getLocationBtn.disabled = false;
@@ -1623,7 +1899,7 @@
             }
         });
 
-        // Photo functionality - Simplified like before
+        // Photo functionality
         const cameraOption = document.getElementById('cameraOption');
         const uploadOption = document.getElementById('uploadOption');
         const cameraContainer = document.getElementById('cameraContainer');
