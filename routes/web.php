@@ -123,15 +123,21 @@ Route::middleware(['auth'])->group(function () {
 
         // Products - alternate routes untuk sales
         Route::get('/products', [SalesController::class, 'products'])->name('products');
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create'); // TAMBAH INI
         Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
         // Customers - alternate routes untuk sales
         Route::get('/customers', [SalesController::class, 'customers'])->name('customers');
+        Route::get('/customers/create', [SuperAdminController::class, 'createCustomer'])->name('customers.create'); // TAMBAH INI
         Route::get('/customers/{customer}', [SuperAdminController::class, 'showCustomer'])->name('customers.show');
 
         // Transactions - alternate routes untuk sales
         Route::get('/transactions', [SalesController::class, 'transactions'])->name('transactions');
+        Route::get('/transactions/create', [SuperAdminController::class, 'createTransaction'])->name('transactions.create'); // TAMBAH INI
         Route::get('/transactions/{transaction}', [SuperAdminController::class, 'showTransaction'])->name('transactions.show');
+
+        // Reports untuk sales
+        Route::get('/reports', [SalesController::class, 'reports'])->name('reports'); // TAMBAH INI
     });
 
     // =============================================

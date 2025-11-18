@@ -106,9 +106,21 @@ class Product extends Model
 
         return (($this->price - $this->cost_price) / $this->cost_price) * 100;
     }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
+    // Tambahkan relationship ke SalesTransaction
+    public function salesTransactions()
+    {
+        return $this->hasMany(SalesTransaction::class, 'product_id');
+    }
+
+    // Relationship untuk menghitung total terjual
+    public function getTotalSoldAttribute()
+    {
+        return $this->salesTransactions()->sum('quantity');
+    }
 }

@@ -6,31 +6,176 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesTransaction;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller
 {
-    // Dashboard
+    // Dashboard Lengkap
     public function dashboard()
     {
-        $totalProducts = Product::count();
-        $totalCustomers = Customer::count();
-        $totalTransactions = SalesTransaction::count();
+        $user = auth()->user();
+        $now = Carbon::now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $startOfWeek = $now->copy()->startOfWeek();
+        $startOfYear = $now->copy()->startOfYear();
+        
+        // Base query untuk transactions berdasarkan user
+        $transactionQuery = SalesTransaction::query();
+        $customerQuery = Customer::query();
+        
+        if ($user->role === 'sales') {
+            // Filter transactions berdasarkan user_id jika kolom ada
+            if (\Schema::hasColumn('sales_transactions', 'user_id')) {
+                $transactionQuery->where('user_id', $user->id);
+            }
+        }
 
-        return view('sales.dashboard', compact('totalProducts', 'totalCustomers', 'totalTransactions'));
+        // Data utama
+        $totalProducts = Product::where('is_active', true)->count();
+        $totalCustomers = $customerQuery->count();
+        $totalTransactions = $transactionQuery->count();
+        
+        // Data periodik
+        $monthlyTransactions = $transactionQuery->clone()
+            ->where('created_at', '>=', $startOfMonth)
+            ->count();
+            
+        $weeklyTransactions = $transactionQuery->clone()
+            ->where('created_at', '>=', $startOfWeek)
+            ->count();
+            
+        $yearlyTransactions = $transactionQuery->clone()
+            ->where('created_at', '>=', $startOfYear)
+            ->count();
+
+        // Revenue
+        $totalRevenue = $transactionQuery->clone()->sum('total_price');
+        $monthlyRevenue = $transactionQuery->clone()
+            ->where('created_at', '>=', $startOfMonth)
+            ->sum('total_price');
+            
+        $weeklyRevenue = $transactionQuery->clone()
+            ->where('created_at', '>=', $startOfWeek)
+            ->sum('total_price');
+
+        // Data untuk charts dan recent activity
+        $recentTransactions = $transactionQuery->clone()
+            ->with(['customer', 'product'])
+            ->latest()
+            ->take(6)
+            ->get();
+
+        // Top products - Query yang diperbaiki
+        $topProductsQuery = Product::where('is_active', true)
+            ->withCount(['salesTransactions as total_sold' => function($query) use ($user) {
+                // Jika sales, filter berdasarkan user_id
+                if ($user->role === 'sales' && \Schema::hasColumn('sales_transactions', 'user_id')) {
+                    $query->where('user_id', $user->id);
+                }
+            }]);
+
+        $topProducts = $topProductsQuery->orderBy('total_sold', 'desc')
+            ->orderBy('name', 'asc')
+            ->take(5)
+            ->get();
+
+        // Monthly sales data for chart - berdasarkan user
+        $monthlySalesQuery = SalesTransaction::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('SUM(total_price) as total'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('created_at', '>=', now()->subMonths(6));
+            
+        if ($user->role === 'sales' && \Schema::hasColumn('sales_transactions', 'user_id')) {
+            $monthlySalesQuery->where('user_id', $user->id);
+        }
+            
+        $monthlySales = $monthlySalesQuery->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Transaction status counts - berdasarkan user
+        $statusQuery = SalesTransaction::query();
+        if ($user->role === 'sales' && \Schema::hasColumn('sales_transactions', 'user_id')) {
+            $statusQuery->where('user_id', $user->id);
+        }
+        
+        $completedTransactions = $statusQuery->clone()->where('status', 'completed')->count();
+        $pendingTransactions = $statusQuery->clone()->where('status', 'pending')->count();
+        $cancelledTransactions = $statusQuery->clone()->where('status', 'cancelled')->count();
+
+        // Payment status counts - berdasarkan user
+        $paidTransactions = $statusQuery->clone()->where('payment_status', 'paid')->count();
+        $unpaidTransactions = $statusQuery->clone()->where('payment_status', 'unpaid')->count();
+
+        // Low stock products (global, tidak berdasarkan user)
+        $lowStockProducts = Product::where('stock_quantity', '<=', DB::raw('min_stock'))
+            ->where('stock_quantity', '>', 0)
+            ->where('is_active', true)
+            ->count();
+
+        $outOfStockProducts = Product::where('stock_quantity', 0)
+            ->where('is_active', true)
+            ->count();
+
+        // Today's transactions - berdasarkan user
+        $todayTransactions = $transactionQuery->clone()
+            ->whereDate('created_at', today())
+            ->count();
+            
+        $todayRevenue = $transactionQuery->clone()
+            ->whereDate('created_at', today())
+            ->sum('total_price');
+
+        return view('sales.dashboard', compact(
+            'totalProducts',
+            'totalCustomers',
+            'totalTransactions',
+            'monthlyTransactions',
+            'weeklyTransactions',
+            'yearlyTransactions',
+            'totalRevenue',
+            'monthlyRevenue',
+            'weeklyRevenue',
+            'recentTransactions',
+            'topProducts',
+            'monthlySales',
+            'completedTransactions',
+            'pendingTransactions',
+            'cancelledTransactions',
+            'paidTransactions',
+            'unpaidTransactions',
+            'lowStockProducts',
+            'outOfStockProducts',
+            'todayTransactions',
+            'todayRevenue'
+        ));
     }
 
-    // Products
+    // ... (methods products, customers, transactions, reports tetap sama)
+    public function reports()
+    {
+        $user = auth()->user();
+        return redirect()->route('sales.transactions');
+    }
+
     public function products(Request $request)
     {
-        $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+        $user = auth()->user();
+        if (!in_array($user->role, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
         $query = Product::query();
 
-        // Search functionality
+        if ($user->role === 'sales') {
+            $query->where('is_active', true);
+        }
+
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -41,12 +186,10 @@ class SalesController extends Controller
             });
         }
 
-        // Filter by category
         if ($request->has('category') && $request->category != '') {
             $query->where('category', $request->category);
         }
 
-        // Filter by status
         if ($request->has('status') && $request->status != '') {
             switch ($request->status) {
                 case 'active':
@@ -68,7 +211,6 @@ class SalesController extends Controller
             }
         }
 
-        // Sorting
         $sort = $request->get('sort', 'created_at');
         $sortDirection = 'desc';
 
@@ -82,7 +224,6 @@ class SalesController extends Controller
 
         $products = $query->paginate(10);
 
-        // Stats untuk dashboard
         $totalProducts = Product::count();
         $activeProducts = Product::where('is_active', true)->count();
         $lowStockProducts = Product::where('stock_quantity', '<=', \DB::raw('min_stock'))
@@ -90,7 +231,6 @@ class SalesController extends Controller
             ->count();
         $outOfStockProducts = Product::where('stock_quantity', 0)->count();
 
-        // Get unique categories for filter dropdown
         $categories = Product::select('category')
             ->whereNotNull('category')
             ->where('category', '!=', '')
@@ -107,17 +247,16 @@ class SalesController extends Controller
             'categories'
         ));
     }
-    // Customers
+
     public function customers(Request $request)
     {
-        $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+        $user = auth()->user();
+        if (!in_array($user->role, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
         $query = Customer::withCount('transactions');
 
-        // Search functionality
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -129,13 +268,11 @@ class SalesController extends Controller
             });
         }
 
-        // Filter by status
         if ($request->has('status') && $request->status != '') {
             $isActive = $request->status == 'active';
             $query->where('is_active', $isActive);
         }
 
-        // Filter by phone availability
         if ($request->has('has_phone') && $request->has_phone != '') {
             if ($request->has_phone == 'yes') {
                 $query->whereNotNull('phone')->where('phone', '!=', '');
@@ -146,7 +283,6 @@ class SalesController extends Controller
             }
         }
 
-        // Sorting
         $sort = $request->get('sort', 'created_at');
         $sortDirection = 'desc';
 
@@ -158,8 +294,7 @@ class SalesController extends Controller
 
         $customers = $query->paginate(10);
 
-        // Stats untuk dashboard
-        $totalCustomers = $customers->total();
+        $totalCustomers = Customer::count();
         $customersWithPhone = Customer::whereNotNull('phone')->where('phone', '!=', '')->count();
         $customersWithAddress = Customer::whereNotNull('address')->where('address', '!=', '')->count();
         $newCustomersThisMonth = Customer::where('created_at', '>=', now()->startOfMonth())->count();
@@ -175,14 +310,17 @@ class SalesController extends Controller
 
     public function transactions(Request $request)
     {
-        $userRole = auth()->user()->role;
-        if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
+        $user = auth()->user();
+        if (!in_array($user->role, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
         }
 
-        $query = SalesTransaction::with(['user', 'customer', 'product']);
+        $query = SalesTransaction::with(['customer', 'product']);
 
-        // Search functionality
+        if ($user->role === 'sales' && \Schema::hasColumn('sales_transactions', 'user_id')) {
+            $query->where('user_id', $user->id);
+        }
+
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -194,24 +332,18 @@ class SalesController extends Controller
                         $productQuery->where('name', 'like', '%' . $searchTerm . '%')
                             ->orWhere('sku', 'like', '%' . $searchTerm . '%');
                     })
-                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                        $userQuery->where('name', 'like', '%' . $searchTerm . '%');
-                    })
                     ->orWhere('id', 'like', '%' . $searchTerm . '%');
             });
         }
 
-        // Filter by status
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
 
-        // Filter by payment status
         if ($request->has('payment_status') && $request->payment_status != '') {
             $query->where('payment_status', $request->payment_status);
         }
 
-        // Filter by date range
         if ($request->has('date_from') && $request->date_from != '') {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -220,21 +352,26 @@ class SalesController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // Sorting
         $sort = $request->get('sort', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sort, $sortDirection);
 
-        // Pagination
         $perPage = $request->get('per_page', 10);
         $transactions = $query->paginate($perPage);
 
-        // Stats untuk dashboard
-        $totalTransactions = SalesTransaction::count();
-        $completedTransactions = SalesTransaction::where('status', 'completed')->count();
-        $pendingTransactions = SalesTransaction::where('status', 'pending')->count();
-        $cancelledTransactions = SalesTransaction::where('status', 'cancelled')->count();
-        $totalRevenue = SalesTransaction::sum('total_price'); // field sesuai database
+        if ($user->role === 'sales' && \Schema::hasColumn('sales_transactions', 'user_id')) {
+            $totalTransactions = SalesTransaction::where('user_id', $user->id)->count();
+            $completedTransactions = SalesTransaction::where('user_id', $user->id)->where('status', 'completed')->count();
+            $pendingTransactions = SalesTransaction::where('user_id', $user->id)->where('status', 'pending')->count();
+            $cancelledTransactions = SalesTransaction::where('user_id', $user->id)->where('status', 'cancelled')->count();
+            $totalRevenue = SalesTransaction::where('user_id', $user->id)->sum('total_price');
+        } else {
+            $totalTransactions = SalesTransaction::count();
+            $completedTransactions = SalesTransaction::where('status', 'completed')->count();
+            $pendingTransactions = SalesTransaction::where('status', 'pending')->count();
+            $cancelledTransactions = SalesTransaction::where('status', 'cancelled')->count();
+            $totalRevenue = SalesTransaction::sum('total_price');
+        }
 
         return view('sales.transactions', compact(
             'transactions',
@@ -245,5 +382,4 @@ class SalesController extends Controller
             'totalRevenue'
         ));
     }
-
 }
