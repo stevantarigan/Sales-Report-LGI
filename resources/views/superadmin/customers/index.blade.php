@@ -722,9 +722,9 @@
             <a href="{{ route('admin.customers.create') }}" class="btn btn-success">
                 <i class="fas fa-plus me-2"></i>Add New Customer
             </a>
-            <button class="btn btn-primary" onclick="exportCustomers()">
+            {{-- <button class="btn btn-primary" onclick="exportCustomers()">
                 <i class="fas fa-download me-2"></i>Export
-            </button>
+            </button> --}}
 
             <!-- Clear Filters Button -->
             @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))

@@ -567,9 +567,9 @@
             <a href="{{ route('admin.users.create') }}" class="btn btn-success">
                 <i class="fas fa-plus me-2"></i>Add New User
             </a>
-            <button class="btn btn-primary" onclick="exportUsers()">
+            {{-- <button class="btn btn-primary" onclick="exportUsers()">
                 <i class="fas fa-download me-2"></i>Export
-            </button>
+            </button> --}}
 
             <!-- Clear Filters Button (akan muncul jika ada filter aktif) -->
             @if (request()->hasAny(['search', 'role', 'status', 'sort']))

@@ -6,7 +6,7 @@
         </button>
         <div class="nav-title">
             <h1 id="typing-title">@yield('page-title', 'Dashboard Overview')</h1>
-            <p>@yield('page-description', 'Welcome back, ' . auth()->user()->name . '. Here\'s what\'s happening today.')</p>
+            <p>@yield('page-description', 'Welcome back, ' . auth()->user()->name . '.')</p>
         </div>
     </div>
 

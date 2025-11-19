@@ -15,7 +15,7 @@
 
 @section('title', 'Tambah Transaksi Baru | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Tambah Transaksi Baru')
-@section('page-description', 'Form untuk menambahkan transaksi baru ke sistem dengan harga yang bisa disesuaikan')
+@section('page-description', 'Form untuk menambahkan transaksi baru.')
 
 @push('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

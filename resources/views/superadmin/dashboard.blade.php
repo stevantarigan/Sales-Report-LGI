@@ -2,8 +2,10 @@
 
 @section('title', 'Dashboard SuperAdmin | Sales Management')
 @section('page-title', 'Dashboard Overview')
-@section('page-description', 'Selamat datang kembali, ' . auth()->user()->name . '. Monitor kinerja sales dan
-    transaksi.')
+@section('page-description',
+    'Selamat datang kembali, ' .
+    auth()->user()->name .
+    '.')
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -548,6 +550,69 @@
 
                 100% {
                     transform: rotate(360deg);
+                }
+            }
+
+            /* Responsive Mobile Only */
+            @media (max-width: 768px) {
+                .metrics-grid {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+
+                .metric-card {
+                    flex-direction: column;
+                    text-align: center;
+                    padding: 1.25rem;
+                }
+
+                .metric-icon {
+                    margin-bottom: 0.75rem;
+                }
+
+                .sales-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .performance-header {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .filter-controls {
+                    justify-content: center;
+                }
+
+                .section-header {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .quick-actions {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .table-responsive {
+                    font-size: 0.8rem;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .sales-stats {
+                    grid-template-columns: 1fr;
+                }
+
+                .quick-actions {
+                    grid-template-columns: 1fr;
+                }
+
+                .table-responsive {
+                    font-size: 0.75rem;
+                }
+
+                .table th,
+                .table td {
+                    padding: 0.5rem 0.25rem;
                 }
             }
         </style>

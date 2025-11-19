@@ -672,9 +672,9 @@
             <a href="{{ route('products.create') }}" class="btn btn-success">
                 <i class="fas fa-plus me-2"></i>Add New Product
             </a>
-            <button class="btn btn-primary" onclick="exportProducts()">
+            {{-- <button class="btn btn-primary" onclick="exportProducts()">
                 <i class="fas fa-download me-2"></i>Export
-            </button>
+            </button> --}}
 
             <!-- Clear Filters Button -->
             @if (request()->hasAny(['search', 'category', 'status', 'sort']))

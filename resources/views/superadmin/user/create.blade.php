@@ -4,7 +4,9 @@
 
 @extends($layout)
 
-@section('title', 'Tambah User Baru | ' . ucfirst(auth()->user()->role))
+@section('title', 'Users Management | ' . ucfirst(auth()->user()->role))
+@section('page-title', 'User Management')
+@section('page-description', 'Kelola pengguna dan akses sistem')
 
 @push('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

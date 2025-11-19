@@ -2,8 +2,7 @@
 
 @section('title', 'Dashboard AdminSales | Sales Management')
 @section('page-title', 'Dashboard Overview')
-@section('page-description', 'Selamat datang kembali, ' . auth()->user()->name . '. Monitor kinerja dan aktivitas
-    sales.')
+@section('page-description', 'Selamat datang kembali, ' . auth()->user()->name . '.')
 
     @push('styles')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

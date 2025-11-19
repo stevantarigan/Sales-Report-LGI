@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>@yield('title', 'SuperAdmin Dashboard | Sales Management')</title>
 
     <!-- Bootstrap 5 -->
@@ -282,6 +283,60 @@
         function enableMarketing() {
             alert('Marketing Features functionality would be implemented here');
         }
+        // Sidebar Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+
+            // Create overlay element jika belum ada
+            let sidebarOverlay = document.querySelector('.sidebar-overlay');
+            if (!sidebarOverlay) {
+                sidebarOverlay = document.createElement('div');
+                sidebarOverlay.className = 'sidebar-overlay';
+                document.body.appendChild(sidebarOverlay);
+            }
+
+            // Toggle sidebar function
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            }
+
+            // Toggle sidebar when button is clicked
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+
+            // Close sidebar when overlay is clicked
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+
+            // Close sidebar when menu item is clicked (on mobile)
+            const menuItems = document.querySelectorAll('.menu-item, .submenu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Close sidebar on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    toggleSidebar();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });r
     </script>
 
     @stack('scripts')

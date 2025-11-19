@@ -956,4 +956,284 @@ class SuperAdminController extends Controller
             return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
         }
     }
+    public function exportUsersPDF(Request $request)
+    {
+        try {
+            // Query data dengan filter
+            $query = User::query();
+
+            // Apply filters
+            if ($request->has('role') && $request->role != '') {
+                $query->where('role', $request->role);
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $isActive = $request->status == 'active' ? true : false;
+                $query->where('is_active', $isActive);
+            }
+
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Apply sorting
+            $sort = $request->get('sort', 'created_at');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sort, $sortDirection);
+
+            $users = $query->get();
+
+            // Stats untuk header
+            $totalUsers = $users->count();
+            $activeUsers = $users->where('is_active', true)->count();
+            $inactiveUsers = $users->where('is_active', false)->count();
+            $superadminCount = $users->where('role', 'superadmin')->count();
+            $adminSalesCount = $users->where('role', 'adminsales')->count();
+            $salesCount = $users->where('role', 'sales')->count();
+
+            // Generate PDF
+            $pdf = PDF::loadView('exports.users-pdf', compact(
+                'users',
+                'totalUsers',
+                'activeUsers',
+                'inactiveUsers',
+                'superadminCount',
+                'adminSalesCount',
+                'salesCount',
+                'request'
+            ));
+
+            $pdf->setPaper('A4', 'landscape');
+            $filename = 'users-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Users PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Products to PDF
+     */
+    public function exportProductsPDF(Request $request)
+    {
+        try {
+            // Query data dengan filter
+            $query = Product::query();
+
+            // Apply filters
+            if ($request->has('category') && $request->category != '') {
+                $query->where('category', $request->category);
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                if ($request->status == 'active') {
+                    $query->where('is_active', true);
+                } elseif ($request->status == 'inactive') {
+                    $query->where('is_active', false);
+                } elseif ($request->status == 'low_stock') {
+                    $query->whereRaw('stock_quantity <= min_stock');
+                } elseif ($request->status == 'out_of_stock') {
+                    $query->where('stock_quantity', 0);
+                }
+            }
+
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhere('brand', 'like', "%{$search}%");
+                });
+            }
+
+            // Apply sorting
+            $sort = $request->get('sort', 'created_at');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sort, $sortDirection);
+
+            $products = $query->get();
+
+            // Stats untuk header
+            $totalProducts = $products->count();
+            $activeProducts = $products->where('is_active', true)->count();
+            $inactiveProducts = $products->where('is_active', false)->count();
+            $lowStockProducts = $products->where('stock_quantity', '<=', \DB::raw('min_stock'))->where('stock_quantity', '>', 0)->count();
+            $outOfStockProducts = $products->where('stock_quantity', 0)->count();
+            $totalStockValue = $products->sum(function ($product) {
+                return $product->stock_quantity * $product->price;
+            });
+
+            // Generate PDF
+            $pdf = PDF::loadView('exports.products-pdf', compact(
+                'products',
+                'totalProducts',
+                'activeProducts',
+                'inactiveProducts',
+                'lowStockProducts',
+                'outOfStockProducts',
+                'totalStockValue',
+                'request'
+            ));
+
+            $pdf->setPaper('A4', 'landscape');
+            $filename = 'products-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Products PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Customers to PDF
+     */
+    public function exportCustomersPDF(Request $request)
+    {
+        try {
+            // Query data dengan filter
+            $query = Customer::query();
+
+            // Apply filters
+            if ($request->has('type') && $request->type != '') {
+                $query->where('type', $request->type);
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%");
+                });
+            }
+
+            // Apply sorting
+            $sort = $request->get('sort', 'created_at');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sort, $sortDirection);
+
+            $customers = $query->get();
+
+            // Stats untuk header
+            $totalCustomers = $customers->count();
+            $activeCustomers = $customers->where('status', 'active')->count();
+            $inactiveCustomers = $customers->where('status', 'inactive')->count();
+            $individualCustomers = $customers->where('type', 'individual')->count();
+            $businessCustomers = $customers->where('type', 'business')->count();
+
+            // Generate PDF
+            $pdf = PDF::loadView('exports.customers-pdf', compact(
+                'customers',
+                'totalCustomers',
+                'activeCustomers',
+                'inactiveCustomers',
+                'individualCustomers',
+                'businessCustomers',
+                'request'
+            ));
+
+            $pdf->setPaper('A4', 'landscape');
+            $filename = 'customers-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Customers PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Transactions to PDF
+     */
+    public function exportTransactionsPDF(Request $request)
+    {
+        try {
+            // Query data dengan filter
+            $query = SalesTransaction::with(['user', 'customer', 'product']);
+
+            // Apply filters
+            if ($request->has('search') && $request->search != '') {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('customer', function ($customerQuery) use ($searchTerm) {
+                        $customerQuery->where('name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                    })
+                        ->orWhereHas('product', function ($productQuery) use ($searchTerm) {
+                            $productQuery->where('name', 'like', '%' . $searchTerm . '%')
+                                ->orWhere('sku', 'like', '%' . $searchTerm . '%');
+                        })
+                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                            $userQuery->where('name', 'like', '%' . $searchTerm . '%');
+                        })
+                        ->orWhere('id', 'like', '%' . $searchTerm . '%');
+                });
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->has('payment_status') && $request->payment_status != '') {
+                $query->where('payment_status', $request->payment_status);
+            }
+
+            if ($request->has('date_from') && $request->date_from != '') {
+                $query->whereDate('created_at', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to') && $request->date_to != '') {
+                $query->whereDate('created_at', '<=', $request->date_to);
+            }
+
+            // Sorting
+            $sort = $request->get('sort', 'created_at');
+            $sortDirection = $request->get('sort_direction', 'desc');
+            $query->orderBy($sort, $sortDirection);
+
+            $transactions = $query->get();
+
+            // Stats untuk header
+            $totalTransactions = $transactions->count();
+            $completedTransactions = $transactions->where('status', 'completed')->count();
+            $pendingTransactions = $transactions->where('status', 'pending')->count();
+            $cancelledTransactions = $transactions->where('status', 'cancelled')->count();
+            $totalRevenue = $transactions->sum('total_price');
+
+            // Generate PDF
+            $pdf = PDF::loadView('exports.transactions-pdf', compact(
+                'transactions',
+                'totalTransactions',
+                'completedTransactions',
+                'pendingTransactions',
+                'cancelledTransactions',
+                'totalRevenue',
+                'request'
+            ));
+
+            $pdf->setPaper('A4', 'landscape');
+            $filename = 'transactions-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Transactions PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
 }
