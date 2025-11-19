@@ -1058,17 +1058,14 @@
             const exportUrl = '{{ route('admin.transactions.export.pdf') }}?' + currentParams.toString();
 
             Swal.fire({
-                title: 'Export Transactions',
-                text: 'Choose export format',
+                title: 'Export to PDF',
+                text: 'Export transactions to PDF format?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#4f46e5',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'PDF Format',
-                cancelButtonText: 'Cancel',
-                showDenyButton: true,
-                denyButtonText: 'Excel Format',
-                denyButtonColor: '#059669'
+                confirmButtonText: 'Export PDF',
+                cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
                     // PDF Export
@@ -1090,9 +1087,6 @@
                     setTimeout(() => {
                         Swal.close();
                     }, 2000);
-
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    Swal.fire('Cancelled', 'Export has been cancelled', 'info');
                 }
             });
         }
