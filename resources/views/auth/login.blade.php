@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Sales Manajemen</title>
+    <title>Login | Sales Power</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -389,7 +389,7 @@
                 <div class="logo-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <h3>Sales Manajemen</h3>
+                <h3>Sales Power</h3>
                 <p class="subtitle">Silakan masuk untuk melanjutkan</p>
             </div>
 
@@ -425,7 +425,7 @@
                 </button>
             </form>
 
-            <p class="text-center footer-text mt-4 mb-0">© 2025 Sales_Manajemen</p>
+            <p class="text-center footer-text mt-4 mb-0">© 2025 Sales_Power</p>
         </div>
     </div>
 
