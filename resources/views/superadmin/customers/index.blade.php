@@ -827,15 +827,18 @@
                                         class="btn-icon btn-icon-view" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.customers.edit', $customer) }}"
-                                        class="btn-icon btn-icon-edit" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="btn-icon btn-icon-delete delete-customer-btn"
-                                        title="Delete" data-customer-id="{{ $customer->id }}"
-                                        data-customer-name="{{ $customer->name }}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    @if (auth()->user()->role === 'superadmin')
+                                        <a href="{{ route('admin.customers.edit', $customer) }}"
+                                            class="btn-icon btn-icon-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn-icon btn-icon-delete delete-customer-btn"
+                                            title="Delete" data-customer-id="{{ $customer->id }}"
+                                            data-customer-name="{{ $customer->name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    @endif
+
                                 </div>
                             </td>
                         </tr>

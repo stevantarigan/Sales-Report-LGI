@@ -1160,40 +1160,60 @@
                     </div>
 
                     <div class="row">
-                        <!-- Status -->
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label required-field">Status Transaksi</label>
-                            <select class="form-select @error('status') is-invalid @enderror" id="status"
-                                name="status" required>
-                                <option value="">Pilih Status</option>
-                                <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending
-                                </option>
-                                <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed
-                                </option>
-                                <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                </option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Status Section -->
+                        <div class="row">
+                            <!-- Status Transaksi -->
+                            <div class="col-md-6 mb-4">
+                                <label for="status" class="form-label required-field">Status Transaksi</label>
+                                <select class="form-select @error('status') is-invalid @enderror" id="status"
+                                    name="status" required>
+                                    <option value="">Pilih Status Transaksi</option>
+                                    <option value="first_meet"
+                                        {{ old('status', $transaction->status ?? '') == 'first_meet' ? 'selected' : '' }}>
+                                        FIRST MEET</option>
+                                    <option value="follow_up"
+                                        {{ old('status', $transaction->status ?? '') == 'follow_up' ? 'selected' : '' }}>
+                                        FOLLOW UP</option>
+                                    <option value="offering"
+                                        {{ old('status', $transaction->status ?? '') == 'offering' ? 'selected' : '' }}>
+                                        OFFERING</option>
+                                    <option value="negotiate"
+                                        {{ old('status', $transaction->status ?? '') == 'negotiate' ? 'selected' : '' }}>
+                                        NEGOTIATE</option>
+                                    <option value="completed"
+                                        {{ old('status', $transaction->status ?? '') == 'completed' ? 'selected' : '' }}>
+                                        COMPLETED</option>
+                                </select>
+                                @error('status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Pilih status sesuai progress penjualan</div>
+                            </div>
 
-                        <!-- Payment Status -->
-                        <div class="col-md-6 mb-3">
-                            <label for="payment_status" class="form-label required-field">Status Pembayaran</label>
-                            <select class="form-select @error('payment_status') is-invalid @enderror" id="payment_status"
-                                name="payment_status" required>
-                                <option value="">Pilih Status Pembayaran</option>
-                                <option value="pending" {{ old('payment_status') == 'pending' ? 'selected' : '' }}>Pending
-                                </option>
-                                <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid
-                                </option>
-                                <option value="cancelled" {{ old('payment_status') == 'cancelled' ? 'selected' : '' }}>
-                                    Cancelled</option>
-                            </select>
-                            @error('payment_status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <!-- Status Pembayaran -->
+                            <div class="col-md-6 mb-4">
+                                <label for="payment_status" class="form-label required-field">Status Pembayaran</label>
+                                <select class="form-select @error('payment_status') is-invalid @enderror"
+                                    id="payment_status" name="payment_status" required>
+                                    <option value="">Pilih Status Pembayaran</option>
+                                    <option value="dp"
+                                        {{ old('payment_status', $transaction->payment_status ?? '') == 'dp' ? 'selected' : '' }}>
+                                        DP (Down Payment)</option>
+                                    <option value="second_payment"
+                                        {{ old('payment_status', $transaction->payment_status ?? '') == 'second_payment' ? 'selected' : '' }}>
+                                        SECOND PAYMENT</option>
+                                    <option value="third_payment"
+                                        {{ old('payment_status', $transaction->payment_status ?? '') == 'third_payment' ? 'selected' : '' }}>
+                                        THIRD PAYMENT</option>
+                                    <option value="completed"
+                                        {{ old('payment_status', $transaction->payment_status ?? '') == 'completed' ? 'selected' : '' }}>
+                                        COMPLETED (Lunas)</option>
+                                </select>
+                                @error('payment_status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Pilih status pembayaran terkini</div>
+                            </div>
                         </div>
                     </div>
 

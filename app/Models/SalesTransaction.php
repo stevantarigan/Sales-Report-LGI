@@ -9,6 +9,19 @@ class SalesTransaction extends Model
 {
     use HasFactory;
 
+    // Status Transaksi
+    const STATUS_FIRST_MEET = 'first_meet';
+    const STATUS_FOLLOW_UP = 'follow_up';
+    const STATUS_OFFERING = 'offering';
+    const STATUS_NEGOTIATE = 'negotiate';
+    const STATUS_COMPLETED = 'completed';
+
+    // Status Pembayaran
+    const PAYMENT_DP = 'dp';
+    const PAYMENT_SECOND = 'second_payment';
+    const PAYMENT_THIRD = 'third_payment';
+    const PAYMENT_COMPLETED = 'completed';
+
     protected $fillable = [
         'user_id',
         'customer_id',
@@ -45,10 +58,9 @@ class SalesTransaction extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    // Method untuk mendapatkan semua produk - PERBAIKI INI
+    // Method untuk mendapatkan semua produk
     public function getAllProducts()
     {
-        // Prioritaskan products_data jika ada
         if ($this->products_data && !empty($this->products_data)) {
             return collect($this->products_data)->map(function ($item) {
                 return (object) [
@@ -60,7 +72,6 @@ class SalesTransaction extends Model
             });
         }
 
-        // Fallback ke product utama untuk data lama
         return collect([
             (object) [
                 'product_id' => $this->product_id,
@@ -80,7 +91,7 @@ class SalesTransaction extends Model
         return $this->quantity;
     }
 
-    // Accessor untuk calculated total (untuk validasi)
+    // Accessor untuk calculated total
     public function getCalculatedTotalAttribute()
     {
         return $this->getAllProducts()->sum('subtotal');
@@ -90,5 +101,79 @@ class SalesTransaction extends Model
     public function getIsMultiProductAttribute()
     {
         return $this->products_data && count($this->products_data) > 1;
+    }
+
+    // Get available status options
+    public static function getStatusOptions()
+    {
+        return [
+            self::STATUS_FIRST_MEET => 'FIRST MEET',
+            self::STATUS_FOLLOW_UP => 'FOLLOW UP',
+            self::STATUS_OFFERING => 'OFFERING',
+            self::STATUS_NEGOTIATE => 'NEGOTIATE',
+            self::STATUS_COMPLETED => 'COMPLETED',
+        ];
+    }
+
+    // Get available payment status options
+    public static function getPaymentStatusOptions()
+    {
+        return [
+            self::PAYMENT_DP => 'DP',
+            self::PAYMENT_SECOND => 'SECOND PAYMENT',
+            self::PAYMENT_THIRD => 'THIRD PAYMENT',
+            self::PAYMENT_COMPLETED => 'COMPLETED',
+        ];
+    }
+
+    // Get status label
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatusOptions()[$this->status] ?? $this->status;
+    }
+
+    // Get payment status label
+    public function getPaymentStatusLabelAttribute()
+    {
+        return self::getPaymentStatusOptions()[$this->payment_status] ?? $this->payment_status;
+    }
+
+    // Check if transaction is completed
+    public function getIsCompletedAttribute()
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    // Check if payment is completed
+    public function getIsPaymentCompletedAttribute()
+    {
+        return $this->payment_status === self::PAYMENT_COMPLETED;
+    }
+
+    // Get status badge color
+    public function getStatusBadgeAttribute()
+    {
+        $colors = [
+            self::STATUS_FIRST_MEET => 'bg-primary',
+            self::STATUS_FOLLOW_UP => 'bg-info',
+            self::STATUS_OFFERING => 'bg-warning',
+            self::STATUS_NEGOTIATE => 'bg-orange',
+            self::STATUS_COMPLETED => 'bg-success',
+        ];
+
+        return $colors[$this->status] ?? 'bg-secondary';
+    }
+
+    // Get payment status badge color
+    public function getPaymentStatusBadgeAttribute()
+    {
+        $colors = [
+            self::PAYMENT_DP => 'bg-primary',
+            self::PAYMENT_SECOND => 'bg-info',
+            self::PAYMENT_THIRD => 'bg-warning',
+            self::PAYMENT_COMPLETED => 'bg-success',
+        ];
+
+        return $colors[$this->payment_status] ?? 'bg-secondary';
     }
 }

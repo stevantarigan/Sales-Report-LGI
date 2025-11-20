@@ -883,7 +883,7 @@ class SuperAdminController extends Controller
             // Query data dengan filter yang sama seperti index
             $query = SalesTransaction::with(['user', 'customer', 'product']);
 
-            // Apply filters sama seperti di method index
+            // Apply filters sama seperti di method transactions
             if ($request->has('search') && $request->search != '') {
                 $searchTerm = $request->search;
                 $query->where(function ($q) use ($searchTerm) {
@@ -918,20 +918,11 @@ class SuperAdminController extends Controller
                 $query->whereDate('created_at', '<=', $request->date_to);
             }
 
-            // Sorting - tambahkan semua opsi sorting
+            // Sorting
             $sort = $request->get('sort', 'created_at');
             $sortDirection = $request->get('sort_direction', 'desc');
-
-            // Validasi sort direction untuk menghindari SQL injection
-            $sortDirection = in_array(strtolower($sortDirection), ['asc', 'desc']) ? $sortDirection : 'desc';
-
-            // Validasi field sort
-            $allowedSortFields = ['created_at', 'total_price', 'id', 'status', 'payment_status'];
-            $sort = in_array($sort, $allowedSortFields) ? $sort : 'created_at';
-
             $query->orderBy($sort, $sortDirection);
 
-            // Get all data tanpa pagination untuk PDF
             $transactions = $query->get();
 
             // Stats untuk header
@@ -955,8 +946,8 @@ class SuperAdminController extends Controller
             // Set paper size and orientation
             $pdf->setPaper('A4', 'landscape');
 
-            // Filename dengan timestamp dan info filter
-            $filename = $this->generateExportFilename($request);
+            // Filename dengan timestamp
+            $filename = 'transactions-report-' . now()->format('Y-m-d-H-i-s') . '.pdf';
 
             return $pdf->download($filename);
 
@@ -964,37 +955,5 @@ class SuperAdminController extends Controller
             \Log::error('PDF Export Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Generate filename berdasarkan filter yang diterapkan
-     */
-    private function generateExportFilename(Request $request)
-    {
-        $baseName = 'transactions-report';
-        $filters = [];
-
-        if ($request->has('search') && $request->search != '') {
-            $filters[] = 'search';
-        }
-        if ($request->has('status') && $request->status != '') {
-            $filters[] = $request->status;
-        }
-        if ($request->has('payment_status') && $request->payment_status != '') {
-            $filters[] = $request->payment_status . '-payment';
-        }
-        if ($request->has('date_from') && $request->date_from != '') {
-            $filters[] = 'from-' . $request->date_from;
-        }
-        if ($request->has('date_to') && $request->date_to != '') {
-            $filters[] = 'to-' . $request->date_to;
-        }
-
-        if (!empty($filters)) {
-            $filterString = implode('-', $filters);
-            return $baseName . '-' . $filterString . '-' . now()->format('Y-m-d-H-i-s') . '.pdf';
-        }
-
-        return $baseName . '-' . now()->format('Y-m-d-H-i-s') . '.pdf';
     }
 }
