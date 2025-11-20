@@ -11,13 +11,11 @@
     }
 @endphp
 
-
 @extends($layout)
 
 @section('title', 'Edit Transaction | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Edit Transaction')
 @section('page-description', 'Edit transaksi penjualan')
-
 
 @push('styles')
     <style>
@@ -27,11 +25,14 @@
             --warning-color: #f59e0b;
             --error-color: #ef4444;
             --info-color: #06b6d4;
+            --orange-color: #ea580c;
             --dark-color: #1e293b;
             --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --gradient-orange: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
             --transition: all 0.3s ease;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
@@ -160,7 +161,7 @@
 
         .product-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
             padding-bottom: 0.75rem;
@@ -249,55 +250,77 @@
             color: var(--dark-color);
         }
 
-        /* Status Badges */
-        .status-pill,
-        .payment-pill {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid;
+        /* Status Badges in Form */
+        .status-option {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 2px solid transparent;
             transition: var(--transition);
+            cursor: pointer;
         }
 
-        .status-pill.completed {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success-color);
-            border-color: rgba(16, 185, 129, 0.3);
+        .status-option:hover {
+            background: #f8fafc;
         }
 
-        .status-pill.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning-color);
-            border-color: rgba(245, 158, 11, 0.3);
+        .status-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.05);
         }
 
-        .status-pill.cancelled {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--error-color);
-            border-color: rgba(239, 68, 68, 0.3);
+        .status-option.first-meet {
+            border-left: 4px solid #4f46e5;
         }
 
-        .payment-pill.paid {
-            background: rgba(139, 92, 246, 0.15);
-            color: #8B5CF6;
-            border-color: rgba(139, 92, 246, 0.3);
+        .status-option.follow-up {
+            border-left: 4px solid #06b6d4;
         }
 
-        .payment-pill.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning-color);
-            border-color: rgba(245, 158, 11, 0.3);
+        .status-option.offering {
+            border-left: 4px solid #f59e0b;
         }
 
-        .payment-pill.cancelled {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--error-color);
-            border-color: rgba(239, 68, 68, 0.3);
+        .status-option.negotiate {
+            border-left: 4px solid #ea580c;
+        }
+
+        .status-option.completed {
+            border-left: 4px solid #10b981;
+        }
+
+        .payment-option {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .payment-option:hover {
+            background: #f8fafc;
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .payment-option.dp {
+            border-left: 4px solid #4f46e5;
+        }
+
+        .payment-option.second-payment {
+            border-left: 4px solid #06b6d4;
+        }
+
+        .payment-option.third-payment {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .payment-option.completed {
+            border-left: 4px solid #10b981;
         }
 
         /* Photo Preview */
@@ -651,37 +674,67 @@
                 </h3>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="status" class="form-label">Transaction Status *</label>
-                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror"
-                            required>
-                            <option value="pending"
-                                {{ old('status', $transaction->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="completed"
-                                {{ old('status', $transaction->status) == 'completed' ? 'selected' : '' }}>Completed
-                            </option>
-                            <option value="cancelled"
-                                {{ old('status', $transaction->status) == 'cancelled' ? 'selected' : '' }}>Cancelled
-                            </option>
-                        </select>
+                        <label class="form-label">Sales Status *</label>
+                        <div>
+                            <div class="status-option first-meet {{ old('status', $transaction->status) == 'first_meet' ? 'selected' : '' }}"
+                                onclick="selectStatus('first_meet')">
+                                <div style="font-weight: 600; color: #4f46e5;">FIRST MEET</div>
+                                <small style="color: #64748b;">Initial meeting with customer</small>
+                            </div>
+                            <div class="status-option follow-up {{ old('status', $transaction->status) == 'follow_up' ? 'selected' : '' }}"
+                                onclick="selectStatus('follow_up')">
+                                <div style="font-weight: 600; color: #06b6d4;">FOLLOW UP</div>
+                                <small style="color: #64748b;">Following up with customer</small>
+                            </div>
+                            <div class="status-option offering {{ old('status', $transaction->status) == 'offering' ? 'selected' : '' }}"
+                                onclick="selectStatus('offering')">
+                                <div style="font-weight: 600; color: #f59e0b;">OFFERING</div>
+                                <small style="color: #64748b;">Making product offering</small>
+                            </div>
+                            <div class="status-option negotiate {{ old('status', $transaction->status) == 'negotiate' ? 'selected' : '' }}"
+                                onclick="selectStatus('negotiate')">
+                                <div style="font-weight: 600; color: #ea580c;">NEGOTIATE</div>
+                                <small style="color: #64748b;">Price negotiation phase</small>
+                            </div>
+                            <div class="status-option completed {{ old('status', $transaction->status) == 'completed' ? 'selected' : '' }}"
+                                onclick="selectStatus('completed')">
+                                <div style="font-weight: 600; color: #10b981;">COMPLETED</div>
+                                <small style="color: #64748b;">Transaction completed</small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="status" id="status_input"
+                            value="{{ old('status', $transaction->status) }}" required>
                         @error('status')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label for="payment_status" class="form-label">Payment Status *</label>
-                        <select name="payment_status" id="payment_status"
-                            class="form-select @error('payment_status') is-invalid @enderror" required>
-                            <option value="pending"
-                                {{ old('payment_status', $transaction->payment_status) == 'pending' ? 'selected' : '' }}>
-                                Pending</option>
-                            <option value="paid"
-                                {{ old('payment_status', $transaction->payment_status) == 'paid' ? 'selected' : '' }}>Paid
-                            </option>
-                            <option value="cancelled"
-                                {{ old('payment_status', $transaction->payment_status) == 'cancelled' ? 'selected' : '' }}>
-                                Cancelled</option>
-                        </select>
+                        <label class="form-label">Payment Status *</label>
+                        <div>
+                            <div class="payment-option dp {{ old('payment_status', $transaction->payment_status) == 'dp' ? 'selected' : '' }}"
+                                onclick="selectPaymentStatus('dp')">
+                                <div style="font-weight: 600; color: #4f46e5;">DP</div>
+                                <small style="color: #64748b;">Down payment received</small>
+                            </div>
+                            <div class="payment-option second-payment {{ old('payment_status', $transaction->payment_status) == 'second_payment' ? 'selected' : '' }}"
+                                onclick="selectPaymentStatus('second_payment')">
+                                <div style="font-weight: 600; color: #06b6d4;">SECOND PAYMENT</div>
+                                <small style="color: #64748b;">Second installment received</small>
+                            </div>
+                            <div class="payment-option third-payment {{ old('payment_status', $transaction->payment_status) == 'third_payment' ? 'selected' : '' }}"
+                                onclick="selectPaymentStatus('third_payment')">
+                                <div style="font-weight: 600; color: #f59e0b;">THIRD PAYMENT</div>
+                                <small style="color: #64748b;">Third installment received</small>
+                            </div>
+                            <div class="payment-option completed {{ old('payment_status', $transaction->payment_status) == 'completed' ? 'selected' : '' }}"
+                                onclick="selectPaymentStatus('completed')">
+                                <div style="font-weight: 600; color: #10b981;">COMPLETED</div>
+                                <small style="color: #64748b;">Full payment received</small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="payment_status" id="payment_status_input"
+                            value="{{ old('payment_status', $transaction->payment_status) }}" required>
                         @error('payment_status')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -898,6 +951,30 @@
             document.getElementById('productsCount').textContent = count + ' product' + (count !== 1 ? 's' : '');
         }
 
+        function selectStatus(status) {
+            document.getElementById('status_input').value = status;
+
+            // Remove selected class from all options
+            document.querySelectorAll('.status-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            event.currentTarget.classList.add('selected');
+        }
+
+        function selectPaymentStatus(paymentStatus) {
+            document.getElementById('payment_status_input').value = paymentStatus;
+
+            // Remove selected class from all options
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            event.currentTarget.classList.add('selected');
+        }
+
         function resetForm() {
             if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
                 document.getElementById('editTransactionForm').reset();
@@ -909,6 +986,21 @@
                 for (let i = 1; i < initialProducts.length; i++) {
                     initialProducts[i].remove();
                 }
+
+                // Reset status selection
+                const currentStatus = '{{ $transaction->status }}';
+                const currentPaymentStatus = '{{ $transaction->payment_status }}';
+
+                document.querySelectorAll('.status-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelector(`.status-option.${currentStatus.replace('_', '-')}`)?.classList.add('selected');
+
+                document.querySelectorAll('.payment-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelector(`.payment-option.${currentPaymentStatus.replace('_', '-')}`)?.classList.add(
+                    'selected');
 
                 productIndex = 1;
                 updateProductsCount();
@@ -948,10 +1040,21 @@
                 }
             });
 
+            // Validate status
+            if (!document.getElementById('status_input').value) {
+                hasErrors = true;
+                alert('Please select a sales status.');
+            }
+
+            // Validate payment status
+            if (!document.getElementById('payment_status_input').value) {
+                hasErrors = true;
+                alert('Please select a payment status.');
+            }
+
             if (hasErrors) {
                 e.preventDefault();
-                alert(
-                    'Please check all product fields. Quantity and Price must be greater than 0, and all products must be selected.');
+                alert('Please check all required fields.');
                 return;
             }
 

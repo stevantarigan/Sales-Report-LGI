@@ -9,6 +9,15 @@
     } else {
         $layout = 'layouts.app';
     }
+
+    // Type colors mapping
+    $typeColors = [
+        'KONTRAKTOR' => 'primary',
+        'ARSITEK' => 'info',
+        'TUKANG' => 'warning',
+        'OWNER' => 'success',
+        'UNDEFINED' => 'secondary',
+    ];
 @endphp
 
 @extends($layout)
@@ -16,7 +25,6 @@
 @section('title', 'Customers Management | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Customer Management')
 @section('page-description', 'Kelola data pelanggan dan informasi kontak')
-
 
 @push('styles')
     <style>
@@ -31,6 +39,7 @@
             --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             --transition: all 0.3s ease;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
@@ -62,7 +71,30 @@
             left: 0;
             width: 100%;
             height: 4px;
+        }
+
+        .stat-card.total::before {
             background: var(--gradient-primary);
+        }
+
+        .stat-card.whatsapp::before {
+            background: var(--gradient-success);
+        }
+
+        .stat-card.address::before {
+            background: var(--gradient-warning);
+        }
+
+        .stat-card.new::before {
+            background: var(--gradient-danger);
+        }
+
+        .stat-card.kontraktor::before {
+            background: var(--gradient-primary);
+        }
+
+        .stat-card.arsitek::before {
+            background: var(--gradient-info);
         }
 
         .stat-card:hover {
@@ -80,8 +112,7 @@
             color: white;
             font-size: 1.5rem;
             margin: 0 auto 1rem;
-            background: var(--gradient-primary);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             transition: var(--transition);
         }
 
@@ -100,36 +131,6 @@
             font-size: 0.9rem;
             color: #64748b;
             font-weight: 500;
-        }
-
-        /* WhatsApp Link Styles */
-        .whatsapp-link {
-            color: #25D366;
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .whatsapp-link:hover {
-            color: #128C7E;
-            background: rgba(37, 211, 102, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .phone-text {
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .fa-whatsapp {
-            color: #25D366;
         }
 
         /* Filter Section */
@@ -156,7 +157,8 @@
             display: block;
         }
 
-        .form-control {
+        .form-control,
+        .form-select {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 0.75rem 1rem;
@@ -164,7 +166,8 @@
             transition: var(--transition);
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
             outline: none;
@@ -239,7 +242,20 @@
             box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
         }
 
-        /* Table Styles */
+        .btn-outline-secondary {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(100, 116, 139, 0.1);
+            color: #475569;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Container */
         .table-container {
             background: white;
             border-radius: 16px;
@@ -276,7 +292,6 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            object-fit: cover;
             border: 2px solid #e2e8f0;
             transition: var(--transition);
             display: flex;
@@ -298,14 +313,14 @@
             font-weight: 600;
         }
 
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success-color);
-        }
-
         .badge-primary {
             background: rgba(79, 70, 229, 0.1);
             color: var(--primary-color);
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
         }
 
         .badge-secondary {
@@ -318,22 +333,35 @@
             color: var(--warning-color);
         }
 
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--info-color);
+        }
+
         /* Status Badge */
-        .status-badge.active {
-            color: var(--success-color);
-            font-weight: 600;
-            background: rgba(16, 185, 129, 0.1);
+        .status-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
+            font-weight: 600;
             display: inline-block;
         }
 
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
         .status-badge.inactive {
-            color: var(--error-color);
-            font-weight: 600;
             background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+
+        /* Type Badge */
+        .type-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
             display: inline-block;
         }
 
@@ -391,7 +419,6 @@
             transform: scale(1.1);
         }
 
-        /* WhatsApp Action Button */
         .btn-icon-whatsapp {
             background: rgba(37, 211, 102, 0.1);
             color: #25D366;
@@ -404,29 +431,39 @@
             transform: scale(1.1);
         }
 
-        /* Bulk Actions */
-        .bulk-actions {
-            background: rgba(79, 70, 229, 0.05);
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        /* Contact Info */
+        .contact-info {
+            font-size: 0.875rem;
+        }
+
+        .email-text {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .phone-text {
+            color: #64748b;
+        }
+
+        .whatsapp-link {
+            color: #25D366;
+            text-decoration: none;
+            font-weight: 500;
             transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .bulk-actions:hover {
-            background: rgba(79, 70, 229, 0.08);
+        .whatsapp-link:hover {
+            color: #128C7E;
+            transform: translateY(-1px);
         }
 
-        .form-check-input {
-            margin-right: 0.5rem;
-        }
-
-        .form-select {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 0.5rem;
+        /* Location Info */
+        .location-info {
+            font-size: 0.8rem;
+            color: #64748b;
         }
 
         /* Empty State */
@@ -467,27 +504,7 @@
             border-top: 1px solid #e2e8f0;
         }
 
-        /* Contact Info */
-        .contact-info {
-            font-size: 0.875rem;
-        }
-
-        .email-text {
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-
-        .phone-text {
-            color: #64748b;
-        }
-
-        /* Location Info */
-        .location-info {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        /* Responsive */
+        /* Responsive Design */
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -527,95 +544,13 @@
                 height: 32px;
             }
         }
-
-        /* SweetAlert2 Custom Styles */
-        .swal2-popup {
-            border-radius: 16px;
-            padding: 2rem;
-        }
-
-        .whatsapp-swal .swal2-title {
-            color: #25D366;
-            font-weight: 600;
-        }
-
-        .btn-whatsapp-swal {
-            background: #25D366 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .btn-whatsapp-swal:hover {
-            background: #128C7E !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .btn-cancel-swal {
-            background: #6c757d !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .btn-cancel-swal:hover {
-            background: #5a6268 !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .btn-export-swal {
-            background: #4f46e5 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 10px 24px !important;
-            font-weight: 600 !important;
-        }
-
-        /* WhatsApp link hover effects */
-        .whatsapp-link {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .whatsapp-link:hover::after {
-            content: 'Klik untuk chat WhatsApp';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #25D366;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 1000;
-        }
-
-        .whatsapp-link:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #25D366;
-            margin-bottom: -5px;
-        }
     </style>
 @endpush
 
 @section('content')
     <!-- Stats Grid -->
     <div class="stats-grid">
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-card total" data-aos="fade-up" data-aos-delay="100">
             <div class="stat-icon" style="background: var(--gradient-primary);">
                 <i class="fas fa-users"></i>
             </div>
@@ -623,7 +558,7 @@
             <div class="stat-label">Total Customers</div>
         </div>
 
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat-card whatsapp" data-aos="fade-up" data-aos-delay="200">
             <div class="stat-icon" style="background: var(--gradient-success);">
                 <i class="fab fa-whatsapp"></i>
             </div>
@@ -631,7 +566,7 @@
             <div class="stat-label">With WhatsApp</div>
         </div>
 
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat-card address" data-aos="fade-up" data-aos-delay="300">
             <div class="stat-icon" style="background: var(--gradient-warning);">
                 <i class="fas fa-map-marker-alt"></i>
             </div>
@@ -639,12 +574,28 @@
             <div class="stat-label">With Address</div>
         </div>
 
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+        <div class="stat-card new" data-aos="fade-up" data-aos-delay="400">
             <div class="stat-icon" style="background: var(--gradient-danger);">
                 <i class="fas fa-calendar"></i>
             </div>
             <div class="stat-value">{{ $newCustomersThisMonth }}</div>
             <div class="stat-label">New This Month</div>
+        </div>
+
+        <div class="stat-card kontraktor" data-aos="fade-up" data-aos-delay="500">
+            <div class="stat-icon" style="background: var(--gradient-primary);">
+                <i class="fas fa-hard-hat"></i>
+            </div>
+            <div class="stat-value">{{ $customerTypeStats['KONTRAKTOR'] }}</div>
+            <div class="stat-label">Kontraktor</div>
+        </div>
+
+        <div class="stat-card arsitek" data-aos="fade-up" data-aos-delay="600">
+            <div class="stat-icon" style="background: var(--gradient-info);">
+                <i class="fas fa-ruler-combined"></i>
+            </div>
+            <div class="stat-value">{{ $customerTypeStats['ARSITEK'] }}</div>
+            <div class="stat-label">Arsitek</div>
         </div>
     </div>
 
@@ -658,6 +609,18 @@
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Tipe Customer</label>
+                    <select name="customer_type" class="form-select" id="customerTypeSelect">
+                        <option value="">All Types</option>
+                        @foreach ($customerTypes as $value => $label)
+                            <option value="{{ $value }}" {{ request('customer_type') == $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -678,6 +641,8 @@
                         </option>
                         <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name A-Z</option>
                         <option value="city" {{ request('sort') == 'city' ? 'selected' : '' }}>City</option>
+                        <option value="customer_type" {{ request('sort') == 'customer_type' ? 'selected' : '' }}>Customer
+                            Type</option>
                     </select>
                 </div>
 
@@ -688,7 +653,6 @@
                 </div>
             </div>
 
-            <!-- Hidden search input untuk maintain search value -->
             @if (request('search'))
                 <input type="hidden" name="search" value="{{ request('search') }}">
             @endif
@@ -698,9 +662,11 @@
     <!-- Action Bar -->
     <div class="action-bar" data-aos="fade-up" data-aos-delay="600">
         <form action="{{ route('admin.customers.index') }}" method="GET" class="d-flex gap-2 align-items-center">
-            <!-- Maintain existing filters -->
             @if (request('status'))
                 <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+            @if (request('customer_type'))
+                <input type="hidden" name="customer_type" value="{{ request('customer_type') }}">
             @endif
             @if (request('has_phone'))
                 <input type="hidden" name="has_phone" value="{{ request('has_phone') }}">
@@ -711,23 +677,18 @@
 
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" class="form-control" placeholder="Search by name, email, city..."
-                    value="{{ request('search') }}" id="searchInput">
+                <input type="text" name="search" class="form-control"
+                    placeholder="Search by name, email, city, company..." value="{{ request('search') }}"
+                    id="searchInput">
             </div>
-
-            <button type="submit" class="btn btn-primary" style="display: none;" id="searchSubmit">Search</button>
         </form>
 
         <div class="d-flex gap-2">
             <a href="{{ route('admin.customers.create') }}" class="btn btn-success">
                 <i class="fas fa-plus me-2"></i>Add New Customer
             </a>
-            {{-- <button class="btn btn-primary" onclick="exportCustomers()">
-                <i class="fas fa-download me-2"></i>Export
-            </button> --}}
 
-            <!-- Clear Filters Button -->
-            @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))
+            @if (request()->hasAny(['search', 'status', 'customer_type', 'has_phone', 'sort']))
                 <a href="{{ route('admin.customers.index') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-times me-2"></i>Clear Filters
                 </a>
@@ -742,6 +703,7 @@
                 <thead>
                     <tr>
                         <th>Customer</th>
+                        <th>Tipe</th>
                         <th>Contact Information</th>
                         <th>Location</th>
                         <th>Status</th>
@@ -753,17 +715,30 @@
                 <tbody>
                     @forelse($customers as $customer)
                         <tr data-aos="fade-right" data-aos-delay="{{ $loop->index * 100 }}">
+                            <!-- Customer Info -->
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="customer-avatar me-3">
                                         <i class="fas fa-user text-primary"></i>
                                     </div>
                                     <div>
-                                        <div style="font-weight: 600;">{{ $customer->name }}</div>
+                                        <div class="fw-semibold">{{ $customer->name }}</div>
                                         <small class="text-muted">ID: {{ $customer->id }}</small>
+                                        @if ($customer->company)
+                                            <br><small class="text-info">{{ $customer->company }}</small>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
+
+                            <!-- Customer Type -->
+                            <td>
+                                <span class="type-badge badge-{{ $typeColors[$customer->customer_type] ?? 'secondary' }}">
+                                    {{ $customer->formatted_type }}
+                                </span>
+                            </td>
+
+                            <!-- Contact Information -->
                             <td>
                                 <div class="contact-info">
                                     <div class="email-text">
@@ -780,8 +755,16 @@
                                             </a>
                                         </div>
                                     @endif
+                                    @if ($customer->phone_secondary)
+                                        <div class="phone-text mt-1">
+                                            <i class="fas fa-phone me-1"></i>
+                                            {{ $customer->phone_secondary }}
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
+
+                            <!-- Location Information -->
                             <td>
                                 <div class="location-info">
                                     @if ($customer->city)
@@ -792,29 +775,39 @@
                                     @endif
                                     @if ($customer->address)
                                         <div class="text-muted mt-1">
-                                            <small><i
-                                                    class="fas fa-location-dot me-1"></i>{{ Str::limit($customer->address, 25) }}</small>
+                                            <small>
+                                                <i class="fas fa-location-dot me-1"></i>
+                                                {{ Str::limit($customer->address, 25) }}
+                                            </small>
                                         </div>
                                     @endif
                                 </div>
                             </td>
+
+                            <!-- Status -->
                             <td>
-                                @if ($customer->is_active)
-                                    <span class="status-badge active">Active</span>
-                                @else
-                                    <span class="status-badge inactive">Inactive</span>
-                                @endif
+                                <span class="status-badge {{ $customer->is_active ? 'active' : 'inactive' }}">
+                                    {{ $customer->is_active ? 'Active' : 'Inactive' }}
+                                </span>
                             </td>
+
+                            <!-- Transactions -->
                             <td>
                                 <span class="badge badge-secondary">
                                     {{ $customer->transactions_count ?? 0 }} transaksi
                                 </span>
                             </td>
+
+                            <!-- Registration Date -->
                             <td>
-                                {{ $customer->created_at->format('M j, Y') }}
-                                <br>
-                                <small class="text-muted">{{ $customer->created_at->diffForHumans() }}</small>
+                                <div class="text-nowrap">
+                                    {{ $customer->created_at->format('M j, Y') }}
+                                    <br>
+                                    <small class="text-muted">{{ $customer->created_at->diffForHumans() }}</small>
+                                </div>
                             </td>
+
+                            <!-- Actions -->
                             <td>
                                 <div class="action-buttons">
                                     @if ($customer->phone)
@@ -824,32 +817,29 @@
                                         </a>
                                     @endif
                                     <a href="{{ route('admin.customers.show', $customer) }}"
-                                        class="btn-icon btn-icon-view" title="View">
+                                        class="btn-icon btn-icon-view" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @if (auth()->user()->role === 'superadmin')
-                                        <a href="{{ route('admin.customers.edit', $customer) }}"
-                                            class="btn-icon btn-icon-edit" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn-icon btn-icon-delete delete-customer-btn"
-                                            title="Delete" data-customer-id="{{ $customer->id }}"
-                                            data-customer-name="{{ $customer->name }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    @endif
-
+                                    <a href="{{ route('admin.customers.edit', $customer) }}"
+                                        class="btn-icon btn-icon-edit" title="Edit Customer">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn-icon btn-icon-delete delete-customer-btn"
+                                        title="Delete Customer" data-customer-id="{{ $customer->id }}"
+                                        data-customer-name="{{ $customer->name }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                            <td colspan="8">
                                 <div class="empty-state">
                                     <i class="fas fa-user-friends"></i>
                                     <h4>No customers found</h4>
                                     <p>No customers match your current filters.</p>
-                                    @if (request()->hasAny(['search', 'status', 'has_phone', 'sort']))
+                                    @if (request()->hasAny(['search', 'status', 'customer_type', 'has_phone', 'sort']))
                                         <a href="{{ route('admin.customers.index') }}" class="btn btn-primary">
                                             <i class="fas fa-times me-2"></i>Clear Filters
                                         </a>
@@ -892,7 +882,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-submit filter form ketika dropdown berubah
-            const filterSelects = document.querySelectorAll('#statusSelect, #phoneSelect, #sortSelect');
+            const filterSelects = document.querySelectorAll(
+                '#statusSelect, #customerTypeSelect, #phoneSelect, #sortSelect');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function() {
                     document.getElementById('filterForm').submit();
@@ -945,8 +936,8 @@
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
 
-                    const customerName = this.closest('tr').querySelector(
-                        'td:nth-child(1) div div:first-child').textContent;
+                    const customerName = this.closest('tr').querySelector('.fw-semibold')
+                        .textContent;
                     const customerPhone = this.closest('tr').querySelector('.whatsapp-link')
                         ?.textContent ||
                         this.getAttribute('href')?.replace('https://wa.me/', '');
@@ -981,35 +972,10 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.open(whatsappUrl, '_blank');
-
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: `WhatsApp dibuka untuk ${customerName}`,
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false,
-                                timerProgressBar: true
-                            });
                         }
                     });
                 });
             });
         });
-
-        function exportCustomers() {
-            // Build export URL dengan parameter filter saat ini
-            const currentParams = new URLSearchParams(window.location.search);
-            const exportUrl = '{{ route('admin.customers.index') }}?' + currentParams.toString() + '&export=true';
-
-            Swal.fire({
-                icon: 'info',
-                title: 'Export Customers',
-                text: 'Preparing your export file...',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                window.location.href = exportUrl;
-            });
-        }
     </script>
 @endpush

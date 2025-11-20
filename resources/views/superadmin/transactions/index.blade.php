@@ -11,13 +11,11 @@
     }
 @endphp
 
-
 @extends($layout)
 
 @section('title', 'Transactions Management | ' . ucfirst(auth()->user()->role))
 @section('page-title', 'Transaction Management')
 @section('page-description', 'Kelola transaksi penjualan dan pembelian')
-
 
 @push('styles')
     <style>
@@ -27,11 +25,14 @@
             --warning-color: #f59e0b;
             --error-color: #ef4444;
             --info-color: #06b6d4;
+            --orange-color: #ea580c;
             --dark-color: #1e293b;
             --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
             --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-info: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            --gradient-orange: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
             --transition: all 0.3s ease;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
@@ -63,7 +64,26 @@
             left: 0;
             width: 100%;
             height: 4px;
+        }
+
+        .stat-card:nth-child(1)::before {
             background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2)::before {
+            background: var(--gradient-info);
+        }
+
+        .stat-card:nth-child(3)::before {
+            background: var(--gradient-warning);
+        }
+
+        .stat-card:nth-child(4)::before {
+            background: var(--gradient-success);
+        }
+
+        .stat-card:nth-child(5)::before {
+            background: var(--gradient-orange);
         }
 
         .stat-card:hover {
@@ -81,13 +101,32 @@
             color: white;
             font-size: 1.5rem;
             margin: 0 auto 1rem;
-            background: var(--gradient-primary);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             transition: var(--transition);
         }
 
         .stat-card:hover .stat-icon {
             transform: scale(1.1) rotate(5deg);
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: var(--gradient-info);
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: var(--gradient-warning);
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: var(--gradient-success);
+        }
+
+        .stat-card:nth-child(5) .stat-icon {
+            background: var(--gradient-orange);
         }
 
         .stat-value {
@@ -103,7 +142,7 @@
             font-weight: 500;
         }
 
-        /* Filter Section - Diperkecil */
+        /* Filter Section */
         .filter-section {
             background: white;
             border: 1px solid #e2e8f0;
@@ -146,7 +185,7 @@
             outline: none;
         }
 
-        /* Action Bar - Diperkecil */
+        /* Action Bar */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -287,50 +326,78 @@
 
         /* Status Badge */
         .status-badge {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             padding: 0.3rem 0.6rem;
             border-radius: 6px;
             font-weight: 600;
             display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.first-meet {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        .status-badge.follow-up {
+            color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .status-badge.offering {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-badge.negotiate {
+            color: #ea580c;
+            background: rgba(234, 88, 12, 0.1);
+            border: 1px solid rgba(234, 88, 12, 0.2);
         }
 
         .status-badge.completed {
-            color: var(--success-color);
+            color: #10b981;
             background: rgba(16, 185, 129, 0.1);
-        }
-
-        .status-badge.pending {
-            color: var(--warning-color);
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        .status-badge.cancelled {
-            color: var(--error-color);
-            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         /* Payment Status Badge */
         .payment-badge {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             padding: 0.3rem 0.6rem;
             border-radius: 6px;
             font-weight: 600;
             display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .payment-badge.paid {
-            color: var(--success-color);
-            background: rgba(16, 185, 129, 0.1);
+        .payment-badge.dp {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.2);
         }
 
-        .payment-badge.pending {
-            color: var(--warning-color);
+        .payment-badge.second-payment {
+            color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .payment-badge.third-payment {
+            color: #f59e0b;
             background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
-        .payment-badge.cancelled {
-            color: var(--error-color);
-            background: rgba(239, 68, 68, 0.1);
+        .payment-badge.completed {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         /* Action Buttons */
@@ -503,6 +570,26 @@
             font-size: 0.8rem;
         }
 
+        /* Products List Styles */
+        .products-list {
+            max-width: 200px;
+        }
+
+        .product-item {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .more-products {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .stats-grid {
@@ -538,6 +625,12 @@
             .pagination-nav {
                 order: 1;
             }
+
+            .status-badge,
+            .payment-badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
         }
 
         @media (max-width: 576px) {
@@ -559,32 +652,6 @@
                 justify-content: center;
             }
         }
-
-        /* Products List Styles */
-        .products-list {
-            max-width: 200px;
-        }
-
-        .product-item {
-            padding: 0.25rem 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .product-item:last-child {
-            border-bottom: none;
-        }
-
-        .more-products {
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px dashed #e2e8f0;
-        }
-
-        /* Hover effect for products */
-        .products-list:hover .product-item {
-            background: #f8fafc;
-            border-radius: 4px;
-        }
     </style>
 @endpush
 
@@ -592,7 +659,7 @@
     <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="stat-icon" style="background: var(--gradient-primary);">
+            <div class="stat-icon">
                 <i class="fas fa-exchange-alt"></i>
             </div>
             <div class="stat-value">{{ $totalTransactions }}</div>
@@ -600,27 +667,35 @@
         </div>
 
         <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
-            <div class="stat-icon" style="background: var(--gradient-success);">
+            <div class="stat-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <div class="stat-value">{{ $firstMeetTransactions }}</div>
+            <div class="stat-label">First Meet</div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-icon">
+                <i class="fas fa-phone-alt"></i>
+            </div>
+            <div class="stat-value">{{ $followUpTransactions }}</div>
+            <div class="stat-label">Follow Up</div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-value">{{ $completedTransactions }}</div>
             <div class="stat-label">Completed</div>
         </div>
 
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
-            <div class="stat-icon" style="background: var(--gradient-warning);">
-                <i class="fas fa-clock"></i>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="500">
+            <div class="stat-icon">
+                <i class="fas fa-handshake"></i>
             </div>
-            <div class="stat-value">{{ $pendingTransactions }}</div>
-            <div class="stat-label">Pending</div>
-        </div>
-
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
-            <div class="stat-icon" style="background: var(--gradient-danger);">
-                <i class="fas fa-times-circle"></i>
-            </div>
-            <div class="stat-value">{{ $cancelledTransactions }}</div>
-            <div class="stat-label">Cancelled</div>
+            <div class="stat-value">{{ $negotiateTransactions }}</div>
+            <div class="stat-label">Negotiate</div>
         </div>
     </div>
 
@@ -629,13 +704,17 @@
         <form action="{{ route('admin.transactions.index') }}" method="GET" id="filterForm">
             <div class="filter-row">
                 <div>
-                    <label class="form-label">Status</label>
+                    <label class="form-label">Sales Status</label>
                     <select name="status" class="form-select" id="statusSelect">
-                        <option value="">All Status</option>
-                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                        <option value="">All Sales Status</option>
+                        <option value="first_meet" {{ request('status') == 'first_meet' ? 'selected' : '' }}>FIRST MEET
                         </option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
+                        <option value="follow_up" {{ request('status') == 'follow_up' ? 'selected' : '' }}>FOLLOW UP
+                        </option>
+                        <option value="offering" {{ request('status') == 'offering' ? 'selected' : '' }}>OFFERING</option>
+                        <option value="negotiate" {{ request('status') == 'negotiate' ? 'selected' : '' }}>NEGOTIATE
+                        </option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>COMPLETED
                         </option>
                     </select>
                 </div>
@@ -644,11 +723,13 @@
                     <label class="form-label">Payment Status</label>
                     <select name="payment_status" class="form-select" id="paymentSelect">
                         <option value="">All Payment Status</option>
-                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                        <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending
-                        </option>
-                        <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>
-                            Cancelled</option>
+                        <option value="dp" {{ request('payment_status') == 'dp' ? 'selected' : '' }}>DP</option>
+                        <option value="second_payment"
+                            {{ request('payment_status') == 'second_payment' ? 'selected' : '' }}>SECOND PAYMENT</option>
+                        <option value="third_payment" {{ request('payment_status') == 'third_payment' ? 'selected' : '' }}>
+                            THIRD PAYMENT</option>
+                        <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>
+                            COMPLETED</option>
                     </select>
                 </div>
 
@@ -749,8 +830,8 @@
                         <th>Products</th>
                         <th>Total Quantity</th>
                         <th>Total Price</th>
-                        <th>Status</th>
-                        <th>Payment</th>
+                        <th>Sales Status</th>
+                        <th>Payment Status</th>
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
@@ -819,13 +900,13 @@
                                 <span class="price">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</span>
                             </td>
                             <td>
-                                <span class="status-badge {{ $transaction->status }}">
-                                    {{ ucfirst($transaction->status) }}
+                                <span class="status-badge {{ $transaction->status_badge_class }}">
+                                    {{ $transaction->status_label }}
                                 </span>
                             </td>
                             <td>
-                                <span class="payment-badge {{ $transaction->payment_status }}">
-                                    {{ ucfirst($transaction->payment_status) }}
+                                <span class="payment-badge {{ $transaction->payment_status_badge_class }}">
+                                    {{ $transaction->payment_status_label }}
                                 </span>
                             </td>
                             <td>

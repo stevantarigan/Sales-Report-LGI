@@ -452,18 +452,22 @@ class SuperAdminController extends Controller
         $perPage = $request->get('per_page', 10);
         $transactions = $query->paginate($perPage);
 
-        // Stats untuk dashboard
+        // Stats untuk dashboard dengan status baru
         $totalTransactions = $transactions->total();
+        $firstMeetTransactions = SalesTransaction::where('status', 'first_meet')->count();
+        $followUpTransactions = SalesTransaction::where('status', 'follow_up')->count();
+        $offeringTransactions = SalesTransaction::where('status', 'offering')->count();
+        $negotiateTransactions = SalesTransaction::where('status', 'negotiate')->count();
         $completedTransactions = SalesTransaction::where('status', 'completed')->count();
-        $pendingTransactions = SalesTransaction::where('status', 'pending')->count();
-        $cancelledTransactions = SalesTransaction::where('status', 'cancelled')->count();
 
         return view('superadmin.transactions.index', compact(
             'transactions',
             'totalTransactions',
-            'completedTransactions',
-            'pendingTransactions',
-            'cancelledTransactions'
+            'firstMeetTransactions',
+            'followUpTransactions',
+            'offeringTransactions',
+            'negotiateTransactions',
+            'completedTransactions'
         ));
     }
 
@@ -494,11 +498,11 @@ class SuperAdminController extends Controller
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
-            'products.*.price' => 'required|numeric|min:0', // Harga bisa diubah
-            'products.*.original_price' => 'required|numeric|min:0', // Simpan harga asli
-            'products.*.discount' => 'nullable|numeric|min:0', // Diskon jika ada
-            'payment_status' => 'required|in:pending,paid,cancelled',
-            'status' => 'required|in:pending,completed,cancelled',
+            'products.*.price' => 'required|numeric|min:0',
+            'products.*.original_price' => 'required|numeric|min:0',
+            'products.*.discount' => 'nullable|numeric|min:0',
+            'payment_status' => 'required|in:dp,second_payment,third_payment,completed',
+            'status' => 'required|in:first_meet,follow_up,offering,negotiate,completed',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -575,13 +579,15 @@ class SuperAdminController extends Controller
             DB::commit();
 
             $productCount = count($request->products);
+
+            // Redirect langsung ke index dengan pesan sukses
             return redirect()->route('admin.transactions.index')
-                ->with('success', "Transaksi berhasil dibuat dengan {$productCount} produk. Total diskon: Rp " . number_format($totalDiscount, 0, ',', '.'));
+                ->with('success', "Transaction #TRX-" . str_pad($transaction->id, 6, '0', STR_PAD_LEFT) . " created successfully!");
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Gagal membuat transaksi: ' . $e->getMessage())
+                ->with('error', 'Failed to create transaction: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -628,8 +634,8 @@ class SuperAdminController extends Controller
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.price' => 'required|numeric|min:0',
-            'payment_status' => 'required|in:pending,paid,cancelled',
-            'status' => 'required|in:pending,completed,cancelled',
+            'payment_status' => 'required|in:dp,second_payment,third_payment,completed',
+            'status' => 'required|in:first_meet,follow_up,offering,negotiate,completed',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -686,8 +692,10 @@ class SuperAdminController extends Controller
             DB::commit();
 
             $productCount = count($request->products);
+
+            // Redirect langsung ke index dengan pesan sukses
             return redirect()->route('admin.transactions.index')
-                ->with('success', "Transaction updated successfully with {$productCount} products.");
+                ->with('success', "Transaction #TRX-" . str_pad($transaction->id, 6, '0', STR_PAD_LEFT) . " updated successfully!");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -710,6 +718,10 @@ class SuperAdminController extends Controller
             ->with('success', 'Transaction deleted successfully.');
     }
 
+
+    // Customers Management - BOLEH diakses sales
+    // app/Http/Controllers/SuperAdminController.php
+
     // Customers Management - BOLEH diakses sales
     public function customers(Request $request)
     {
@@ -727,7 +739,8 @@ class SuperAdminController extends Controller
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                     ->orWhere('email', 'like', '%' . $searchTerm . '%')
                     ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('city', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('city', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('company', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -735,6 +748,11 @@ class SuperAdminController extends Controller
         if ($request->has('status') && $request->status != '') {
             $isActive = $request->status == 'active';
             $query->where('is_active', $isActive);
+        }
+
+        // Filter by customer type
+        if ($request->has('customer_type') && $request->customer_type != '') {
+            $query->where('customer_type', $request->customer_type);
         }
 
         // Filter by phone availability
@@ -752,7 +770,7 @@ class SuperAdminController extends Controller
         $sort = $request->get('sort', 'created_at');
         $sortDirection = 'desc';
 
-        if ($sort == 'name' || $sort == 'city') {
+        if ($sort == 'name' || $sort == 'city' || $sort == 'customer_type') {
             $sortDirection = 'asc';
         }
 
@@ -766,12 +784,18 @@ class SuperAdminController extends Controller
         $customersWithAddress = Customer::whereNotNull('address')->where('address', '!=', '')->count();
         $newCustomersThisMonth = Customer::where('created_at', '>=', now()->startOfMonth())->count();
 
+        // Stats untuk customer type
+        $customerTypeStats = Customer::getStatsByType();
+        $customerTypes = Customer::getCustomerTypes();
+
         return view('superadmin.customers.index', compact(
             'customers',
             'totalCustomers',
             'customersWithPhone',
             'customersWithAddress',
-            'newCustomersThisMonth'
+            'newCustomersThisMonth',
+            'customerTypeStats',
+            'customerTypes'
         ));
     }
 
@@ -782,7 +806,8 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.customers.create');
+        $customerTypes = Customer::getCustomerTypes();
+        return view('superadmin.customers.create', compact('customerTypes'));
     }
 
     public function storeCustomer(Request $request)
@@ -796,8 +821,15 @@ class SuperAdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers',
             'phone' => 'nullable|string|max:20',
+            'phone_secondary' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:10',
+            'country' => 'nullable|string|max:100',
             'company' => 'nullable|string|max:255',
+            'customer_type' => 'required|in:KONTRAKTOR,ARSITEK,TUKANG,OWNER,UNDEFINED',
+            'notes' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -806,7 +838,21 @@ class SuperAdminController extends Controller
                 ->withInput();
         }
 
-        Customer::create($request->all());
+        Customer::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'phone_secondary' => $request->phone_secondary,
+            'address' => $request->address,
+            'city' => $request->city,
+            'province' => $request->province,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country ?? 'Indonesia',
+            'company' => $request->company,
+            'customer_type' => $request->customer_type,
+            'notes' => $request->notes,
+            'is_active' => true,
+        ]);
 
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer created successfully.');
@@ -819,7 +865,10 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.customers.show', compact('customer'));
+        $customer->loadCount('transactions');
+        $customerTypes = Customer::getCustomerTypes();
+
+        return view('superadmin.customers.show', compact('customer', 'customerTypes'));
     }
 
     public function editCustomer(Customer $customer)
@@ -829,7 +878,8 @@ class SuperAdminController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        return view('superadmin.customers.edit', compact('customer'));
+        $customerTypes = Customer::getCustomerTypes();
+        return view('superadmin.customers.edit', compact('customer', 'customerTypes'));
     }
 
     public function updateCustomer(Request $request, Customer $customer)
@@ -843,8 +893,15 @@ class SuperAdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers,email,' . $customer->id,
             'phone' => 'nullable|string|max:20',
+            'phone_secondary' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:10',
+            'country' => 'nullable|string|max:100',
             'company' => 'nullable|string|max:255',
+            'customer_type' => 'required|in:KONTRAKTOR,ARSITEK,TUKANG,OWNER,UNDEFINED',
+            'notes' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -853,7 +910,21 @@ class SuperAdminController extends Controller
                 ->withInput();
         }
 
-        $customer->update($request->all());
+        $customer->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'phone_secondary' => $request->phone_secondary,
+            'address' => $request->address,
+            'city' => $request->city,
+            'province' => $request->province,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country ?? 'Indonesia',
+            'company' => $request->company,
+            'customer_type' => $request->customer_type,
+            'notes' => $request->notes,
+            'is_active' => $request->boolean('is_active'),
+        ]);
 
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer updated successfully.');
@@ -864,6 +935,12 @@ class SuperAdminController extends Controller
         $userRole = auth()->user()->role;
         if (!in_array($userRole, ['superadmin', 'adminsales', 'sales'])) {
             abort(403, 'Unauthorized access.');
+        }
+
+        // Check if customer has transactions
+        if ($customer->transactions()->exists()) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete customer with existing transactions.');
         }
 
         $customer->delete();

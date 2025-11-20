@@ -106,6 +106,11 @@
             display: block;
         }
 
+        .required-field::after {
+            content: " *";
+            color: var(--error-color);
+        }
+
         .form-control {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -186,6 +191,46 @@
         .status-badge.inactive {
             background: rgba(239, 68, 68, 0.1);
             color: var(--error-color);
+        }
+
+        /* Type Options */
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .type-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .type-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .type-option.active {
+            border-color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .type-icon-small {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .type-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.9rem;
         }
 
         /* Action Buttons */
@@ -326,6 +371,40 @@
             transform: translateY(-1px);
         }
 
+        /* Type Badge */
+        .type-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-primary {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--info-color);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .badge-secondary {
+            background: rgba(100, 116, 139, 0.1);
+            color: #64748b;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .form-grid {
@@ -341,6 +420,10 @@
             }
 
             .preview-details {
+                grid-template-columns: 1fr;
+            }
+
+            .type-options {
                 grid-template-columns: 1fr;
             }
         }
@@ -386,6 +469,31 @@
             @method('PUT')
 
             <div class="form-body">
+                <!-- Session Messages -->
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+                    </div>
+                @endif
+
+                <!-- Validation Errors -->
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Terjadi Kesalahan!</h6>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Basic Information Section -->
                 <div class="form-section">
                     <h4 class="section-title">
@@ -395,7 +503,7 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="name" class="form-label">Nama Lengkap *</label>
+                            <label for="name" class="form-label required-field">Nama Lengkap</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
                                 name="name" value="{{ old('name', $customer->name) }}" required>
                             @error('name')
@@ -404,7 +512,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="email" class="form-label">Email *</label>
+                            <label for="email" class="form-label required-field">Email</label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
                                 name="email" value="{{ old('email', $customer->email) }}" required>
                             @error('email')
@@ -413,30 +521,67 @@
                         </div>
                     </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="is_active" id="active"
-                                        value="1" {{ old('is_active', $customer->is_active) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="active">
-                                        <span class="status-badge active">
-                                            <i class="fas fa-check-circle"></i>
-                                            Active
-                                        </span>
-                                    </label>
+                    <div class="form-group">
+                        <label class="form-label required-field">Tipe Customer</label>
+                        <div class="type-options" id="typeOptions">
+                            @foreach ($customerTypes as $value => $label)
+                                <div class="type-option {{ old('customer_type', $customer->customer_type) == $value ? 'active' : '' }}"
+                                    data-type="{{ $value }}">
+                                    <div class="type-icon-small">
+                                        @switch($value)
+                                            @case('KONTRAKTOR')
+                                                <i class="fas fa-hard-hat"></i>
+                                            @break
+
+                                            @case('ARSITEK')
+                                                <i class="fas fa-ruler-combined"></i>
+                                            @break
+
+                                            @case('TUKANG')
+                                                <i class="fas fa-tools"></i>
+                                            @break
+
+                                            @case('OWNER')
+                                                <i class="fas fa-home"></i>
+                                            @break
+
+                                            @default
+                                                <i class="fas fa-user"></i>
+                                        @endswitch
+                                    </div>
+                                    <div class="type-label">{{ $label }}</div>
+                                    <input type="radio" class="d-none" name="customer_type" value="{{ $value }}"
+                                        {{ old('customer_type', $customer->customer_type) == $value ? 'checked' : '' }}>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="is_active" id="inactive"
-                                        value="0" {{ !old('is_active', $customer->is_active) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="inactive">
-                                        <span class="status-badge inactive">
-                                            <i class="fas fa-times-circle"></i>
-                                            Inactive
-                                        </span>
-                                    </label>
-                                </div>
+                            @endforeach
+                        </div>
+                        @error('customer_type')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" id="active"
+                                    value="1" {{ old('is_active', $customer->is_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="active">
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle"></i>
+                                        Active
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" id="inactive"
+                                    value="0" {{ !old('is_active', $customer->is_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="inactive">
+                                    <span class="status-badge inactive">
+                                        <i class="fas fa-times-circle"></i>
+                                        Inactive
+                                    </span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -451,12 +596,15 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="phone" class="form-label">Nomor Telepon/WhatsApp</label>
-                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone"
-                                name="phone" value="{{ old('phone', $customer->phone) }}"
-                                placeholder="Contoh: +6281234567890">
+                            <label for="phone" class="form-label">Nomor WhatsApp</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fab fa-whatsapp text-success"></i></span>
+                                <input type="tel" class="form-control @error('phone') is-invalid @enderror"
+                                    id="phone" name="phone" value="{{ old('phone', $customer->phone) }}"
+                                    placeholder="+6281234567890">
+                            </div>
                             <div class="form-text">
-                                Format: +62 followed by your number (contoh: +6281234567890)
+                                Format: +62 diikuti nomor (contoh: +6281234567890)
                             </div>
                             @error('phone')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -465,10 +613,13 @@
 
                         <div class="form-group">
                             <label for="phone_secondary" class="form-label">Nomor Telepon Alternatif</label>
-                            <input type="tel" class="form-control @error('phone_secondary') is-invalid @enderror"
-                                id="phone_secondary" name="phone_secondary"
-                                value="{{ old('phone_secondary', $customer->phone_secondary) }}"
-                                placeholder="Nomor telepon alternatif">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone text-primary"></i></span>
+                                <input type="tel" class="form-control @error('phone_secondary') is-invalid @enderror"
+                                    id="phone_secondary" name="phone_secondary"
+                                    value="{{ old('phone_secondary', $customer->phone_secondary) }}"
+                                    placeholder="Nomor telepon alternatif">
+                            </div>
                             @error('phone_secondary')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -591,6 +742,23 @@
                             </span>
                         </div>
                         <div class="preview-item">
+                            <span class="preview-label">Tipe Customer</span>
+                            <span class="preview-value" id="previewType">
+                                @php
+                                    $typeColors = [
+                                        'KONTRAKTOR' => 'primary',
+                                        'ARSITEK' => 'info',
+                                        'TUKANG' => 'warning',
+                                        'OWNER' => 'success',
+                                        'UNDEFINED' => 'secondary',
+                                    ];
+                                @endphp
+                                <span class="type-badge badge-{{ $typeColors[$customer->customer_type] ?? 'secondary' }}">
+                                    {{ $customer->formatted_type }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="preview-item">
                             <span class="preview-label">Telepon</span>
                             <span class="preview-value" id="previewPhone">
                                 @if ($customer->phone)
@@ -649,6 +817,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editCustomerForm');
             const submitBtn = document.getElementById('submitBtn');
+
+            // Customer type selection
+            const typeOptions = document.querySelectorAll('.type-option');
+            typeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    typeOptions.forEach(opt => opt.classList.remove('active'));
+
+                    // Add active class to clicked option
+                    this.classList.add('active');
+
+                    // Check the radio button
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+
+                    // Update preview
+                    updateTypePreview();
+                });
+            });
 
             // Real-time preview updates
             const nameInput = document.getElementById('name');
@@ -715,6 +902,35 @@
                 }
             }
 
+            function updateTypePreview() {
+                const selectedType = document.querySelector('input[name="customer_type"]:checked');
+                const typePreview = document.getElementById('previewType');
+
+                if (selectedType) {
+                    const typeValue = selectedType.value;
+                    const typeLabels = {
+                        'KONTRAKTOR': 'Kontraktor',
+                        'ARSITEK': 'Arsitek',
+                        'TUKANG': 'Tukang',
+                        'OWNER': 'Owner',
+                        'UNDEFINED': 'Undefined'
+                    };
+                    const typeColors = {
+                        'KONTRAKTOR': 'primary',
+                        'ARSITEK': 'info',
+                        'TUKANG': 'warning',
+                        'OWNER': 'success',
+                        'UNDEFINED': 'secondary'
+                    };
+
+                    typePreview.innerHTML = `
+                        <span class="type-badge badge-${typeColors[typeValue]}">
+                            ${typeLabels[typeValue]}
+                        </span>
+                    `;
+                }
+            }
+
             // Form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -751,6 +967,13 @@
                 const email = emailInput.value;
                 if (email && !isValidEmail(email)) {
                     emailInput.classList.add('is-invalid');
+                    isValid = false;
+                }
+
+                // Customer type validation
+                const customerType = document.querySelector('input[name="customer_type"]:checked');
+                if (!customerType) {
+                    document.getElementById('typeOptions').classList.add('is-invalid');
                     isValid = false;
                 }
 
@@ -791,6 +1014,7 @@
                     if (result.isConfirmed) {
                         form.reset();
                         updatePreview();
+                        updateTypePreview();
 
                         Swal.fire({
                             title: 'Berhasil!',
@@ -803,84 +1027,9 @@
                 });
             };
 
-            // Auto-save draft (optional feature)
-            let draftTimeout;
-            const formInputs = form.querySelectorAll('input, textarea, select');
-
-            formInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(draftTimeout);
-                    draftTimeout = setTimeout(saveDraft, 1000);
-                });
-            });
-
-            function saveDraft() {
-                // Implement draft saving logic here if needed
-                console.log('Auto-saving draft...');
-            }
-
             // Initialize preview on page load
             updatePreview();
+            updateTypePreview();
         });
-
-       
     </script>
-
-    <style>
-        /* SweetAlert2 Custom Styles */
-        .swal2-popup {
-            border-radius: 16px;
-            padding: 2rem;
-        }
-
-        /* Animation for form elements */
-        [data-aos] {
-            transition: all 0.6s ease;
-        }
-
-        /* Custom scrollbar */
-        .form-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .form-body::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        .form-body::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .form-body::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Focus states for better accessibility */
-        .form-control:focus {
-            transform: translateY(-1px);
-        }
-
-        /* Hover effects */
-        .btn {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-    </style>
 @endpush

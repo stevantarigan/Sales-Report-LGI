@@ -17,7 +17,6 @@
 @section('page-title', 'Tambah Customer')
 @section('page-description', 'Tambahkan data pelanggan baru ke sistem')
 
-
 @push('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -321,9 +320,73 @@
             font-size: 1.2rem;
         }
 
+        /* Type Section */
+        .type-section {
+            background: rgba(245, 158, 11, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .type-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .type-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-warning);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .type-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .type-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .type-option.active {
+            border-color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .type-icon-small {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .type-label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
         /* Status Section */
         .status-section {
-            background: rgba(245, 158, 11, 0.05);
+            background: rgba(239, 68, 68, 0.05);
             border-radius: 12px;
             padding: 1.5rem;
             margin: 1rem 0;
@@ -477,6 +540,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .type-options {
+                grid-template-columns: 1fr;
+            }
+
             .status-options {
                 flex-direction: column;
                 gap: 1rem;
@@ -544,7 +611,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.customers.store') }}" method="POST">
+                <form action="{{ route('admin.customers.store') }}" method="POST" id="customerForm">
                     @csrf
 
                     <!-- Basic Information Section -->
@@ -567,6 +634,54 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                    </div>
+
+                    <!-- Customer Type Section -->
+                    <div class="type-section">
+                        <div class="type-info">
+                            <div class="type-icon">
+                                <i class="fas fa-user-tag"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Tipe Customer</h6>
+                                <p class="mb-0 text-muted">Pilih kategori customer berdasarkan profesi</p>
+                            </div>
+                        </div>
+
+                        <div class="type-options" id="typeOptions">
+                            @foreach ($customerTypes as $value => $label)
+                                <div class="type-option" data-type="{{ $value }}">
+                                    <div class="type-icon-small">
+                                        @switch($value)
+                                            @case('KONTRAKTOR')
+                                                <i class="fas fa-hard-hat"></i>
+                                            @break
+
+                                            @case('ARSITEK')
+                                                <i class="fas fa-ruler-combined"></i>
+                                            @break
+
+                                            @case('TUKANG')
+                                                <i class="fas fa-tools"></i>
+                                            @break
+
+                                            @case('OWNER')
+                                                <i class="fas fa-home"></i>
+                                            @break
+
+                                            @default
+                                                <i class="fas fa-user"></i>
+                                        @endswitch
+                                    </div>
+                                    <div class="type-label">{{ $label }}</div>
+                                    <input type="radio" class="d-none" name="customer_type" value="{{ $value }}"
+                                        {{ old('customer_type') == $value ? 'checked' : '' }}>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('customer_type')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Contact Information Section -->
@@ -737,6 +852,7 @@
                             <li>Pastikan email yang dimasukkan valid dan aktif</li>
                             <li>Nomor WhatsApp akan digunakan untuk komunikasi utama</li>
                             <li>Status Active berarti customer dapat melakukan transaksi</li>
+                            <li>Pilih tipe customer yang sesuai dengan profesi</li>
                         </ul>
                     </div>
 
@@ -745,7 +861,7 @@
                         <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary">
                             <i class="fas fa-times me-1"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="submitBtn">
                             <i class="fas fa-save me-1"></i> Simpan Customer
                         </button>
                     </div>
@@ -758,6 +874,7 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Initialize AOS
         AOS.init({
@@ -781,6 +898,28 @@
 
                 e.target.value = value;
             });
+
+            // Customer type selection
+            const typeOptions = document.querySelectorAll('.type-option');
+            typeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    typeOptions.forEach(opt => opt.classList.remove('active'));
+
+                    // Add active class to clicked option
+                    this.classList.add('active');
+
+                    // Check the radio button
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                });
+            });
+
+            // Initialize active type if exists
+            const initialType = document.querySelector('input[name="customer_type"]:checked');
+            if (initialType) {
+                initialType.closest('.type-option').classList.add('active');
+            }
 
             // Status option selection
             const statusOptions = document.querySelectorAll('.status-option');
@@ -808,26 +947,49 @@
             }, 5000);
 
             // Form validation before submit
-            document.querySelector('form').addEventListener('submit', function(e) {
+            document.getElementById('customerForm').addEventListener('submit', function(e) {
                 const email = document.getElementById('email').value;
                 const phone = document.getElementById('phone').value;
+                const customerType = document.querySelector('input[name="customer_type"]:checked');
 
                 // Basic email validation
                 if (email && !isValidEmail(email)) {
                     e.preventDefault();
-                    alert('Format email tidak valid');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Format Email Salah',
+                        text: 'Format email yang dimasukkan tidak valid',
+                        confirmButtonColor: '#ef4444'
+                    });
                     return;
                 }
 
                 // Phone validation if provided
                 if (phone && !isValidPhone(phone)) {
                     e.preventDefault();
-                    alert('Format nomor WhatsApp tidak valid. Gunakan format: +6281234567890');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Format WhatsApp Salah',
+                        text: 'Format nomor WhatsApp tidak valid. Gunakan format: +6281234567890',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                // Customer type validation
+                if (!customerType) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tipe Customer Belum Dipilih',
+                        text: 'Silakan pilih tipe customer terlebih dahulu',
+                        confirmButtonColor: '#ef4444'
+                    });
                     return;
                 }
 
                 // Show loading state
-                const submitBtn = this.querySelector('button[type="submit"]');
+                const submitBtn = document.getElementById('submitBtn');
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
                 submitBtn.disabled = true;
             });
